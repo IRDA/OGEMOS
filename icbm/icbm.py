@@ -21,15 +21,15 @@ class icbm_MCO():
     '''Version basée sur les calculs de la version excel de Marc-Olivier intitulé ICBM résidus_Martin'''
 
     # def __init__(self):
-    #     self.climat =                 # Climat présent
-    #     self.sol =                    #type de sol présent dans la parcelle
+    #     self.climat =                 # climat présent
+    #     self.sol =                    # type de sol présent dans la parcelle
     #     self.travail =                # type de travail du sol effectué
-    #     self.culture1 =               # Nom de la première culture se rapprochant le plus de celle cultivée pour l'année en cours
-    #     self.culture2 =               # Nom de la deuxième culture se rapprochant le plus de celle cultivée pour l'année en cours
-    #     self.MO = 3                   # pourcentage de matière organique initiale (%)
+    #     self.culture1 =               # nom de la première culture se rapprochant le plus de celle cultivée pour l'année en cours
+    #     self.culture2 =               # nom de la deuxième culture se rapprochant le plus de celle cultivée pour l'année en cours
+    #     self.MO = 3                   # pourcentage de matière organique initial (%)
     #     self.prof = 0.17              # profondeur de sol qu'occupe les racines(m)
     #     self.mva = 1.31731402552353   # masse volumique apparente ()
-    #     self.MS = 0.845               # Masse sèche
+    #     self.MS = 0.845               # masse sèche
 
     def MO (self,tss,  mva, prof):
         '''
@@ -46,7 +46,7 @@ class icbm_MCO():
         TSS =  i/r (1/k1+h/k2)
         :param iCracines: masse des racines (kg/m2) - float
         :param iCtigesdispos: masse des tiges disponibles (kg/m2) - float
-        :param iCTigesrécoltés: masse des tiges récoltés (kg/m2) - float
+        :param iCTigesrécoltés: masse des tiges récoltées (kg/m2) - float
         :param r: facteur climatique () - float
         :param k1: facteur relié au type de sol présent () - float
         :param k2: facteur relié au type de sol présent () - float
