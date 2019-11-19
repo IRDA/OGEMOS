@@ -21,7 +21,7 @@ class setup():
     #    GEOMOS_path = self.def_path
 
     def def_path(self):
-        '''Détermine le parcours de l'outil GEOMOS'''
+        '''Détermine le parcours de l'outil OGEMOS'''
         path = os.path.dirname(os.path.abspath(os.path.normpath('OGEMOS.py')))
         path1, path2 = os.path.split(path)
         if path == 'ICBM_IRDA':
