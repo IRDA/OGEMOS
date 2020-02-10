@@ -1,7 +1,7 @@
 #
 #
 ############################################################################
-# Module:      ICBM
+# Module:      ICBM *version 1*
 # Purpose:     Procéder aux calculs de ICBM
 # Author(s):   David Dugré - IRDA
 # Created:     25-04-2019 v1
