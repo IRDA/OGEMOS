@@ -56,3 +56,12 @@ class Amendement:
 
     def calculer_apport_en_carbone(self):
         pass  # TODO: calculer l'apport en carbone de l'amendement
+
+
+class TravailDuSol:
+    def __init__(self, type_de_travail_du_sol, profondeur_maximale_du_travail):
+        self.__type_de_travail_du_sol = type_de_travail_du_sol
+        self.__profondeur_maximale_du_travail = profondeur_maximale_du_travail
+
+    def calculer_apport_en_carbone_travail_du_sol(self):
+        pass # TODO: calculer l'apport en carbone du trravail du sol
