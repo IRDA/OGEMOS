@@ -21,7 +21,7 @@ class CulturePrincipale:
         self.__type_de_culture_principale = type_de_culture_principale
         self.__rendement = rendement
         self.__recolte_residu = recolte_residu
-        self.__hauteur_coupe = hauteur_coupe
+        #self.__hauteur_coupe = hauteur_coupe
 
     def calculer_apport_en_carbone_culture_principale(self):
         pass  # TODO: calculer l'apport en carbone de la culture principale
