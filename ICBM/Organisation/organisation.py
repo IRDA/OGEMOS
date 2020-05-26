@@ -49,8 +49,8 @@ class ZoneDeGestion:
         self.__municipalite = municipalite
         self.__serie_de_sol = serie_de_sol
         self.__classe_de_drainage = classe_de_drainage
-        self.__coeffcicient_mineralisation_pool_jeune = self.__caculer_coefficient_mineralisation_pool_jeune()
-        self.__coeffcicient_mineralisation_pool_vieux = self.__calculer_coefficient_mineralisation_pool_vieux()
+        self.__coefficient_mineralisation_pool_jeune = self.__caculer_coefficient_mineralisation_pool_jeune()
+        self.__coefficient_mineralisation_pool_vieux = self.__calculer_coefficient_mineralisation_pool_vieux()
         self.__facteur_climatique = self.__calculer_facteur_climatique()
         self.__regies_sol_et_culture = regies_sol_et_culture
         self.__regies_sol_et_culture_pour_la_duree_de_la_simulation = []
@@ -71,18 +71,17 @@ class ZoneDeGestion:
     """
 
     def __calculer_carbone_organique_initial_du_sol(self):
-        conversion_g_cm2_en_kg_m2 = 1000 / 100 ** 2
+        facteur_conversion_de_g_cm2_a_kg_m2 = 1000 / 100 ** 2
         conversion_pourcentage_taux_matiere_organique = 100
-        facteur_conversion_entre_matiere_organique_et_carbone_organique_du_sol = 1.724
-        return self.__masse_volumique_apparente * self.__profondeur * (
-                    self.__taux_matiere_organique / facteur_conversion_entre_matiere_organique_et_carbone_organique_du_sol) * conversion_g_cm2_en_kg_m2 * conversion_pourcentage_taux_matiere_organique
-
+        facteur_conversion_de_matiere_organique_a_carbone_organique_du_sol = 1/1.724
+        return self.__masse_volumique_apparente * self.__profondeur * \
+               (self.__taux_matiere_organique/conversion_pourcentage_taux_matiere_organique) * facteur_conversion_de_matiere_organique_a_carbone_organique_du_sol * facteur_conversion_de_g_cm2_a_kg_m2
     def calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation(self):
         pool_carbone_jeune_initial = self.__calculer_pool_carbone_jeune_initial()
         pool_carbone_vieux_initial = self.__calculer_pool_carbone_vieux_initial(pool_carbone_jeune_initial)
 
     def __calculer_pool_carbone_jeune_initial(self):
-        return self.__regies_sol_et_culture_pour_la_duree_de_la_simulation[0].calculer_apport_annuel_en_carbone_de_la_regie() / (self.__facteur_climatique * self.__coeffcicient_mineralisation_pool_jeune)
+        return self.__regies_sol_et_culture_pour_la_duree_de_la_simulation[0].calculer_apport_annuel_en_carbone_de_la_regie() / (self.__facteur_climatique * self.__coefficient_mineralisation_pool_jeune)
 
     def __calculer_pool_carbone_vieux_initial(self, pool_carbone_jeune_initial):
         return self.__carbone_organique_initial_du_sol - pool_carbone_jeune_initial
