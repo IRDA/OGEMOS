@@ -1,3 +1,5 @@
+from ICBM.CoefficientDocumentation import database_querying
+
 class RegieDesSolsEtCultures:
     def __init__(self, culture_pricipale, culture_secondaire, amendements, travail_du_sol):
         self.__annee_de_culture = None
@@ -17,14 +19,14 @@ class RegieDesSolsEtCultures:
 
 
 class CulturePrincipale:
-    def __init__(self, type_de_culture_principale, rendement, recolte_residu, hauteur_coupe=0):
+    def __init__(self, type_de_culture_principale, rendement, recolte_residu):
         self.__type_de_culture_principale = type_de_culture_principale
         self.__rendement = rendement
         self.__recolte_residu = recolte_residu
-        #self.__hauteur_coupe = hauteur_coupe
 
     def calculer_apport_en_carbone_culture_principale(self):
-        pass  # TODO: calculer l'apport en carbone de la culture principale
+        instance = database_querying.get_coefficients_des_residus_de_culture(self.__type_de_culture_principale)
+        print(instance)
 
 
 class CultureSecondaire:
@@ -64,4 +66,9 @@ class TravailDuSol:
         self.__profondeur_maximale_du_travail = profondeur_maximale_du_travail
 
     def calculer_apport_en_carbone_travail_du_sol(self):
-        pass # TODO: calculer l'apport en carbone du trravail du sol
+        pass  # TODO: calculer l'apport en carbone du trravail du sol
+
+
+if __name__ == '__main__':
+    cp = CulturePrincipale('Avoine', 1, True)
+    cp.calculer_apport_en_carbone_culture_principale()

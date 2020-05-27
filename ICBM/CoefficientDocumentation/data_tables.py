@@ -1,12 +1,6 @@
-import sqlalchemy
-from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Float, String
 
-"""
-Crée une connection à la base de donne lorsque des actions sur le conetnu sont nécessaire
-"""
-engine = create_engine('sqlite:///coefficient.db')
 Base = declarative_base()
 
 
@@ -32,5 +26,5 @@ class CoefficientDesResidusDeCulture(Base):
     ratio_partie_tige_non_recolte = Column(Float)
     ratio_partie_racinaire = Column(Float)
     ratio_partie_extra_racinaire = Column(Float)
-
-
+    taux_carbone_chaque_partie = Column(Float)
+    coefficient_humidification_residus_culture = Column(Float)
