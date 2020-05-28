@@ -1,4 +1,4 @@
-from ICBM.RegieSolEtCulture import regie_sol_et_culture
+from ICBM.CoefficientDocumentation.database_querying import *
 # TODO: trouver un meilleur nom pour le fichier et le directory
 class EntrepriseAgricole:
     def __init__(self, champs, nom_entreprise_agricole):
@@ -87,13 +87,19 @@ class ZoneDeGestion:
         return self.__carbone_organique_initial_du_sol - pool_carbone_jeune_initial
 
     def __caculer_coefficient_mineralisation_pool_jeune(self):
-        pass  # TODO: caculer le coefficient coefficient de mineralisation du pool jeune
+        return get_facteur_series_de_sol(self.__serie_de_sol).coefficient_mineralisation_pool_jeune
 
     def __calculer_coefficient_mineralisation_pool_vieux(self):
-        pass  # TODO: calculer le coefficient de mineralisation du pool vieux
+        return get_facteur_series_de_sol(self.__serie_de_sol).coefficient_mineralisation_pool_vieux
 
     def __calculer_facteur_climatique(self):
-        pass  # TODO: calculer le facteur climatique
+        facteur_climatique = get_facteur_climatique(self.__obtenir_region_climatique_a_partir_de_municipalite())
+        return facteur_climatique.facteur_temperature_sol * facteur_climatique.facteur_humidite_sol
+
+    def __obtenir_region_climatique_a_partir_de_municipalite(self):
+        #TODO: enelver la dummy version et faire la vrai fonction
+        if self.__municipalite == 'Victoriaville':
+            return 'Centre-du-Québec'
 
 
 

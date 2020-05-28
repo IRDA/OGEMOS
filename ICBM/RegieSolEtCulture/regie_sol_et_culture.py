@@ -20,13 +20,22 @@ class RegieDesSolsEtCultures:
 
 
 class CulturePrincipale:
-    def __init__(self, type_de_culture_principale, rendement, recolte_residu):
+    """
+    :param rendement: rendement en ton/ha
+    """
+    def __init__(self, type_de_culture_principale, rendement, recolte_residu, taux_matiere_seche=0.845):
         self.__type_de_culture_principale = type_de_culture_principale
         self.__rendement = rendement
         self.__recolte_residu = recolte_residu
+        self.__taux_matiere_seche = taux_matiere_seche
 
     def calculer_apport_en_carbone_culture_principale(self):
-        instance = get_coefficients_des_residus_de_culture(self.__type_de_culture_principale)
+        conversion_de_ton_ha_a_kg_m2 = 1000 / 10000
+        coefficient_de_calcul = get_coefficients_des_residus_de_culture(self.__type_de_culture_principale)
+        quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * self.__taux_matiere_seche
+        quantite_carbone_partie_tige_non_recolte = quantite_carbone_partie_recolte * (coefficient_de_calcul.ratio_partie_recolte/coefficient_de_calcul.ratio_partie_tige_non_recolte)
+        quantite_carbone_partie_racinaire = quantite_carbone_partie_recolte * ((coefficient_de_calcul.ratio_partie_racinaire+coefficient_de_calcul.ratio_partie_extra_racinaire)/coefficient_de_calcul.ratio_partie_recolte)
+        return quantite_carbone_partie_recolte + quantite_carbone_partie_tige_non_recolte + quantite_carbone_partie_racinaire
 
 
 class CultureSecondaire:
@@ -67,3 +76,8 @@ class TravailDuSol:
 
     def calculer_apport_en_carbone_travail_du_sol(self):
         pass  # TODO: calculer l'apport en carbone du trravail du sol
+
+
+if __name__ == '__main__':
+    cp = CulturePrincipale('Maïs grain', 15.0, True)
+    print(cp.calculer_apport_en_carbone_culture_principale())
