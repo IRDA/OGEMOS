@@ -1,4 +1,4 @@
-from ICBM.CoefficientDocumentation.database_querying import *
+from ICBM.BaseDeDonnees.database_querying import *
 
 
 class RegieDesSolsEtCultures:
@@ -17,6 +17,9 @@ class RegieDesSolsEtCultures:
 
     def set_annee_de_culture(self, annee_de_culture):
         self.__annee_de_culture = annee_de_culture
+
+    def calculer_coefficient_humidification_residus_culture(self):
+        return get_coefficients_des_residus_de_culture(self.__culture_principale).coefficient_residus_culture
 
 
 class CulturePrincipale:
@@ -44,7 +47,7 @@ class CultureSecondaire:
         self.__periode_implantation = periode_implantation
 
     def calculer_apport_en_carbone_culture_secondaire(self):
-        pass  # TODO: calculer l'apport en carbone de la culture secondaire
+        return 0.0 # TODO: calculer l'apport en carbone de la culture secondaire en allant chercher l'apport selon le type dans une base de données et faisant le calcul nécessaire
 
 
 class Amendements:
@@ -66,7 +69,7 @@ class Amendement:
         self.__taux_humidite = None
 
     def calculer_apport_en_carbone(self):
-        pass  # TODO: calculer l'apport en carbone de l'amendement
+        return 0.0 # TODO: calculer l'apport en carbone de l'amendement en allant chercher les taux dans une base de données et faisant le calcul nécessaire
 
 
 class TravailDuSol:
@@ -75,7 +78,7 @@ class TravailDuSol:
         self.__profondeur_maximale_du_travail = profondeur_maximale_du_travail
 
     def calculer_apport_en_carbone_travail_du_sol(self):
-        pass  # TODO: calculer l'apport en carbone du trravail du sol
+        return 0.0  # TODO: calculer l'apport en carbone du travail du sol en allant le chercher dans une base de données
 
 
 if __name__ == '__main__':

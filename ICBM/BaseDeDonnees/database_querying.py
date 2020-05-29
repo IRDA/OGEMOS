@@ -1,4 +1,4 @@
-from ICBM.CoefficientDocumentation.data_tables import *
+from ICBM.BaseDeDonnees.data_tables import *
 from ICBM.database_setup import *
 
 session = Session()
