@@ -3,7 +3,7 @@ from ICBM.BaseDeDonnees.database_querying import *
 
 # TODO: trouver un meilleur nom pour le fichier et le directory
 class EntrepriseAgricole:
-    def __init__(self, champs, nom_entreprise_agricole):
+    def __init__(self, nom_entreprise_agricole, champs):
         self.__nom_entreprise_agricole = nom_entreprise_agricole
         self.__champs = champs
 
@@ -15,14 +15,14 @@ class EntrepriseAgricole:
         for champs in self.__champs:
             champs.calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation()
 
-    def calculer_carbone_organique_du_sol_pour_une_liste_de_champs_la_duree_de_la_simulation(self,liste_nom_de_champs):
+    def calculer_carbone_organique_du_sol_pour_une_liste_de_champs_la_duree_de_la_simulation(self, liste_nom_de_champs):
         for champs in self.__champs:
             if champs in liste_nom_de_champs:
                 champs.calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation()
 
 
 class Champs:
-    def __init__(self, zones_de_gestion, nom_champs):
+    def __init__(self,nom_champs, zones_de_gestion):
         self.__nom_champs = nom_champs
         self.__zones_de_gestion = zones_de_gestion
 
@@ -47,12 +47,18 @@ class ZoneDeGestion:
     qui correspondent à une rotation
     """
 
-    def __init__(self, taux_matiere_organique, municipalite, serie_de_sol, classe_de_drainage, regies_sol_et_culture,
-                 masse_volumique_apparente=1.318, profondeur=17):
+    def __init__(self, taux_matiere_organique, municipalite, serie_de_sol, classe_de_drainage,
+                 masse_volumique_apparente, profondeur,regies_sol_et_culture):
         self.FACTEUR_CONVERSION_MATIERE_ORGANIQUE_CARBONE_ORGANIQUE_SOL = 1.724
+        if masse_volumique_apparente is None:
+            self.__masse_volumique_apparente = 1.318
+        else:
+            self.__masse_volumique_apparente = masse_volumique_apparente
+        if profondeur is None:
+            self.__profondeur = 17
+        else:
+            self.__profondeur = profondeur
         self.__taux_matiere_organique = taux_matiere_organique
-        self.__masse_volumique_apparente = masse_volumique_apparente
-        self.__profondeur = profondeur
         self.__municipalite = municipalite
         self.__serie_de_sol = serie_de_sol
         self.__classe_de_drainage = classe_de_drainage
@@ -65,14 +71,15 @@ class ZoneDeGestion:
         self.__carbone_organique_du_sol_pour_la_duree_de_la_simulation = []
 
     def appliquer_les_regies_pour_la_duree_de_la_simulation(self, annee_initiale, annee_finale):
-        annee_courante = annee_initiale
-        compteur_annee = 0
-        while annee_courante < annee_finale:
-            regie_annee_courante = self.__regies_sol_et_culture[compteur_annee % self.__regies_sol_et_culture.size()]
-            regie_annee_courante.set_annee_culture(annee_courante)
-            self.__regies_sol_et_culture_pour_la_duree_de_la_simulation.append(regie_annee_courante)
-            annee_courante += 1
-            compteur_annee += 1
+        if len(self.__regies_sol_et_culture) != 0:
+            annee_courante = annee_initiale
+            compteur_annee = 0
+            while annee_courante < annee_finale:
+                regie_annee_courante = self.__regies_sol_et_culture[compteur_annee % len(self.__regies_sol_et_culture)]
+                regie_annee_courante.set_annee_de_culture(annee_courante)
+                self.__regies_sol_et_culture_pour_la_duree_de_la_simulation.append(regie_annee_courante)
+                annee_courante += 1
+                compteur_annee += 1
 
     """
     :returns carbone organique du sol initial ou TTS (total carbon at steady state) (kg C/m2)
@@ -84,23 +91,29 @@ class ZoneDeGestion:
         facteur_conversion_de_matiere_organique_a_carbone_organique_du_sol = 1 / 1.724
         return self.__masse_volumique_apparente * self.__profondeur * \
                (
-                           self.__taux_matiere_organique / conversion_pourcentage_taux_matiere_organique) * facteur_conversion_de_matiere_organique_a_carbone_organique_du_sol * facteur_conversion_de_g_cm2_a_kg_m2
+                       self.__taux_matiere_organique / conversion_pourcentage_taux_matiere_organique) * facteur_conversion_de_matiere_organique_a_carbone_organique_du_sol * facteur_conversion_de_g_cm2_a_kg_m2
 
     def calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation(self):
-        pool_carbone_jeune_initial = self.__calculer_pool_carbone_jeune_initial()
-        pool_carbone_vieux_initial = self.__calculer_pool_carbone_vieux_initial(pool_carbone_jeune_initial)
-        regie_annee_calcule, *regie_annee_simulation_restante = self.__regies_sol_et_culture_pour_la_duree_de_la_simulation
-        self.__carbone_organique_du_sol_pour_la_duree_de_la_simulation.append(pool_carbone_jeune_initial + pool_carbone_vieux_initial)
-        for regie_annee_de_simulation in regie_annee_simulation_restante:
-            carbone_organique_du_sol = regie_annee_de_simulation.calculer_apport_annuel_en_carbone_de_la_regie() / (
+        if len(self.__regies_sol_et_culture_pour_la_duree_de_la_simulation) !=0:
+            pool_carbone_jeune_initial = self.__calculer_pool_carbone_jeune_initial()
+            pool_carbone_vieux_initial = self.__calculer_pool_carbone_vieux_initial(pool_carbone_jeune_initial)
+            regie_annee_calcule, *regie_annee_simulation_restante = self.__regies_sol_et_culture_pour_la_duree_de_la_simulation
+            self.__carbone_organique_du_sol_pour_la_duree_de_la_simulation.append(
+                pool_carbone_jeune_initial + pool_carbone_vieux_initial)
+            for regie_annee_de_simulation in regie_annee_simulation_restante:
+                carbone_organique_du_sol = regie_annee_de_simulation.calculer_apport_annuel_en_carbone_de_la_regie() / (
                         self.__facteur_climatique * (
-                            1 / self.__coefficient_mineralisation_pool_jeune() + regie_annee_de_simulation.calculer_coefficient_humidification_residus_culture() / self.__coefficient_mineralisation_pool_vieux))
-            self.__carbone_organique_du_sol_pour_la_duree_de_la_simulation.append(carbone_organique_du_sol)
+                        (1 / self.__coefficient_mineralisation_pool_jeune) + (
+                        regie_annee_de_simulation.calculer_coefficient_humidification_residus_culture() / self.__coefficient_mineralisation_pool_vieux)))
+                self.__carbone_organique_du_sol_pour_la_duree_de_la_simulation.append(carbone_organique_du_sol)
 
     def __calculer_pool_carbone_jeune_initial(self):
-        return self.__regies_sol_et_culture_pour_la_duree_de_la_simulation[
-                   0].calculer_apport_annuel_en_carbone_de_la_regie() / (
+        if len(self.__regies_sol_et_culture_pour_la_duree_de_la_simulation):
+            return self.__regies_sol_et_culture_pour_la_duree_de_la_simulation[
+                       0].calculer_apport_annuel_en_carbone_de_la_regie() / (
                            self.__facteur_climatique * self.__coefficient_mineralisation_pool_jeune)
+        else:
+            return 0
 
     def __calculer_pool_carbone_vieux_initial(self, pool_carbone_jeune_initial):
         return self.__carbone_organique_initial_du_sol - pool_carbone_jeune_initial
@@ -119,18 +132,3 @@ class ZoneDeGestion:
         # TODO: enelver la dummy version et faire la vrai fonction
         if self.__municipalite == 'Victoriaville':
             return 'Centre-du-Québec'
-
-
-class Simulation:
-    def __init__(self, entreprise_agricole, annee_itiniale, annee_finale):
-        self.__entreprise_agricole = entreprise_agricole
-        self.__appliquer_les_regies_pour_la_duree_de_la_simulation(annee_itiniale, annee_finale)
-
-    def __appliquer_les_regies_pour_la_duree_de_la_simulation(self, annee_initiale, annee_finale):
-        self.__entreprise_agricole.appliquer_les_regies_pour_la_duree_de_la_simulation(annee_initiale, annee_finale)
-
-    def calculer_carbone_organique_du_sol_pour_entreprise_agricole_la_duree_de_la_simulation(self):
-        self.__entreprise_agricole.calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation()
-
-    def calculer_carbone_organique_du_sol_pour_une_liste_de_champs_la_duree_de_la_simulation(self,liste_nom_de_champs):
-        self.__entreprise_agricole.calculer_carbone_organique_du_sol_pour_une_liste_de_champs_la_duree_de_la_simulation(liste_nom_de_champs)

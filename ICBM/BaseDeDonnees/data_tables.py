@@ -28,3 +28,10 @@ class CoefficientDesResidusDeCulture(Base):
     ratio_partie_extra_racinaire = Column(Float)
     taux_carbone_chaque_partie = Column(Float)
     coefficient_humidification_residus_culture = Column(Float)
+
+
+class CoefficientDesAmendements(Base):
+    __tablename__ = 'CoefficientAmendements'
+    amendement = Column(String, primary_key=True)
+    pourcentage_matiere_seche = Column(Float)
+    coefficient_mineralisation_amendement = Column(Float)  # pourcentage %
