@@ -22,3 +22,12 @@ def get_coefficients_des_residus_de_culture(culture_principale):
         CoefficientDesResidusDeCulture.culture_principale == culture_principale).one()
     session.close()
     return query_result
+
+
+def get_cultures_fourrageres():
+    sesion = Session()
+    query_result = []
+    for culture in sesion.query(CoefficientDesResidusDeCulture).filter(CoefficientDesResidusDeCulture.est_culture_fourragere.is_(True)):
+        query_result.append(culture.culture_principale)
+    sesion.close()
+    return query_result

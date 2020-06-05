@@ -58,12 +58,23 @@ def __zone_de_gestion_mapping(data):
 
 def __regie_sol_et_culture_mapping(data):
     liste_regies = []
-    for regie in data:
-        culture_principale = __culture_principale_mapping(regie["culture_principale"])
-        culture_secondaire = __culture_secondaire_mapping(regie["culture_secondaire"])
-        amendements = __amendements_mapping(regie["amendements"])
-        travail_du_sol = __travail_du_sol_mapping(regie["travail_du_sol"])
+    cultures_fourrageres = get_cultures_fourrageres()
+    iterateur_annee = 0
+    postion_derniere_annee_de_simulation = len(data)-1
+    while iterateur_annee < len(data):
+        if data[iterateur_annee]["culture_principale"] in cultures_fourrageres:
+            culture_annee_suivante = data[iterateur_annee+1]["culture_principale"]
+            if iterateur_annee == postion_derniere_annee_de_simulation or culture_annee_suivante not in cultures_fourrageres:
+                culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], True)
+            else:
+                culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], False)
+        else:
+            culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], False)
+        culture_secondaire = __culture_secondaire_mapping(data[iterateur_annee]["culture_secondaire"])
+        amendements = __amendements_mapping(data[iterateur_annee]["amendements"])
+        travail_du_sol = __travail_du_sol_mapping(data[iterateur_annee]["travail_du_sol"])
         liste_regies.append(RegieDesSolsEtCultures(culture_principale, culture_secondaire, amendements, travail_du_sol))
+        iterateur_annee += 1
     return liste_regies
 
 
@@ -80,17 +91,18 @@ def __amendements_mapping(data):
     return Amendements(liste_amendement)
 
 
-def __culture_principale_mapping(data):
+def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourragere):
     culture_principale = data["culture_principale"]
     rendement = data["rendement"]
     produit_non_recolte = data["produit_non_recolte"]
-    proportion_redisu_recolte = data["proportion_residu_recolte"]
+    proportion_tige_exporte = data["proportion_tige_exporte"]
     taux_matiere_seche = data["taux_matiere_seche"]
     if taux_matiere_seche is None:
-        return CulturePrincipale(culture_principale, rendement, proportion_redisu_recolte, produit_non_recolte)
+        return CulturePrincipale(culture_principale, rendement, proportion_tige_exporte, produit_non_recolte,
+                                 est_derniere_annee_rotation_culture_fourragere)
     else:
-        return CulturePrincipale(culture_principale, rendement, proportion_redisu_recolte, produit_non_recolte,
-                                 taux_matiere_seche)
+        return CulturePrincipale(culture_principale, rendement, proportion_tige_exporte, produit_non_recolte,
+                                 est_derniere_annee_rotation_culture_fourragere, taux_matiere_seche)
 
 
 def __culture_secondaire_mapping(data):

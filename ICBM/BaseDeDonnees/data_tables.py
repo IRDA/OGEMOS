@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Float, String
+from sqlalchemy import Column, Float, String, Boolean
 
 Base = declarative_base()
 
@@ -28,6 +28,7 @@ class CoefficientDesResidusDeCulture(Base):
     ratio_partie_extra_racinaire = Column(Float)
     taux_carbone_chaque_partie = Column(Float)
     coefficient_humidification_residus_culture = Column(Float)
+    est_culture_fourragere = Column(Boolean)
 
 
 class CoefficientDesAmendements(Base):
