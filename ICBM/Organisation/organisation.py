@@ -22,7 +22,7 @@ class EntrepriseAgricole:
 
 
 class Champs:
-    def __init__(self,nom_champs, zones_de_gestion):
+    def __init__(self, nom_champs, zones_de_gestion):
         self.__nom_champs = nom_champs
         self.__zones_de_gestion = zones_de_gestion
 
@@ -74,7 +74,7 @@ class ZoneDeGestion:
         if len(self.__regies_sol_et_culture) != 0:
             annee_courante = annee_initiale
             compteur_annee = 0
-            while annee_courante < annee_finale:
+            while annee_courante <= annee_finale:
                 regie_annee_courante = self.__regies_sol_et_culture[compteur_annee % len(self.__regies_sol_et_culture)]
                 regie_annee_courante.set_annee_de_culture(annee_courante)
                 self.__regies_sol_et_culture_pour_la_duree_de_la_simulation.append(regie_annee_courante)
@@ -94,7 +94,7 @@ class ZoneDeGestion:
                        self.__taux_matiere_organique / conversion_pourcentage_taux_matiere_organique) * facteur_conversion_de_matiere_organique_a_carbone_organique_du_sol * facteur_conversion_de_g_cm2_a_kg_m2
 
     def calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation(self):
-        if len(self.__regies_sol_et_culture_pour_la_duree_de_la_simulation) !=0:
+        if len(self.__regies_sol_et_culture_pour_la_duree_de_la_simulation) != 0:
             pool_carbone_jeune_initial = self.__calculer_pool_carbone_jeune_initial()
             pool_carbone_vieux_initial = self.__calculer_pool_carbone_vieux_initial(pool_carbone_jeune_initial)
             regie_annee_calcule, *regie_annee_simulation_restante = self.__regies_sol_et_culture_pour_la_duree_de_la_simulation

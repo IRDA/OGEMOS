@@ -36,3 +36,9 @@ class CoefficientDesAmendements(Base):
     amendement = Column(String, primary_key=True)
     pourcentage_matiere_seche = Column(Float)
     coefficient_mineralisation_amendement = Column(Float)  # pourcentage %
+
+
+class FacteurTravailDuSol(Base):
+    __tablename__ = 'FacteurTravailDuSol'
+    travail_du_sol = Column(String, primary_key=True)
+    facteur_travail_du_sol = Column(Float)
