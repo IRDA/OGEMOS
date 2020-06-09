@@ -29,13 +29,19 @@ class CoefficientDesResidusDeCulture(Base):
     taux_carbone_chaque_partie = Column(Float)
     coefficient_humidification_residus_culture = Column(Float)
     est_culture_fourragere = Column(Boolean)
+    hproduit = Column(Float)
+    htige = Column(Float)
+    hracine = Column(Float)
+    hextraracinaire = Column(Float)
 
 
 class CoefficientDesAmendements(Base):
     __tablename__ = 'CoefficientAmendements'
     amendement = Column(String, primary_key=True)
-    pourcentage_matiere_seche = Column(Float)
-    coefficient_mineralisation_amendement = Column(Float)  # pourcentage %
+    matiere_seche = Column(Float) #% sur base humide
+    carbon_nitrogen = Column(Float)
+    nitrogen_total = Column(Float)
+    coefficient_humidification = Column(Float)
 
 
 class FacteurTravailDuSol(Base):

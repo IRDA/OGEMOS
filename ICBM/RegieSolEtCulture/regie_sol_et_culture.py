@@ -37,7 +37,6 @@ class CulturePrincipale:
         self.__taux_matiere_seche = taux_matiere_seche
 
     def calculer_apport_en_carbone_culture_principale(self):
-        # TODO: ajouter hroot et hshoot à la base de données pour chaque type de culture mais les séparer en 4 paramètres pour qu'ils soient facilement modifiable prendre les données de Katterer 2014 pour l'instant et donner hshoot au produit et tige et hroot au reste
         conversion_de_ton_ha_a_kg_m2 = 1000 / 10000
         proportion_tige_laissee_au_champs = (1 - self.__proportion_tige_exporte)
         coefficient_de_calcul = get_coefficients_des_residus_de_culture(self.__type_de_culture_principale)
@@ -50,9 +49,9 @@ class CulturePrincipale:
             quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_extra_racinaire / coefficient_de_calcul.ratio_partie_recolte)
             if self.__produit_non_recolte:
-                return quantite_carbone_partie_tige_non_recolte + quantite_carbone_partie_racinaire + quantite_carbone_partie_extra_racinaire
+                return coefficient_de_calcul.htige * quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
             else:
-                return quantite_carbone_partie_recolte + quantite_carbone_partie_tige_non_recolte + quantite_carbone_partie_racinaire + quantite_carbone_partie_extra_racinaire
+                return coefficient_de_calcul.hproduit * quantite_carbone_partie_recolte + coefficient_de_calcul.htige * quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
         else:
             quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * self.__taux_matiere_seche * proportion_tige_laissee_au_champs
             quantite_carbone_partie_racinaire = quantite_carbone_partie_recolte * (
@@ -60,9 +59,9 @@ class CulturePrincipale:
             quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_extra_racinaire / coefficient_de_calcul.ratio_partie_recolte)
             if self.__est_derniere_annee_rotation_plante_fourragere:
-                return quantite_carbone_partie_recolte + quantite_carbone_partie_racinaire + quantite_carbone_partie_extra_racinaire
+                return coefficient_de_calcul.hproduit * quantite_carbone_partie_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
             else:
-                return quantite_carbone_partie_recolte + quantite_carbone_partie_extra_racinaire
+                return coefficient_de_calcul.hproduit * quantite_carbone_partie_recolte + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
 
     def get_coefficient_calcul(self):
         return get_coefficients_des_residus_de_culture(self.__type_de_culture_principale)
@@ -90,13 +89,14 @@ class Amendements:
 
 
 class Amendement:
-    def __init__(self, type_amendement):
+    def __init__(self, type_amendement, apport):
         self.__type_amendement = type_amendement
-        self.__taux_apport_specifique = None
-        self.__taux_humidite = None
+        self.__apport = apport
 
     def calculer_apport_en_carbone(self):
-        return 0.0  # TODO: calculer l'apport en carbone de l'amendement en allant chercher les taux dans une base de données et faisant le calcul nécessaire
+        coefficient_de_calcul = get_coefficient_des_amendements(self.__type_amendement)
+        quantite_carbone_amendement = self.__apport * coefficient_de_calcul.nitrogen_total * coefficient_de_calcul.carbon_nitrogen
+        return quantite_carbone_amendement
 
 
 class TravailDuSol:

@@ -48,6 +48,7 @@ def __zone_de_gestion_mapping(data):
         taux_matiere_organique = zone_de_gestion["taux_matiere_organique"]
         municipalite = zone_de_gestion["municipalite"]
         serie_de_sol = zone_de_gestion["serie_de_sol"]
+        taille_de_la_zone = zone_de_gestion["taille_de_la_zone"]
 
         try:
             assert serie_de_sol in series_de_sol_supportees
@@ -61,7 +62,7 @@ def __zone_de_gestion_mapping(data):
         regies_sol_et_culture = __regie_sol_et_culture_mapping(zone_de_gestion["regies_sol_et_culture"])
         liste_zone_de_gestion.append(
             ZoneDeGestion(taux_matiere_organique, municipalite, serie_de_sol, classe_de_drainage,
-                          masse_volumique_apparente, profondeur, regies_sol_et_culture))
+                          masse_volumique_apparente, profondeur, regies_sol_et_culture, taille_de_la_zone))
     return liste_zone_de_gestion
 
 
@@ -104,7 +105,7 @@ def __travail_du_sol_mapping(data):
 def __amendements_mapping(data):
     liste_amendement = []
     for amendement in data:
-        liste_amendement.append(Amendement(amendement["amendement"]))
+        liste_amendement.append(Amendement(amendement["amendement"], amendement["apport"]))
     return Amendements(liste_amendement)
 
 

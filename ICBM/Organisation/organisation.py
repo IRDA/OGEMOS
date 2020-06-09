@@ -48,7 +48,7 @@ class ZoneDeGestion:
     """
 
     def __init__(self, taux_matiere_organique, municipalite, serie_de_sol, classe_de_drainage,
-                 masse_volumique_apparente, profondeur,regies_sol_et_culture):
+                 masse_volumique_apparente, profondeur, regies_sol_et_culture, taille_de_la_zone):
         self.FACTEUR_CONVERSION_MATIERE_ORGANIQUE_CARBONE_ORGANIQUE_SOL = 1.724
         if masse_volumique_apparente is None:
             self.__masse_volumique_apparente = 1.318
@@ -127,6 +127,18 @@ class ZoneDeGestion:
     def __calculer_facteur_climatique(self):
         facteur_climatique = get_facteur_climatique(self.__obtenir_region_climatique_a_partir_de_municipalite())
         return facteur_climatique.facteur_temperature_sol * facteur_climatique.facteur_humidite_sol
+
+    def __calculer_bilan_annuel_moyen(self):
+        somme_des_bilan_annuel = 0
+        for annee in self.__carbone_organique_du_sol_pour_la_duree_de_la_simulation:
+            somme_des_bilan_annuel += annee
+        return somme_des_bilan_annuel/len(self.__carbone_organique_du_sol_pour_la_duree_de_la_simulation)
+
+    def __calculer_teneur_finale_projetee(self):
+        return self.__carbone_organique_du_sol_pour_la_duree_de_la_simulation[len(self.__carbone_organique_du_sol_pour_la_duree_de_la_simulation)-1]
+
+    def __calculer_difference_entre_teneur_initiale_et_finale(self):
+        return self.__carbone_organique_du_sol_pour_la_duree_de_la_simulation[0] - self.__calculer_teneur_finale_projetee()
 
     def __obtenir_region_climatique_a_partir_de_municipalite(self):
         # TODO: enelver la dummy version et faire la vrai fonction

@@ -64,3 +64,10 @@ def get_types_travail_du_sol_supportes():
         query_result.append(travail.travail_du_sol)
     session.close()
     return query_result
+
+
+def get_coefficient_des_amendements(amendement):
+    session = Session()
+    query_result = session.query(CoefficientDesAmendements).filter(CoefficientDesAmendements.amendement == amendement).one()
+    session.close()
+    return query_result
