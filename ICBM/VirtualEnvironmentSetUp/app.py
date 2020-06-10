@@ -29,7 +29,8 @@ def __simulation_mapping(data):
 def __entreprise_agricole_mapping(data):
     entreprise_nom = data["nom"]
     champs = __champs_mapping(data["champs"])
-    return EntrepriseAgricole(entreprise_nom, champs)
+    taille_entreprise = data["taille_entreprise"]
+    return EntrepriseAgricole(entreprise_nom, champs, taille_entreprise)
 
 
 def __champs_mapping(data):
@@ -37,7 +38,8 @@ def __champs_mapping(data):
     for champs in data:
         nom_champs = champs["nom"]
         zones_de_gestion = __zone_de_gestion_mapping(champs["zones_de_gestion"])
-        liste_champs.append(Champs(nom_champs, zones_de_gestion))
+        taille_champs = champs["taille_champs"]
+        liste_champs.append(Champs(nom_champs, zones_de_gestion, taille_champs))
     return liste_champs
 
 
