@@ -43,12 +43,12 @@ def get_cultures_principales_supportees():
 
 
 def get_cultures_fourrageres():
-    sesion = Session()
+    session = Session()
     query_result = []
-    for culture in sesion.query(CoefficientDesResidusDeCulture).filter(
+    for culture in session.query(CoefficientDesResidusDeCulture).filter(
             CoefficientDesResidusDeCulture.est_culture_fourragere.is_(True)):
         query_result.append(culture.culture_principale)
-    sesion.close()
+    session.close()
     return query_result
 
 
@@ -81,5 +81,22 @@ def get_amendements_supportees():
     query_result = []
     for amendement in session.query(CoefficientDesAmendements.amendement).all():
         query_result.append(amendement.amendement)
+    session.close()
+    return query_result
+
+
+def get_classe_de_drainage(classe_de_drainage):
+    session = Session()
+    query_result = session.query(CoefficientClasseDeDrainage).filter(
+        CoefficientClasseDeDrainage.classe_de_drainage == classe_de_drainage).one()
+    session.close()
+    return query_result
+
+
+def get_classes_de_drainage_supportees():
+    session = Session()
+    query_result = []
+    for classe_de_drainage in session.query(CoefficientClasseDeDrainage.classe_de_drainage).all():
+        query_result.append(classe_de_drainage.classe_de_drainage)
     session.close()
     return query_result

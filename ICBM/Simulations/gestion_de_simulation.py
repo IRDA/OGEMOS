@@ -6,14 +6,11 @@ class GestionSimulation:
     def __init__(self):
         self.__simulations = []
 
-    def effectuer_les_simulations_pour_l_entreprise_agricole(self):
+    def generer_les_bilans_pour_les_simulations_de_l_entreprise_agricole(self):
+        bilan_des_simulations = []
         for simulation in self.__simulations:
-            simulation.calculer_carbone_organique_du_sol_pour_entreprise_agricole_la_duree_de_la_simulation()
-
-    def effectuer_les_simulations_pour_une_liste_de_champs(self, liste_nom_de_champs):
-        for simulation in self.__simulations:
-            simulation.calculer_carbone_organique_du_sol_pour_une_liste_de_champs_la_duree_de_la_simulation(
-                liste_nom_de_champs)
+            bilan_des_simulations.append(simulation.generer_le_bilan_pour_la_simulation())
+        return {"bilans_des_simulations": bilan_des_simulations}
 
     def ajouter_une_simulation(self, simulation):
         self.__simulations.append(simulation)
@@ -27,12 +24,8 @@ class Simulation:
     def __appliquer_les_regies_pour_la_duree_de_la_simulation(self, annee_initiale, annee_finale):
         self.__entreprise_agricole.appliquer_les_regies_pour_la_duree_de_la_simulation(annee_initiale, annee_finale)
 
-    def calculer_carbone_organique_du_sol_pour_entreprise_agricole_la_duree_de_la_simulation(self):
-        self.__entreprise_agricole.calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation()
-
-    def calculer_carbone_organique_du_sol_pour_une_liste_de_champs_la_duree_de_la_simulation(self, liste_nom_de_champs):
-        self.__entreprise_agricole.calculer_carbone_organique_du_sol_pour_une_liste_de_champs_la_duree_de_la_simulation(
-            liste_nom_de_champs)
+    def generer_le_bilan_pour_la_simulation(self):
+        return self.__entreprise_agricole.generer_le_bilan_entreprise()
 
 
 if __name__ == '__main__':
@@ -46,4 +39,4 @@ if __name__ == '__main__':
     chmp = Champs("Joe's Field", [zg])
     ea = EntrepriseAgricole("Joe's Farm", [chmp])
     sim = Simulation(2015, 2020, ea)
-    print(sim.calculer_carbone_organique_du_sol_pour_entreprise_agricole_la_duree_de_la_simulation())
+    #2print(sim.calculer_carbone_organique_du_sol_pour_entreprise_agricole_la_duree_de_la_simulation())

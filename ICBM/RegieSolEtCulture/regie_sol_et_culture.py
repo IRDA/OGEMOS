@@ -21,6 +21,12 @@ class RegieDesSolsEtCultures:
     def calculer_coefficient_humidification_residus_culture(self):
         return self.__culture_principale.get_coefficient_calcul().coefficient_humidification_residus_culture
 
+    def generer_bilan_regie(self):
+
+        return {"culture_principale": self.__culture_principale.generer_bilan_culture_principale(),
+                "culture_secondaire": self.__culture_secondaire.generer_bilan_culture_secondaire(),
+                "amendements": self.__amendements.generer_bilan_amendements()}
+
 
 class CulturePrincipale:
     """
@@ -28,13 +34,20 @@ class CulturePrincipale:
     """
 
     def __init__(self, type_de_culture_principale, rendement, proportion_tige_exporte, produit_non_recolte,
-                 est_derniere_annee_rotation_plante_fourragere, taux_matiere_seche=0.845):
+                 est_derniere_annee_rotation_plante_fourragere, taux_matiere_seche):
+        self.__coefficient_des_residus_de_culture = get_coefficients_des_residus_de_culture(type_de_culture_principale)
         self.__type_de_culture_principale = type_de_culture_principale
         self.__rendement = rendement
-        self.__proportion_tige_exporte = proportion_tige_exporte
+        if proportion_tige_exporte is not None:
+            self.__proportion_tige_exporte = proportion_tige_exporte
+        else:
+            self.__proportion_tige_exporte = self.__coefficient_des_residus_de_culture.proportion_des_tiges_exportees
         self.__produit_non_recolte = produit_non_recolte
         self.__est_derniere_annee_rotation_plante_fourragere = est_derniere_annee_rotation_plante_fourragere
-        self.__taux_matiere_seche = taux_matiere_seche
+        if taux_matiere_seche is not None:
+            self.__taux_matiere_seche = taux_matiere_seche
+        else:
+            self.__taux_matiere_seche = self.__coefficient_des_residus_de_culture.taux_matiere_seche
 
     def calculer_apport_en_carbone_culture_principale(self):
         conversion_de_ton_ha_a_kg_m2 = 1000 / 10000
@@ -66,6 +79,9 @@ class CulturePrincipale:
     def get_coefficient_calcul(self):
         return get_coefficients_des_residus_de_culture(self.__type_de_culture_principale)
 
+    def generer_bilan_culture_principale(self):
+        return {"culture_principale": self.__type_de_culture_principale}
+
 
 class CultureSecondaire:
     def __init__(self, type_de_culture_secondaire, periode_implantation):
@@ -74,6 +90,9 @@ class CultureSecondaire:
 
     def calculer_apport_en_carbone_culture_secondaire(self):
         return 0.0  # TODO: calculer l'apport en carbone de la culture secondaire en allant chercher l'apport selon le type dans une base de données et faisant le calcul nécessaire
+
+    def generer_bilan_culture_secondaire(self):
+        return {"culture_secondaire": self.__type_de_culture_secondaire}
 
 
 class Amendements:
@@ -87,6 +106,12 @@ class Amendements:
                 total_carbone_amendements += amendement.calculer_apport_en_carbone()
         return total_carbone_amendements
 
+    def generer_bilan_amendements(self):
+        amendements = []
+        for amendement in self.__amendements:
+            amendements.append(amendement.generer_bilan_amendement())
+        return {"amendements": amendements}
+
 
 class Amendement:
     def __init__(self, type_amendement, apport):
@@ -97,6 +122,9 @@ class Amendement:
         coefficient_de_calcul = get_coefficient_des_amendements(self.__type_amendement)
         quantite_carbone_amendement = self.__apport * coefficient_de_calcul.nitrogen_total * coefficient_de_calcul.carbon_nitrogen
         return quantite_carbone_amendement
+
+    def generer_bilan_amendement(self):
+        return {"amendement": self.__type_amendement, "apport": self.__apport}
 
 
 class TravailDuSol:
@@ -109,7 +137,10 @@ class TravailDuSol:
 
 
 if __name__ == '__main__':
-    # cp = CulturePrincipale('Maïs grain', 15.0, True, True)
-    # print(cp.calculer_apport_en_carbone_culture_principale())
-
-    print(get_cultures_fourrageres())
+    cp = CulturePrincipale('Maïs grain', 15.0, 0.75, True, True, 3)
+    cs = CultureSecondaire(0, 0)
+    am = Amendement('Lisier porcs', 0)
+    ams = Amendements([am])
+    ts = TravailDuSol(0, 0)
+    data = RegieDesSolsEtCultures(cp, cs, ams, ts)
+    print(data.generer_bilan_regie()["culture_principale"])

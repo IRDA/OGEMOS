@@ -7,13 +7,13 @@ app = Flask(__name__)
 @app.route('/api/icbm-bilan', methods=['POST'])
 def add():
     data = request.get_json()
-    __launch_icbm_simulation(data)
-    return jsonify(data)
+    response = __launch_icbm_simulation(data)
+    return jsonify(response)
 
 
 def __launch_icbm_simulation(data):
     gestion_simulation = __simulation_mapping(data["simulations"])
-    gestion_simulation.effectuer_les_simulations_pour_l_entreprise_agricole()
+    return gestion_simulation.generer_les_bilans_pour_les_simulations_de_l_entreprise_agricole()
 
 
 def __simulation_mapping(data):
@@ -86,6 +86,7 @@ def __champs_mapping(data):
 def __zone_de_gestion_mapping(data):
     liste_zone_de_gestion = []
     series_de_sol_supportees = get_series_de_sol_supportees()
+    classe_de_drainage_supportees = get_classes_de_drainage_supportees()
     for zone_de_gestion in data:
         taux_matiere_organique = zone_de_gestion["taux_matiere_organique"]
         municipalite = zone_de_gestion["municipalite"]
@@ -119,26 +120,28 @@ def __zone_de_gestion_mapping(data):
         try:
             assert isinstance(taille_de_la_zone, (float, int)) and taille_de_la_zone > 0
         except AssertionError:
-            message_erreur = str(taille_de_la_zone) + " n'est pas une taille de la zone de gestion valide. Voir documentation API."
+            message_erreur = str(
+                taille_de_la_zone) + " n'est pas une taille de la zone de gestion valide. Voir documentation API."
             abort(400, message_erreur)
 
-        # TODO: Une fois la table des classes de drainage faite regarder si la classe de drainage est supportée
         try:
-            assert isinstance(classe_de_drainage, str)
+            assert classe_de_drainage in classe_de_drainage_supportees
         except AssertionError:
-            message_erreur = str(classe_de_drainage) + " n'est pas une classe de drainage valide. Voir documentation API."
+            message_erreur = str(
+                classe_de_drainage) + " n'est pas une classe de drainage supportée."
             abort(400, message_erreur)
 
         try:
-            assert isinstance(masse_volumique_apparente, (float, int)) or masse_volumique_apparente == None
+            assert isinstance(masse_volumique_apparente, (float, int)) or masse_volumique_apparente is None
             if masse_volumique_apparente is not None:
                 assert masse_volumique_apparente > 0
         except AssertionError:
-            message_erreur = str(masse_volumique_apparente) + " n'est pas une nom masse_volumique_apparente valide. Voir documentation API."
+            message_erreur = str(
+                masse_volumique_apparente) + " n'est pas une nom masse_volumique_apparente valide. Voir documentation API."
             abort(400, message_erreur)
 
         try:
-            assert isinstance(profondeur, (float, int)) or profondeur == None
+            assert isinstance(profondeur, (float, int)) or profondeur is None
             if profondeur is not None:
                 assert profondeur > 0
         except AssertionError:
@@ -234,13 +237,17 @@ def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourr
         abort(400, message_erreur)
 
     try:
-        assert isinstance(proportion_tige_exporte, (float, int)) and proportion_tige_exporte >= 0
+        assert (isinstance(proportion_tige_exporte,
+                           (float, int)) and proportion_tige_exporte >= 0) or proportion_tige_exporte is None
     except AssertionError:
-        message_erreur = str(proportion_tige_exporte) + " n'est pas une proportion tige exporte valide. Voir documentation API."
+        message_erreur = str(
+            proportion_tige_exporte) + " n'est pas une proportion tige exporte valide. Voir documentation API."
         abort(400, message_erreur)
 
     try:
-        assert isinstance(taux_matiere_seche, (float, int))
+        assert isinstance(taux_matiere_seche, (float, int)) or taux_matiere_seche is None
+        if taux_matiere_seche is not None:
+            assert taux_matiere_seche > 0
     except AssertionError:
         message_erreur = str(taux_matiere_seche) + " n'est pas un taux de matière sèche valide. Voir documentation API."
         abort(400, message_erreur)
@@ -267,7 +274,8 @@ def __culture_secondaire_mapping(data):
     try:
         assert isinstance(periode_implantation, str)
     except AssertionError:
-        message_erreur = str(periode_implantation) + " n'est pas une periode d'implantation valide. Voir documentation API."
+        message_erreur = str(
+            periode_implantation) + " n'est pas une periode d'implantation valide. Voir documentation API."
         abort(400, message_erreur)
 
     return CultureSecondaire(culture_secondaire, periode_implantation)

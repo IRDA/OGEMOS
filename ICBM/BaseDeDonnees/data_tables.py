@@ -33,6 +33,8 @@ class CoefficientDesResidusDeCulture(Base):
     htige = Column(Float)
     hracine = Column(Float)
     hextraracinaire = Column(Float)
+    proportion_des_tiges_exportees = Column(Float)
+    taux_matiere_seche = Column(Float)
 
 
 class CoefficientDesAmendements(Base):
@@ -48,3 +50,8 @@ class FacteurTravailDuSol(Base):
     __tablename__ = 'FacteurTravailDuSol'
     travail_du_sol = Column(String, primary_key=True)
     facteur_travail_du_sol = Column(Float)
+
+
+class CoefficientClasseDeDrainage(Base):
+    __tablename__ = 'CoefficientClasseDeDrainage'
+    classe_de_drainage = Column(String, primary_key=True)
