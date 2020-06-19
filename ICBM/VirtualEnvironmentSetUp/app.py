@@ -43,7 +43,6 @@ def __simulation_mapping(data):
 def __entreprise_agricole_mapping(data):
     entreprise_nom = data["nom"]
     champs = __champs_mapping(data["champs"])
-    taille_entreprise = data["taille_entreprise"]
 
     try:
         assert isinstance(entreprise_nom, str)
@@ -51,13 +50,7 @@ def __entreprise_agricole_mapping(data):
         message_erreur = str(entreprise_nom) + " n'est pas un nom d'entreprise valide. Voir documentation API."
         abort(400, message_erreur)
 
-    try:
-        assert isinstance(taille_entreprise, (float, int)) and taille_entreprise > 0
-    except AssertionError:
-        message_erreur = str(taille_entreprise) + " n'est pas une taille d'entreprise valide. Voir documentation API."
-        abort(400, message_erreur)
-
-    return EntrepriseAgricole(entreprise_nom, champs, taille_entreprise)
+    return EntrepriseAgricole(entreprise_nom, champs)
 
 
 def __champs_mapping(data):
@@ -65,7 +58,6 @@ def __champs_mapping(data):
     for champs in data:
         nom_champs = champs["nom"]
         zones_de_gestion = __zone_de_gestion_mapping(champs["zones_de_gestion"])
-        taille_champs = champs["taille_champs"]
 
         try:
             assert isinstance(nom_champs, str)
@@ -73,13 +65,7 @@ def __champs_mapping(data):
             message_erreur = str(nom_champs) + " n'est pas un nom d'entreprise valide. Voir documentation API."
             abort(400, message_erreur)
 
-        try:
-            assert isinstance(taille_champs, (float, int)) and taille_champs > 0
-        except AssertionError:
-            message_erreur = str(taille_champs) + " n'est pas un nom d'entreprise valide. Voir documentation API."
-            abort(400, message_erreur)
-
-        liste_champs.append(Champs(nom_champs, zones_de_gestion, taille_champs))
+        liste_champs.append(Champs(nom_champs, zones_de_gestion))
     return liste_champs
 
 
@@ -95,7 +81,8 @@ def __zone_de_gestion_mapping(data):
         classe_de_drainage = zone_de_gestion["classe_de_drainage"]
         masse_volumique_apparente = zone_de_gestion["masse_volumique_apparente"]
         profondeur = zone_de_gestion["profondeur"]
-        regies_sol_et_culture = __regie_sol_et_culture_mapping(zone_de_gestion["regies_sol_et_culture"])
+        regies_sol_et_culture_projection = __regie_sol_et_culture_mapping(zone_de_gestion["regies_sol_et_culture_projection"])
+        regies_sol_et_culture_historique = __regie_sol_et_culture_mapping(zone_de_gestion["regies_sol_et_culture_historique"])
 
         try:
             assert serie_de_sol in series_de_sol_supportees
@@ -150,7 +137,7 @@ def __zone_de_gestion_mapping(data):
 
         liste_zone_de_gestion.append(
             ZoneDeGestion(taux_matiere_organique, municipalite, serie_de_sol, classe_de_drainage,
-                          masse_volumique_apparente, profondeur, regies_sol_et_culture, taille_de_la_zone))
+                          masse_volumique_apparente, profondeur, taille_de_la_zone, regies_sol_et_culture_projection, regies_sol_et_culture_historique))
     return liste_zone_de_gestion
 
 
@@ -262,20 +249,19 @@ def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourr
 
 def __culture_secondaire_mapping(data):
     culture_secondaire = data["culture_secondaire"]
-    periode_implantation = data["periode_implantation"]
+    rendement = data["rendement"]
 
-    # TODO: Vérifier s'il y a une table de culture secondaire
     try:
-        assert isinstance(culture_secondaire, str)
+        assert culture_secondaire in get_cultures_secondaires_supportees()
     except AssertionError:
-        message_erreur = str(culture_secondaire) + " n'est pas une culture secondaire valide. Voir documentation API."
+        message_erreur = str(culture_secondaire) + " n'est pas une culture secondaire supportée."
         abort(400, message_erreur)
 
     try:
-        assert isinstance(periode_implantation, str)
+        assert isinstance(rendement, float)
     except AssertionError:
         message_erreur = str(
-            periode_implantation) + " n'est pas une periode d'implantation valide. Voir documentation API."
+            rendement) + " n'est pas une periode d'implantation valide. Voir documentation API."
         abort(400, message_erreur)
 
-    return CultureSecondaire(culture_secondaire, periode_implantation)
+    return CultureSecondaire(culture_secondaire, rendement)

@@ -84,12 +84,22 @@ class CulturePrincipale:
 
 
 class CultureSecondaire:
-    def __init__(self, type_de_culture_secondaire, periode_implantation):
+    def __init__(self, type_de_culture_secondaire, rendement):
         self.__type_de_culture_secondaire = type_de_culture_secondaire
-        self.__periode_implantation = periode_implantation
+        self.__rendement = rendement
 
     def calculer_apport_en_carbone_culture_secondaire(self):
-        return 0.0  # TODO: calculer l'apport en carbone de la culture secondaire en allant chercher l'apport selon le type dans une base de données et faisant le calcul nécessaire
+        conversion_de_ton_ha_a_kg_m2 = 1000 / 10000
+        coefficient_de_calcul = get_coefficients_culture_secondaire(self.__type_de_culture_secondaire)
+        proportion_tige_laissee_au_champs = (1 - coefficient_de_calcul.proportion_des_tiges_exportees)
+        quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * coefficient_de_calcul.taux_matiere_seche
+        quantite_carbone_partie_tige_non_recolte = quantite_carbone_partie_recolte * (
+                coefficient_de_calcul.ratio_partie_tige_non_recolte / coefficient_de_calcul.ratio_partie_recolte) * proportion_tige_laissee_au_champs
+        quantite_carbone_partie_racinaire = quantite_carbone_partie_recolte * (
+                coefficient_de_calcul.ratio_partie_racinaire / coefficient_de_calcul.ratio_partie_recolte)
+        quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
+                coefficient_de_calcul.ratio_partie_extra_racinaire / coefficient_de_calcul.ratio_partie_recolte)
+        return coefficient_de_calcul.htige * quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
 
     def generer_bilan_culture_secondaire(self):
         return {"culture_secondaire": self.__type_de_culture_secondaire}

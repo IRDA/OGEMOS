@@ -3,10 +3,10 @@ from ICBM.BaseDeDonnees.database_querying import *
 
 # TODO: trouver un meilleur nom pour le fichier et le directory
 class EntrepriseAgricole:
-    def __init__(self, nom_entreprise_agricole, champs, taille_entreprise):
+    def __init__(self, nom_entreprise_agricole, champs):
         self.__nom_entreprise_agricole = nom_entreprise_agricole
         self.__champs = champs
-        self.__taille_entreprise = taille_entreprise
+        self.__taille_entreprise = self.__calculer_la_taille_de_l_entreprise()
 
     def appliquer_les_regies_pour_la_duree_de_la_simulation(self, annee_initiale, annee_finale):
         for champs in self.__champs:
@@ -27,6 +27,12 @@ class EntrepriseAgricole:
                 annee += 1
         return bilan_annuel_moyen_ponderee_entreprise
 
+    def __calculer_la_taille_de_l_entreprise(self):
+        taille_de_l_entreprise = 0
+        for champs in self.__champs:
+            taille_de_l_entreprise += champs.get_taille_du_champs()
+        return taille_de_l_entreprise
+
     def generer_le_bilan_entreprise(self):
         bilans_des_champs = []
         for champs in self.__champs:
@@ -36,10 +42,10 @@ class EntrepriseAgricole:
 
 
 class Champs:
-    def __init__(self, nom_champs, zones_de_gestion, taille_du_champs):
+    def __init__(self, nom_champs, zones_de_gestion):
         self.__nom_champs = nom_champs
         self.__zones_de_gestion = zones_de_gestion
-        self.__taille_du_champs = taille_du_champs
+        self.__taille_du_champs = self.__calculer_la_taille_du_champs()
 
     def appliquer_les_regies_pour_la_duree_de_la_simulation(self, annee_initiale, annee_finale):
         for zone_de_gestion in self.__zones_de_gestion:
@@ -59,6 +65,15 @@ class Champs:
                 annee += 1
         return bilan_annuel_moyen_ponderee_champs
 
+    def __calculer_la_taille_du_champs(self):
+        taille_du_champs = 0
+        for zone in self.__zones_de_gestion:
+            taille_du_champs += zone.get_taille_de_la_zone()
+        return taille_du_champs
+
+    def get_taille_du_champs(self):
+        return self.__taille_du_champs
+
     def generer_le_bilan_des_champs(self):
         bilans_des_zones = []
         for zone_de_gestion in self.__zones_de_gestion:
@@ -77,12 +92,13 @@ class ZoneDeGestion:
     :param municipalite: municipalite dans laquelle se trouve la zone de gestion
     :param serie_de_sol: série de sol de la zone de gestion
     :param classe_de_drainage: classe de drainage de la zone de gestion
-    :param regies_sol_et_culture: Régies des sols constitué des cultures, amendement, etc, pour les quelques années
+    :param regies_sol_et_culture_projection: Régies des sols constitué des cultures, amendement, etc, pour les quelques années
     qui correspondent à une rotation
     """
 
     def __init__(self, taux_matiere_organique, municipalite, serie_de_sol, classe_de_drainage,
-                 masse_volumique_apparente, profondeur, regies_sol_et_culture, taille_de_la_zone):
+                 masse_volumique_apparente, profondeur, taille_de_la_zone, regies_sol_et_culture_projection,
+                 regies_sol_et_culture_historique):
         self.FACTEUR_CONVERSION_MATIERE_ORGANIQUE_CARBONE_ORGANIQUE_SOL = 1.724
         if masse_volumique_apparente is None:
             self.__masse_volumique_apparente = 1.318
@@ -99,17 +115,32 @@ class ZoneDeGestion:
         self.__coefficient_mineralisation_pool_jeune = self.__caculer_coefficient_mineralisation_pool_jeune()
         self.__coefficient_mineralisation_pool_vieux = self.__calculer_coefficient_mineralisation_pool_vieux()
         self.__facteur_climatique = self.__calculer_facteur_climatique()
-        self.__regies_sol_et_culture = regies_sol_et_culture
+        self.__regies_sol_et_culture_projection = regies_sol_et_culture_projection
+        if regies_sol_et_culture_historique is None:
+            self.__regies_sol_et_culture_historique = []
+        else:
+            self.__regies_sol_et_culture_historique = regies_sol_et_culture_historique
         self.__regies_sol_et_culture_pour_la_duree_de_la_simulation = []
         self.__carbone_organique_initial_du_sol = self.__calculer_carbone_organique_initial_du_sol()
         self.__taille_de_la_zone_de_gestion = taille_de_la_zone
 
     def appliquer_les_regies_pour_la_duree_de_la_simulation(self, annee_initiale, annee_finale):
-        if len(self.__regies_sol_et_culture) != 0:
+        if len(self.__regies_sol_et_culture_historique) != 0:
+            annee_courante = annee_initiale - len(self.__regies_sol_et_culture_historique)
+            compteur_annee = 0
+            while annee_courante < annee_initiale:
+                regie_annee_courante = self.__regies_sol_et_culture_historique[
+                    compteur_annee % len(self.__regies_sol_et_culture_historique)]
+                regie_annee_courante.set_annee_de_culture(annee_courante)
+                self.__regies_sol_et_culture_pour_la_duree_de_la_simulation.append(regie_annee_courante)
+                annee_courante += 1
+                compteur_annee += 1
+        if len(self.__regies_sol_et_culture_projection) != 0:
             annee_courante = annee_initiale
             compteur_annee = 0
             while annee_courante <= annee_finale:
-                regie_annee_courante = self.__regies_sol_et_culture[compteur_annee % len(self.__regies_sol_et_culture)]
+                regie_annee_courante = self.__regies_sol_et_culture_projection[
+                    compteur_annee % len(self.__regies_sol_et_culture_projection)]
                 regie_annee_courante.set_annee_de_culture(annee_courante)
                 self.__regies_sol_et_culture_pour_la_duree_de_la_simulation.append(regie_annee_courante)
                 annee_courante += 1
@@ -178,12 +209,33 @@ class ZoneDeGestion:
     def __calculer_difference_entre_teneur_initiale_et_finale(self,
                                                               carbone_organique_du_sol_pour_la_duree_de_la_simulation,
                                                               teneur_finale_projetee):
-        return carbone_organique_du_sol_pour_la_duree_de_la_simulation[0] - teneur_finale_projetee
+        return teneur_finale_projetee - carbone_organique_du_sol_pour_la_duree_de_la_simulation[0]
+
+    def __calculer_moyenne_de_chaque_annee_de_rotation_dans_la_projection(self,
+                                                                          carbone_organique_de_sol_pour_la_duree_de_la_simulation):
+        moyenne_de_chaque_annee_de_rotation = []
+        nombre_de_repetition_de_annee_de_rotation = []
+        for index_annee in range(len(carbone_organique_de_sol_pour_la_duree_de_la_simulation)):
+            if index_annee < len(self.__regies_sol_et_culture_projection):
+                moyenne_de_chaque_annee_de_rotation.append(
+                    carbone_organique_de_sol_pour_la_duree_de_la_simulation[index_annee])
+                nombre_de_repetition_de_annee_de_rotation.append(1)
+            else:
+                moyenne_de_chaque_annee_de_rotation[index_annee % len(self.__regies_sol_et_culture_projection)] = \
+                    carbone_organique_de_sol_pour_la_duree_de_la_simulation[index_annee]
+                nombre_de_repetition_de_annee_de_rotation[index_annee % len(self.__regies_sol_et_culture_projection)] += 1
+        for index_annee in range(len(moyenne_de_chaque_annee_de_rotation)):
+            moyenne_de_chaque_annee_de_rotation[index_annee] = moyenne_de_chaque_annee_de_rotation[index_annee]/ nombre_de_repetition_de_annee_de_rotation[index_annee]
+
+        return moyenne_de_chaque_annee_de_rotation
 
     def __obtenir_region_climatique_a_partir_de_municipalite(self):
         # TODO: enelver la dummy version et faire la vrai fonction
         if self.__municipalite == 'Victoriaville':
             return 'Centre-du-Québec'
+
+    def get_taille_de_la_zone(self):
+        return self.__taille_de_la_zone_de_gestion
 
     def generer_le_bilan_de_zone(self):
         bilan_carbon_pour_la_simulation = self.__calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation()
@@ -191,13 +243,20 @@ class ZoneDeGestion:
         teneur_finale_projetee = self.__calculer_teneur_finale_projetee(bilan_carbon_pour_la_simulation)
         difference_entre_teneur_initiale_et_finale = self.__calculer_difference_entre_teneur_initiale_et_finale(
             bilan_carbon_pour_la_simulation, teneur_finale_projetee)
-        bilan_des_regies = []
-        for regie in self.__regies_sol_et_culture:
-            bilan_des_regies.append(regie.generer_bilan_regie())
+        moyenne_de_chaque_annee_de_rotation = self.__calculer_moyenne_de_chaque_annee_de_rotation_dans_la_projection(
+            bilan_carbon_pour_la_simulation)
+        bilan_des_regies_projections = []
+        bilan_des_regies_historiques = []
+        for regie_projection in self.__regies_sol_et_culture_projection:
+            bilan_des_regies_projections.append(regie_projection.generer_bilan_regie())
+        for regie_historique in self.__regies_sol_et_culture_historique:
+            bilan_des_regies_historiques.append(regie_historique.generer_bilan_regie())
         return {"bilan_carbone_de_la_zone_pour_la_simulation": bilan_carbon_pour_la_simulation,
                 "bilan_annuel_moyen_pour_la_zone": bilan_annuel_moyen, "teneur_finale_projetee": teneur_finale_projetee,
                 "difference_entre_la_teneur_finale_et_la_zone": difference_entre_teneur_initiale_et_finale,
+                "moyenne_de_chaque_annee_de_rotation": moyenne_de_chaque_annee_de_rotation,
                 "taille_de_la_zone": self.__taille_de_la_zone_de_gestion,
                 "taux_de_matiere_organique_initial": self.__taux_matiere_organique, "serie_de_sol": self.__serie_de_sol,
                 "classe_de_drainage": self.__classe_de_drainage,
-                "bilan_des_regies": bilan_des_regies}
+                "bilan_des_regies_projections": bilan_des_regies_projections,
+                "bilan_des_regies_historiques": bilan_des_regies_historiques}

@@ -100,3 +100,19 @@ def get_classes_de_drainage_supportees():
         query_result.append(classe_de_drainage.classe_de_drainage)
     session.close()
     return query_result
+
+
+def get_coefficients_culture_secondaire(culture_secondaire):
+    session = Session()
+    query_result = session.query(CoefficientDesCulturesSecondaires).filter(CoefficientDesCulturesSecondaires.culture_secondaire == culture_secondaire).one()
+    session.close()
+    return query_result
+
+
+def get_cultures_secondaires_supportees():
+    session = Session()
+    query_result = []
+    for cultures_secondaires in session.query(CoefficientDesCulturesSecondaires.culture_secondaire).all():
+        query_result.append(cultures_secondaires.culture_secondaire)
+    session.close()
+    return query_result
