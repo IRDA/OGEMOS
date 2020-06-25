@@ -46,7 +46,8 @@ def run_gui(frame):
                     for entry in grid_slave1_1:
                         nombre_de_zone_de_gestion = entry.get()
                     information_champs.append({"nom_du_champs": nom_du_champs,
-                                               "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion})
+                                               "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion,
+                                               "information_zone_de_gestion": []})
 
             for widget in frame_champs_list.winfo_children():
                 widget.destroy()
@@ -82,8 +83,7 @@ def run_gui(frame):
 
     def show_creation_zone_de_gestion(zone_de_gestion_mainframe):
         def get_information_zone_de_gestion(scrollable_frame):
-            global information_zone_de_gestion
-            information_zone_de_gestion = []
+            index = 0
             for scrollable_frame_widget in scrollable_frame.winfo_children():
                 if isinstance(scrollable_frame_widget, ttk.LabelFrame):
                     for champs_frame_widget in scrollable_frame_widget.winfo_children():
@@ -109,13 +109,15 @@ def run_gui(frame):
                             grid_slave6_1 = champs_frame_widget.grid_slaves(row=6, column=1)
                             for entry in grid_slave6_1:
                                 superficie_de_la_zone = entry.get()
-                            information_zone_de_gestion.append({"taux_matiere_organique": taux_matiere_organique,
+                            global information_champs
+                            information_champs[index]["information_zone_de_gestion"].append({"taux_matiere_organique": taux_matiere_organique,
                                                                 "municipalite": municipalite,
                                                                 "serie_de_sol": serie_de_sol,
                                                                 "classe_de_drainage": classe_de_drainage,
                                                                 "masse_volumique_apparente": masse_volumique_apparente,
                                                                 "profondeur": profondeur,
                                                                 "superficie_de_la_zone": superficie_de_la_zone})
+                index += 1
 
             for widget in zone_de_gestion_mainframe.winfo_children():
                 widget.destroy()
@@ -130,6 +132,7 @@ def run_gui(frame):
         canvas.configure(yscrollcommand=scrollbar.set)
 
         for index_champs in range(int(nombre_de_champs)):
+            global information_champs
             champs_frame = ttk.LabelFrame(scrollable_frame, text=information_champs[index_champs]["nom_du_champs"])
             for index_zone_de_gestion in range(int(information_champs[index_champs]["nombre_de_zone_de_gestion"])):
                 zone_de_gestion_frame = ttk.LabelFrame(champs_frame,
@@ -262,7 +265,8 @@ def run_gui(frame):
                 nombre_de_zone_de_gestion = nombre_de_zone_de_gestion_entry.get()
                 global information_champs
                 information_champs.append({"nom_du_champs": nom_du_champs,
-                                           "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion})
+                                           "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion,
+                                           "information_zone_de_gestion": []})
                 global nombre_de_champs
                 nombre_de_champs += 1
                 for widget in new_champs_window.winfo_children():
@@ -314,47 +318,45 @@ def run_gui(frame):
                     zone_de_gestion_frame.pack()
 
                 creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame,
-                                                             command=lambda: add_new_tab())
+                                                             command=lambda: add_new_zone_tab())
                 creation_zone_de_gestion_bouton.pack()
                 canvas.pack(side="left", fill="x", expand=True)
                 scrollbar.pack(side="right", fill="y")
                 creation_zone_frame.pack()
 
-                def add_new_tab():
+                def add_new_zone_tab():
                     for scrollable_frame_widget in scrollable_frame.winfo_children():
                         if isinstance(scrollable_frame_widget, ttk.LabelFrame):
-                            for champs_frame_widget in scrollable_frame_widget.winfo_children():
-                                if isinstance(champs_frame_widget, ttk.LabelFrame):
-                                    grid_slave0_1 = champs_frame_widget.grid_slaves(row=0, column=1)
-                                    for entry in grid_slave0_1:
-                                        taux_matiere_organique = entry.get()
-                                    grid_slave1_1 = champs_frame_widget.grid_slaves(row=1, column=1)
-                                    for entry in grid_slave1_1:
-                                        municipalite = entry.get()
-                                    grid_slave2_1 = champs_frame_widget.grid_slaves(row=2, column=1)
-                                    for entry in grid_slave2_1:
-                                        serie_de_sol = entry.get()
-                                    grid_slave3_1 = champs_frame_widget.grid_slaves(row=3, column=1)
-                                    for entry in grid_slave3_1:
-                                        classe_de_drainage = entry.get()
-                                    grid_slave4_1 = champs_frame_widget.grid_slaves(row=4, column=1)
-                                    for entry in grid_slave4_1:
-                                        masse_volumique_apparente = entry.get()
-                                    grid_slave5_1 = champs_frame_widget.grid_slaves(row=5, column=1)
-                                    for entry in grid_slave5_1:
-                                        profondeur = entry.get()
-                                    grid_slave6_1 = champs_frame_widget.grid_slaves(row=6, column=1)
-                                    for entry in grid_slave6_1:
-                                        superficie_de_la_zone = entry.get()
-                                    global information_zone_de_gestion
-                                    information_zone_de_gestion.append(
-                                        {"taux_matiere_organique": taux_matiere_organique,
-                                         "municipalite": municipalite,
-                                         "serie_de_sol": serie_de_sol,
-                                         "classe_de_drainage": classe_de_drainage,
-                                         "masse_volumique_apparente": masse_volumique_apparente,
-                                         "profondeur": profondeur,
-                                         "superficie_de_la_zone": superficie_de_la_zone})
+                                grid_slave0_1 = scrollable_frame_widget.grid_slaves(row=0, column=1)
+                                for entry in grid_slave0_1:
+                                    taux_matiere_organique = entry.get()
+                                grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
+                                for entry in grid_slave1_1:
+                                    municipalite = entry.get()
+                                grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
+                                for entry in grid_slave2_1:
+                                    serie_de_sol = entry.get()
+                                grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
+                                for entry in grid_slave3_1:
+                                    classe_de_drainage = entry.get()
+                                grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
+                                for entry in grid_slave4_1:
+                                    masse_volumique_apparente = entry.get()
+                                grid_slave5_1 = scrollable_frame_widget.grid_slaves(row=5, column=1)
+                                for entry in grid_slave5_1:
+                                    profondeur = entry.get()
+                                grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
+                                for entry in grid_slave6_1:
+                                    superficie_de_la_zone = entry.get()
+                                global information_champs
+                                information_champs[len(information_champs)-1]["information_zone_de_gestion"].append(
+                                    {"taux_matiere_organique": taux_matiere_organique,
+                                     "municipalite": municipalite,
+                                     "serie_de_sol": serie_de_sol,
+                                     "classe_de_drainage": classe_de_drainage,
+                                     "masse_volumique_apparente": masse_volumique_apparente,
+                                     "profondeur": profondeur,
+                                     "superficie_de_la_zone": superficie_de_la_zone})
                     new_champs_window.destroy()
                     for simulation_frame in simulation_notebook.winfo_children():
                         if len(simulation_frame.winfo_children()) == 0:
@@ -407,6 +409,7 @@ def run_gui(frame):
                     global information_champs
                     information_champs[champs_index]["nombre_de_zone_de_gestion"] = str(
                         int(information_champs[champs_index]["nombre_de_zone_de_gestion"]) - 1)
+                    information_champs[champs_index]["information_zone_de_gestion"].pop(index_clicked_tab)
                     for simulation_frame in simulation_notebook.winfo_children():
                         if len(simulation_frame.winfo_children()) == 0:
                             pass
@@ -479,40 +482,41 @@ def run_gui(frame):
                 creation_zone_frame.pack()
 
                 def add_new_tab():
+                    index = 0
                     for scrollable_frame_widget in scrollable_frame.winfo_children():
                         if isinstance(scrollable_frame_widget, ttk.LabelFrame):
-                            for champs_frame_widget in scrollable_frame_widget.winfo_children():
-                                if isinstance(champs_frame_widget, ttk.LabelFrame):
-                                    grid_slave0_1 = champs_frame_widget.grid_slaves(row=0, column=1)
-                                    for entry in grid_slave0_1:
-                                        taux_matiere_organique = entry.get()
-                                    grid_slave1_1 = champs_frame_widget.grid_slaves(row=1, column=1)
-                                    for entry in grid_slave1_1:
-                                        municipalite = entry.get()
-                                    grid_slave2_1 = champs_frame_widget.grid_slaves(row=2, column=1)
-                                    for entry in grid_slave2_1:
-                                        serie_de_sol = entry.get()
-                                    grid_slave3_1 = champs_frame_widget.grid_slaves(row=3, column=1)
-                                    for entry in grid_slave3_1:
-                                        classe_de_drainage = entry.get()
-                                    grid_slave4_1 = champs_frame_widget.grid_slaves(row=4, column=1)
-                                    for entry in grid_slave4_1:
-                                        masse_volumique_apparente = entry.get()
-                                    grid_slave5_1 = champs_frame_widget.grid_slaves(row=5, column=1)
-                                    for entry in grid_slave5_1:
-                                        profondeur = entry.get()
-                                    grid_slave6_1 = champs_frame_widget.grid_slaves(row=6, column=1)
-                                    for entry in grid_slave6_1:
-                                        superficie_de_la_zone = entry.get()
-                                    global information_zone_de_gestion
-                                    information_zone_de_gestion.append(
-                                        {"taux_matiere_organique": taux_matiere_organique,
-                                         "municipalite": municipalite,
-                                         "serie_de_sol": serie_de_sol,
-                                         "classe_de_drainage": classe_de_drainage,
-                                         "masse_volumique_apparente": masse_volumique_apparente,
-                                         "profondeur": profondeur,
-                                         "superficie_de_la_zone": superficie_de_la_zone})
+                                grid_slave0_1 = scrollable_frame_widget.grid_slaves(row=0, column=1)
+                                for entry in grid_slave0_1:
+                                    taux_matiere_organique = entry.get()
+                                grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
+                                for entry in grid_slave1_1:
+                                    municipalite = entry.get()
+                                grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
+                                for entry in grid_slave2_1:
+                                    serie_de_sol = entry.get()
+                                grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
+                                for entry in grid_slave3_1:
+                                    classe_de_drainage = entry.get()
+                                grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
+                                for entry in grid_slave4_1:
+                                    masse_volumique_apparente = entry.get()
+                                grid_slave5_1 = scrollable_frame_widget.grid_slaves(row=5, column=1)
+                                for entry in grid_slave5_1:
+                                    profondeur = entry.get()
+                                grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
+                                for entry in grid_slave6_1:
+                                    superficie_de_la_zone = entry.get()
+                                global information_champs
+                                information_champs[index]["information_zone_de_gestion"].append(
+                                    {"taux_matiere_organique": taux_matiere_organique,
+                                     "municipalite": municipalite,
+                                     "serie_de_sol": serie_de_sol,
+                                     "classe_de_drainage": classe_de_drainage,
+                                     "masse_volumique_apparente": masse_volumique_apparente,
+                                     "profondeur": profondeur,
+                                     "superficie_de_la_zone": superficie_de_la_zone})
+                        index += 1
+
                     new_zone_window.destroy()
 
                     for simulation_frame in simulation_notebook.winfo_children():
