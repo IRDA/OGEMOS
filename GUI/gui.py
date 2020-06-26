@@ -110,13 +110,14 @@ def run_gui(frame):
                             for entry in grid_slave6_1:
                                 superficie_de_la_zone = entry.get()
                             global information_champs
-                            information_champs[index]["information_zone_de_gestion"].append({"taux_matiere_organique": taux_matiere_organique,
-                                                                "municipalite": municipalite,
-                                                                "serie_de_sol": serie_de_sol,
-                                                                "classe_de_drainage": classe_de_drainage,
-                                                                "masse_volumique_apparente": masse_volumique_apparente,
-                                                                "profondeur": profondeur,
-                                                                "superficie_de_la_zone": superficie_de_la_zone})
+                            information_champs[index]["information_zone_de_gestion"].append(
+                                {"taux_matiere_organique": taux_matiere_organique,
+                                 "municipalite": municipalite,
+                                 "serie_de_sol": serie_de_sol,
+                                 "classe_de_drainage": classe_de_drainage,
+                                 "masse_volumique_apparente": masse_volumique_apparente,
+                                 "profondeur": profondeur,
+                                 "superficie_de_la_zone": superficie_de_la_zone})
                 index += 1
 
             for widget in zone_de_gestion_mainframe.winfo_children():
@@ -183,6 +184,9 @@ def run_gui(frame):
         global nombre_simulations
         nombre_simulations = 0
 
+        global duree_simulation
+        duree_simulation = []
+
         tab1 = ttk.Frame(simulation_notebook)
 
         def add_new_simulation_tab(event):
@@ -192,7 +196,60 @@ def run_gui(frame):
                 simulation_notebook.winfo_children()[index_clicked_tab].destroy()
                 global nombre_simulations
                 nombre_simulations += 1
-                set_up_simulation(simulation_notebook)
+
+                def duree_de_la_simulation():
+                    def readd_simulation():
+                        tab = ttk.Frame(simulation_notebook)
+                        simulation_notebook.add(tab, text="+")
+                        global nombre_simulations
+                        nombre_simulations -= 1
+                        duree_simulation_window.destroy()
+
+                    def get_duree_de_la_simulation():
+                        annee_historique_initiale = annee_historique_initiale_entry.get()
+                        annee_historique_finale = annee_historique_finale_entry.get()
+                        annee_projection_initiale = annee_projection_initiale_entry.get()
+                        annee_projection_finale = annee_projection_finale_entry.get()
+
+                        global duree_simulation
+                        duree_simulation.append({"annee_historique_initiale": annee_historique_initiale,
+                                                 "annee_historique_finale": annee_historique_finale,
+                                                 "annee_projection_initiale": annee_projection_initiale,
+                                                 "annee_projection_finale": annee_projection_finale})
+
+                        duree_simulation_window.destroy()
+                        set_up_simulation(simulation_notebook)
+
+                    duree_simulation_window = tk.Toplevel()
+                    duree_simulation_window.protocol("WM_DELETE_WINDOW", readd_simulation)
+                    duree_simulation_frame = ttk.Frame(duree_simulation_window)
+                    annee_historique_initiale_label = ttk.Label(duree_simulation_frame,
+                                                                text="Année historique initiale: ")
+                    annee_historique_initiale_entry = ttk.Entry(duree_simulation_frame)
+                    annee_historique_finale_label = ttk.Label(duree_simulation_frame, text="Année historique finale: ")
+                    annee_historique_finale_entry = ttk.Entry(duree_simulation_frame)
+                    annee_projection_initiale_label = ttk.Label(duree_simulation_frame,
+                                                                text="Année de projection initiale: ")
+                    annee_projection_initiale_entry = ttk.Entry(duree_simulation_frame)
+                    annee_projection_finale_label = ttk.Label(duree_simulation_frame,
+                                                              text="Année de projection finale: ")
+                    annee_projection_finale_entry = ttk.Entry(duree_simulation_frame)
+
+                    annee_historique_initiale_label.grid(row=0, column=0)
+                    annee_historique_initiale_entry.grid(row=0, column=1)
+                    annee_historique_finale_label.grid(row=1, column=0)
+                    annee_historique_finale_entry.grid(row=1, column=1)
+                    annee_projection_initiale_label.grid(row=2, column=0)
+                    annee_projection_initiale_entry.grid(row=2, column=1)
+                    annee_projection_finale_label.grid(row=3, column=0)
+                    annee_projection_finale_entry.grid(row=3, column=1)
+
+                    creer_simulation_bouton = ttk.Button(duree_simulation_frame,
+                                                         command= get_duree_de_la_simulation)
+                    creer_simulation_bouton.grid(row=4, column=0, columnspan=2)
+                    duree_simulation_frame.pack()
+
+                duree_de_la_simulation()
 
         def delete_simulation_tab(event):
             clicked_tab = simulation_notebook.tk.call(simulation_notebook._w, "identify", "tab", event.x, event.y)
@@ -202,6 +259,8 @@ def run_gui(frame):
                 global nombre_simulations
                 nombre_simulations -= 1
                 current_index = index_clicked_tab
+                global duree_simulation
+                duree_simulation.pop(index_clicked_tab)
                 while current_index < simulation_notebook.index("end"):
                     simulation_notebook.tab(current_index, text="Simulation " + str(current_index + 1))
                     if current_index == simulation_notebook.index("end") - 1:
@@ -250,7 +309,9 @@ def run_gui(frame):
                 tab = ttk.Frame(champs_notebook)
                 champs_notebook.add(tab, text=champs["nom_du_champs"])
                 zone_de_gestion_notebook = ttk.Notebook(tab)
-                set_up_champs(zone_de_gestion_notebook, int(champs["nombre_de_zone_de_gestion"]), champs_notebook)
+                global duree_simulation
+                simulation_index = len(duree_simulation)-1
+                set_up_champs(zone_de_gestion_notebook, int(champs["nombre_de_zone_de_gestion"]), champs_notebook, simulation_index)
 
             tab = ttk.Frame(champs_notebook)
             champs_notebook.add(tab, text="+")
@@ -327,36 +388,36 @@ def run_gui(frame):
                 def add_new_zone_tab():
                     for scrollable_frame_widget in scrollable_frame.winfo_children():
                         if isinstance(scrollable_frame_widget, ttk.LabelFrame):
-                                grid_slave0_1 = scrollable_frame_widget.grid_slaves(row=0, column=1)
-                                for entry in grid_slave0_1:
-                                    taux_matiere_organique = entry.get()
-                                grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
-                                for entry in grid_slave1_1:
-                                    municipalite = entry.get()
-                                grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
-                                for entry in grid_slave2_1:
-                                    serie_de_sol = entry.get()
-                                grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
-                                for entry in grid_slave3_1:
-                                    classe_de_drainage = entry.get()
-                                grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
-                                for entry in grid_slave4_1:
-                                    masse_volumique_apparente = entry.get()
-                                grid_slave5_1 = scrollable_frame_widget.grid_slaves(row=5, column=1)
-                                for entry in grid_slave5_1:
-                                    profondeur = entry.get()
-                                grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
-                                for entry in grid_slave6_1:
-                                    superficie_de_la_zone = entry.get()
-                                global information_champs
-                                information_champs[len(information_champs)-1]["information_zone_de_gestion"].append(
-                                    {"taux_matiere_organique": taux_matiere_organique,
-                                     "municipalite": municipalite,
-                                     "serie_de_sol": serie_de_sol,
-                                     "classe_de_drainage": classe_de_drainage,
-                                     "masse_volumique_apparente": masse_volumique_apparente,
-                                     "profondeur": profondeur,
-                                     "superficie_de_la_zone": superficie_de_la_zone})
+                            grid_slave0_1 = scrollable_frame_widget.grid_slaves(row=0, column=1)
+                            for entry in grid_slave0_1:
+                                taux_matiere_organique = entry.get()
+                            grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
+                            for entry in grid_slave1_1:
+                                municipalite = entry.get()
+                            grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
+                            for entry in grid_slave2_1:
+                                serie_de_sol = entry.get()
+                            grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
+                            for entry in grid_slave3_1:
+                                classe_de_drainage = entry.get()
+                            grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
+                            for entry in grid_slave4_1:
+                                masse_volumique_apparente = entry.get()
+                            grid_slave5_1 = scrollable_frame_widget.grid_slaves(row=5, column=1)
+                            for entry in grid_slave5_1:
+                                profondeur = entry.get()
+                            grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
+                            for entry in grid_slave6_1:
+                                superficie_de_la_zone = entry.get()
+                            global information_champs
+                            information_champs[len(information_champs) - 1]["information_zone_de_gestion"].append(
+                                {"taux_matiere_organique": taux_matiere_organique,
+                                 "municipalite": municipalite,
+                                 "serie_de_sol": serie_de_sol,
+                                 "classe_de_drainage": classe_de_drainage,
+                                 "masse_volumique_apparente": masse_volumique_apparente,
+                                 "profondeur": profondeur,
+                                 "superficie_de_la_zone": superficie_de_la_zone})
                     new_champs_window.destroy()
                     for simulation_frame in simulation_notebook.winfo_children():
                         if len(simulation_frame.winfo_children()) == 0:
@@ -371,7 +432,7 @@ def run_gui(frame):
                             tab = ttk.Frame(notebook)
                             notebook.add(tab, text=nom_du_champs)
                             zone_notebook = ttk.Notebook(tab)
-                            set_up_champs(zone_notebook, nombre_de_zone_de_gestion, notebook)
+                            set_up_champs(zone_notebook, nombre_de_zone_de_gestion, notebook, simulation_notebook.index(simulation_frame))
                             new_tab = ttk.Frame(notebook)
                             notebook.add(new_tab, text="+")
 
@@ -390,7 +451,7 @@ def run_gui(frame):
             creer_nouveau_champs_bouton.grid(row=3, column=0, columnspan=2)
             nouveau_champs_frame.pack()
 
-        def set_up_champs(zone_notebook, nombre_de_zone, champs_notebook):
+        def set_up_champs(zone_notebook, nombre_de_zone, champs_notebook, simulation_index):
 
             def add_new_zone_de_gestion_tab(event):
                 clicked_tab = zone_notebook.tk.call(zone_notebook._w, "identify", "tab", event.x, event.y)
@@ -399,7 +460,7 @@ def run_gui(frame):
                     global information_champs
                     information_champs[champs_index]["nombre_de_zone_de_gestion"] = str(
                         int(information_champs[champs_index]["nombre_de_zone_de_gestion"]) + 1)
-                    set_up_new_zone_de_gestion(champs_index)
+                    set_up_new_zone_de_gestion(champs_index, simulation_index)
 
             def delete_zone_de_gestion_tab(event):
                 clicked_tab = zone_notebook.tk.call(zone_notebook._w, "identify", "tab", event.x, event.y)
@@ -426,7 +487,7 @@ def run_gui(frame):
                                     champs_courant_zone_notebook.tab(current_index, text="+")
                                 current_index += 1
 
-            def set_up_new_zone_de_gestion(champs_index):
+            def set_up_new_zone_de_gestion(champs_index, simulation_index):
                 new_zone_window = tk.Toplevel()
                 creation_zone_frame = ttk.Frame(new_zone_window)
                 canvas = tk.Canvas(creation_zone_frame)
@@ -485,40 +546,41 @@ def run_gui(frame):
                     index = 0
                     for scrollable_frame_widget in scrollable_frame.winfo_children():
                         if isinstance(scrollable_frame_widget, ttk.LabelFrame):
-                                grid_slave0_1 = scrollable_frame_widget.grid_slaves(row=0, column=1)
-                                for entry in grid_slave0_1:
-                                    taux_matiere_organique = entry.get()
-                                grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
-                                for entry in grid_slave1_1:
-                                    municipalite = entry.get()
-                                grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
-                                for entry in grid_slave2_1:
-                                    serie_de_sol = entry.get()
-                                grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
-                                for entry in grid_slave3_1:
-                                    classe_de_drainage = entry.get()
-                                grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
-                                for entry in grid_slave4_1:
-                                    masse_volumique_apparente = entry.get()
-                                grid_slave5_1 = scrollable_frame_widget.grid_slaves(row=5, column=1)
-                                for entry in grid_slave5_1:
-                                    profondeur = entry.get()
-                                grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
-                                for entry in grid_slave6_1:
-                                    superficie_de_la_zone = entry.get()
-                                global information_champs
-                                information_champs[index]["information_zone_de_gestion"].append(
-                                    {"taux_matiere_organique": taux_matiere_organique,
-                                     "municipalite": municipalite,
-                                     "serie_de_sol": serie_de_sol,
-                                     "classe_de_drainage": classe_de_drainage,
-                                     "masse_volumique_apparente": masse_volumique_apparente,
-                                     "profondeur": profondeur,
-                                     "superficie_de_la_zone": superficie_de_la_zone})
+                            grid_slave0_1 = scrollable_frame_widget.grid_slaves(row=0, column=1)
+                            for entry in grid_slave0_1:
+                                taux_matiere_organique = entry.get()
+                            grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
+                            for entry in grid_slave1_1:
+                                municipalite = entry.get()
+                            grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
+                            for entry in grid_slave2_1:
+                                serie_de_sol = entry.get()
+                            grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
+                            for entry in grid_slave3_1:
+                                classe_de_drainage = entry.get()
+                            grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
+                            for entry in grid_slave4_1:
+                                masse_volumique_apparente = entry.get()
+                            grid_slave5_1 = scrollable_frame_widget.grid_slaves(row=5, column=1)
+                            for entry in grid_slave5_1:
+                                profondeur = entry.get()
+                            grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
+                            for entry in grid_slave6_1:
+                                superficie_de_la_zone = entry.get()
+                            global information_champs
+                            information_champs[index]["information_zone_de_gestion"].append(
+                                {"taux_matiere_organique": taux_matiere_organique,
+                                 "municipalite": municipalite,
+                                 "serie_de_sol": serie_de_sol,
+                                 "classe_de_drainage": classe_de_drainage,
+                                 "masse_volumique_apparente": masse_volumique_apparente,
+                                 "profondeur": profondeur,
+                                 "superficie_de_la_zone": superficie_de_la_zone})
                         index += 1
 
                     new_zone_window.destroy()
 
+                    index = 0
                     for simulation_frame in simulation_notebook.winfo_children():
                         if len(simulation_frame.winfo_children()) == 0:
                             pass
@@ -531,24 +593,26 @@ def run_gui(frame):
                             tab = ttk.Frame(champs_courant_zone_notebook)
                             champs_courant_zone_notebook.add(tab, text="Zone de gestion " + str(
                                 len(champs_courant_zone_notebook.winfo_children())))
-                            set_up_regies(tab)
+                            set_up_regies(tab, index)
 
                             new_zone_tab = ttk.Frame(champs_courant_zone_notebook)
                             champs_courant_zone_notebook.add(new_zone_tab, text="+")
+                        index += 1
 
             zone_notebook.bind("<Button-1>", add_new_zone_de_gestion_tab)
             zone_notebook.bind("<Button-3>", delete_zone_de_gestion_tab)
 
+            global duree_simulation
             for zone in range(int(nombre_de_zone)):
                 zone_tab = ttk.Frame(zone_notebook)
                 zone_notebook.add(zone_tab, text="Zone de gestion " + str(zone + 1))
-                set_up_regies(zone_tab)
+                set_up_regies(zone_tab, simulation_index)
 
             new_tab = ttk.Frame(zone_notebook)
             zone_notebook.add(new_tab, text="+")
             zone_notebook.pack()
 
-        def set_up_regies(zone_tab):
+        def set_up_regies(zone_tab, index):
             historique_frame = ttk.LabelFrame(zone_tab, text="Régies historiques")
             canvas_historique = tk.Canvas(historique_frame)
             scrollbar_historique = ttk.Scrollbar(historique_frame, orient="vertical",
@@ -556,6 +620,7 @@ def run_gui(frame):
             scrollable_frame_historique = ttk.Frame(canvas_historique)
             scrollable_frame_historique.bind("<Configure>", lambda e: canvas_historique.configure(
                 scrollregion=canvas_historique.bbox("all")))
+            add_regies_historiques(scrollable_frame_historique, index)
             canvas_historique.create_window((0, 0), window=scrollable_frame_historique, anchor="nw")
             canvas_historique.configure(yscrollcommand=scrollbar_historique.set)
             canvas_historique.pack(side="left", fill="both", expand=True)
@@ -573,6 +638,54 @@ def run_gui(frame):
             canvas_projection.pack(side="left", fill="both", expand=True)
             scrollbar_projection.pack(side="right", fill="y")
             projection_frame.grid(row=1, column=0)
+
+        def add_regies_historiques(scrollable_frame, index):
+            global duree_simulation
+            annee_historique_initiale = int(duree_simulation[index]["annee_historique_initiale"])
+            annee_historique_finale = int(duree_simulation[index]["annee_historique_finale"])
+            annee_courante = annee_historique_initiale
+            while annee_courante <= annee_historique_finale:
+                annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(annee_courante))
+                culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
+                culture_principale_combobox = ttk.Combobox(annee_courante_frame)
+                rendement_label = ttk.Label(annee_courante_frame, text="Rendement: ")
+                rendement_entry = ttk.Entry(annee_courante_frame)
+                proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté: ")
+                proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
+                production_non_recolte_label = ttk.Label(annee_courante_frame, text="Production non récoltée: ")
+                production_non_recolte_combobox = ttk.Combobox(annee_courante_frame)
+                taux_matiere_seche_label = ttk.Label(annee_courante_frame, text="Taux de matière sèche: ")
+                taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
+                travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
+                travail_du_sol_combobox = ttk.Combobox(annee_courante_frame)
+                profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maxiamle: ")
+                profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
+                culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
+                culture_secondaire_combobox = ttk.Combobox(annee_courante_frame)
+                rendement_culture_secondaire_label = ttk.Label(annee_courante_frame, text="Rendement culture secondaire: ")
+                rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
+
+                culture_principale_label.grid(row=0, column=0)
+                culture_principale_combobox.grid(row=0, column=1)
+                rendement_label.grid(row=1, column=0)
+                rendement_entry.grid(row=1, column=1)
+                proportion_tige_exporte_label.grid(row=2, column=0)
+                proportion_tige_exporte_entry.grid(row=2, column=1)
+                production_non_recolte_label.grid(row=3, column=0)
+                production_non_recolte_combobox.grid(row=3, column=1)
+                taux_matiere_seche_label.grid(row=4, column=0)
+                taux_matiere_seche_entry.grid(row=4, column=1)
+                travail_du_sol_label.grid(row=5, column=0)
+                travail_du_sol_combobox.grid(row=5, column=1)
+                profondeur_maximale_label.grid(row=6, column=0)
+                profondeur_maximale_entry.grid(row=6, column=1)
+                culture_secondaire_label.grid(row=7, column=0)
+                culture_secondaire_combobox.grid(row=7, column=1)
+                rendement_culture_secondaire_label.grid(row=8, column=0)
+                rendement_culture_secondaire_entry.grid(row=8, column=1)
+
+                annee_courante += 1
+                annee_courante_frame.pack()
 
         simulation_notebook.bind("<Button-1>", add_new_simulation_tab)
         simulation_notebook.bind("<Button-3>", delete_simulation_tab)
