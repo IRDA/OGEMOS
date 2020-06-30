@@ -19,8 +19,8 @@ def __launch_icbm_simulation(data):
 def __simulation_mapping(data):
     gestion_simulation = GestionSimulation()
     for simulation in data:
-        annee_initiale = simulation["annee_initiale"]
-        annee_finale = simulation["annee_finale"]
+        annee_initiale = simulation["annee_initiale_projection"]
+        annee_finale = simulation["annee_finale_projection"]
 
         try:
             assert isinstance(annee_initiale, int)
@@ -77,7 +77,7 @@ def __zone_de_gestion_mapping(data):
         taux_matiere_organique = zone_de_gestion["taux_matiere_organique"]
         municipalite = zone_de_gestion["municipalite"]
         serie_de_sol = zone_de_gestion["serie_de_sol"]
-        taille_de_la_zone = zone_de_gestion["taille_de_la_zone"]
+        superficie_de_la_zone = zone_de_gestion["superficie_de_la_zone"]
         classe_de_drainage = zone_de_gestion["classe_de_drainage"]
         masse_volumique_apparente = zone_de_gestion["masse_volumique_apparente"]
         profondeur = zone_de_gestion["profondeur"]
@@ -105,10 +105,10 @@ def __zone_de_gestion_mapping(data):
             abort(400, message_erreur)
 
         try:
-            assert isinstance(taille_de_la_zone, (float, int)) and taille_de_la_zone > 0
+            assert isinstance(superficie_de_la_zone, (float, int)) and superficie_de_la_zone > 0
         except AssertionError:
             message_erreur = str(
-                taille_de_la_zone) + " n'est pas une taille de la zone de gestion valide. Voir documentation API."
+                superficie_de_la_zone) + " n'est pas une taille de la zone de gestion valide. Voir documentation API."
             abort(400, message_erreur)
 
         try:
@@ -137,7 +137,7 @@ def __zone_de_gestion_mapping(data):
 
         liste_zone_de_gestion.append(
             ZoneDeGestion(taux_matiere_organique, municipalite, serie_de_sol, classe_de_drainage,
-                          masse_volumique_apparente, profondeur, taille_de_la_zone, regies_sol_et_culture_projection, regies_sol_et_culture_historique))
+                          masse_volumique_apparente, profondeur, superficie_de_la_zone, regies_sol_et_culture_projection, regies_sol_et_culture_historique))
     return liste_zone_de_gestion
 
 
