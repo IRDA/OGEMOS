@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
+import json
 
 root = tk.Tk()
 root.title("OGEMOS")
@@ -119,11 +121,11 @@ def run_gui(frame):
                                  "profondeur": profondeur,
                                  "superficie_de_la_zone": superficie_de_la_zone})
                 index += 1
-
+            sauvergarder_attirbuts_entreprise_apres_creation()
             for widget in zone_de_gestion_mainframe.winfo_children():
                 widget.destroy()
 
-            show_creation_des_regies(zone_de_gestion_mainframe)
+            question_ajout_regie_historique(zone_de_gestion_mainframe)
 
         canvas = tk.Canvas(zone_de_gestion_mainframe)
         scrollbar = ttk.Scrollbar(zone_de_gestion_mainframe, orient="vertical", command=canvas.yview)
@@ -179,7 +181,9 @@ def run_gui(frame):
                                                      command=lambda: get_information_zone_de_gestion(scrollable_frame))
         creation_zone_de_gestion_bouton.pack()
 
-    def show_creation_des_regies(parent_frame_tabs):
+    def show_creation_des_regies(parent_frame_tabs, show_regie_historique):
+        for widget in parent_frame_tabs.winfo_children():
+            widget.destroy()
         simulation_notebook = ttk.Notebook(parent_frame_tabs)
         global nombre_simulations
         nombre_simulations = 0
@@ -199,6 +203,7 @@ def run_gui(frame):
 
                 def duree_de_la_simulation():
                     def readd_simulation():
+                        root.deiconify()
                         tab = ttk.Frame(simulation_notebook)
                         simulation_notebook.add(tab, text="+")
                         global nombre_simulations
@@ -206,50 +211,40 @@ def run_gui(frame):
                         duree_simulation_window.destroy()
 
                     def get_duree_de_la_simulation():
-                        annee_historique_initiale = annee_historique_initiale_entry.get()
-                        annee_historique_finale = annee_historique_finale_entry.get()
+                        root.deiconify()
                         annee_projection_initiale = annee_projection_initiale_entry.get()
-                        annee_projection_finale = annee_projection_finale_entry.get()
+                        duree_projection = duree_projection_entry.get()
                         nombre_annee_rotation = nombre_annee_rotation_projection_entry.get()
 
                         global duree_simulation
-                        duree_simulation.append({"annee_historique_initiale": annee_historique_initiale,
-                                                 "annee_historique_finale": annee_historique_finale,
-                                                 "annee_projection_initiale": annee_projection_initiale,
-                                                 "annee_projection_finale": annee_projection_finale,
+                        duree_simulation.append({"annee_projection_initiale": annee_projection_initiale,
+                                                 "duree_projection": duree_projection,
                                                  "nombre_annee_rotation": nombre_annee_rotation})
 
                         duree_simulation_window.destroy()
                         set_up_simulation(simulation_notebook)
 
+                    root.withdraw()
                     duree_simulation_window = tk.Toplevel()
                     duree_simulation_window.protocol("WM_DELETE_WINDOW", readd_simulation)
                     duree_simulation_frame = ttk.Frame(duree_simulation_window)
-                    annee_historique_initiale_label = ttk.Label(duree_simulation_frame,
-                                                                text="Année historique initiale: ")
-                    annee_historique_initiale_entry = ttk.Entry(duree_simulation_frame)
-                    annee_historique_finale_label = ttk.Label(duree_simulation_frame, text="Année historique finale: ")
-                    annee_historique_finale_entry = ttk.Entry(duree_simulation_frame)
                     annee_projection_initiale_label = ttk.Label(duree_simulation_frame,
                                                                 text="Année de projection initiale: ")
                     annee_projection_initiale_entry = ttk.Entry(duree_simulation_frame)
-                    annee_projection_finale_label = ttk.Label(duree_simulation_frame,
-                                                              text="Année de projection finale: ")
-                    annee_projection_finale_entry = ttk.Entry(duree_simulation_frame)
+                    duree_projection_label = ttk.Label(duree_simulation_frame,
+                                                       text="Durée de la projection: ")
+                    duree_projection_entry = ttk.Entry(duree_simulation_frame)
+                    duree_projection_entry.insert(0, "30")
                     nombre_annee_rotation_projection_label = ttk.Label(duree_simulation_frame,
-                                                                       text="Nombre d'année pour une rotation de la projection: ")
+                                                                       text="Nombre d'année de la rotation de culture: ")
                     nombre_annee_rotation_projection_entry = ttk.Entry(duree_simulation_frame)
 
-                    annee_historique_initiale_label.grid(row=0, column=0)
-                    annee_historique_initiale_entry.grid(row=0, column=1)
-                    annee_historique_finale_label.grid(row=1, column=0)
-                    annee_historique_finale_entry.grid(row=1, column=1)
-                    annee_projection_initiale_label.grid(row=2, column=0)
-                    annee_projection_initiale_entry.grid(row=2, column=1)
-                    annee_projection_finale_label.grid(row=3, column=0)
-                    annee_projection_finale_entry.grid(row=3, column=1)
-                    nombre_annee_rotation_projection_label.grid(row=4, column=0)
-                    nombre_annee_rotation_projection_entry.grid(row=4, column=1)
+                    annee_projection_initiale_label.grid(row=0, column=0)
+                    annee_projection_initiale_entry.grid(row=0, column=1)
+                    duree_projection_label.grid(row=1, column=0)
+                    duree_projection_entry.grid(row=1, column=1)
+                    nombre_annee_rotation_projection_label.grid(row=2, column=0)
+                    nombre_annee_rotation_projection_entry.grid(row=2, column=1)
 
                     creer_simulation_bouton = ttk.Button(duree_simulation_frame,
                                                          command=get_duree_de_la_simulation)
@@ -286,7 +281,6 @@ def run_gui(frame):
                 clicked_tab = champs_notebook.tk.call(champs_notebook._w, "identify", "tab", event.x, event.y)
                 if clicked_tab == champs_notebook.index("end") - 1:
                     global nombre_de_champs
-                    nombre_de_champs += 1
                     set_up_new_champs()
 
             def delete_champs_tab(event):
@@ -297,6 +291,7 @@ def run_gui(frame):
                     information_champs.pop(index_clicked_tab)
                     global nombre_de_champs
                     nombre_de_champs -= 1
+                    sauvegarder_attributs_entreprise_apres_modification()
                     for simulation_frame in simulation_notebook.winfo_children():
                         if len(simulation_frame.winfo_children()) == 0:
                             pass
@@ -426,6 +421,7 @@ def run_gui(frame):
                                  "masse_volumique_apparente": masse_volumique_apparente,
                                  "profondeur": profondeur,
                                  "superficie_de_la_zone": superficie_de_la_zone})
+                            sauvegarder_attributs_entreprise_apres_modification()
                     new_champs_window.destroy()
                     for simulation_frame in simulation_notebook.winfo_children():
                         if len(simulation_frame.winfo_children()) == 0:
@@ -480,6 +476,7 @@ def run_gui(frame):
                     information_champs[champs_index]["nombre_de_zone_de_gestion"] = str(
                         int(information_champs[champs_index]["nombre_de_zone_de_gestion"]) - 1)
                     information_champs[champs_index]["information_zone_de_gestion"].pop(index_clicked_tab)
+                    sauvegarder_attributs_entreprise_apres_modification()
                     for simulation_frame in simulation_notebook.winfo_children():
                         if len(simulation_frame.winfo_children()) == 0:
                             pass
@@ -586,7 +583,7 @@ def run_gui(frame):
                                  "profondeur": profondeur,
                                  "superficie_de_la_zone": superficie_de_la_zone})
                         index += 1
-
+                    sauvegarder_attributs_entreprise_apres_modification()
                     new_zone_window.destroy()
 
                     index = 0
@@ -622,19 +619,20 @@ def run_gui(frame):
             zone_notebook.pack()
 
         def set_up_regies(zone_tab, index):
-            historique_frame = ttk.LabelFrame(zone_tab, text="Régies historiques")
-            canvas_historique = tk.Canvas(historique_frame)
-            scrollbar_historique = ttk.Scrollbar(historique_frame, orient="vertical",
-                                                 command=canvas_historique.yview)
-            scrollable_frame_historique = ttk.Frame(canvas_historique)
-            scrollable_frame_historique.bind("<Configure>", lambda e: canvas_historique.configure(
-                scrollregion=canvas_historique.bbox("all")))
-            add_regies_historiques(scrollable_frame_historique, index)
-            canvas_historique.create_window((0, 0), window=scrollable_frame_historique, anchor="nw")
-            canvas_historique.configure(yscrollcommand=scrollbar_historique.set)
-            canvas_historique.pack(side="left", fill="both", expand=True)
-            scrollbar_historique.pack(side="right", fill="y")
-            historique_frame.grid(row=0, column=0)
+            if show_regie_historique is True:
+                historique_frame = ttk.LabelFrame(zone_tab, text="Régies historiques")
+                canvas_historique = tk.Canvas(historique_frame)
+                scrollbar_historique = ttk.Scrollbar(historique_frame, orient="vertical",
+                                                     command=canvas_historique.yview)
+                scrollable_frame_historique = ttk.Frame(canvas_historique)
+                scrollable_frame_historique.bind("<Configure>", lambda e: canvas_historique.configure(
+                    scrollregion=canvas_historique.bbox("all")))
+                add_regies_historiques(scrollable_frame_historique, index)
+                canvas_historique.create_window((0, 0), window=scrollable_frame_historique, anchor="nw")
+                canvas_historique.configure(yscrollcommand=scrollbar_historique.set)
+                canvas_historique.pack(side="left", fill="both", expand=True)
+                scrollbar_historique.pack(side="right", fill="y")
+                historique_frame.grid(row=0, column=0, columnspan=2)
             projection_frame = ttk.LabelFrame(zone_tab, text="Régies de la projection")
             canvas_projection = tk.Canvas(projection_frame)
             scrollbar_projection = ttk.Scrollbar(projection_frame, orient="vertical",
@@ -647,15 +645,18 @@ def run_gui(frame):
             canvas_projection.configure(yscrollcommand=scrollbar_projection.set)
             canvas_projection.pack(side="left", fill="both", expand=True)
             scrollbar_projection.pack(side="right", fill="y")
-            projection_frame.grid(row=1, column=0)
+            projection_frame.grid(row=1, column=0, columnspan=2)
             get_information_simulation_button = ttk.Button(zone_tab, text="Créer rapport",
                                                            command=get_information_toutes_les_simulations)
             get_information_simulation_button.grid(row=2, column=0)
+            editer_information_entreprise_button = ttk.Button(zone_tab, text="Éditer attributs de l'entreprise",
+                                                              command=editer_caracteristique_physique_entreprise)
+            editer_information_entreprise_button.grid(row=2, column=1)
 
         def add_regies_historiques(scrollable_frame, index):
-            global duree_simulation
-            annee_historique_initiale = int(duree_simulation[index]["annee_historique_initiale"])
-            annee_historique_finale = int(duree_simulation[index]["annee_historique_finale"])
+            global annees_historiques
+            annee_historique_initiale = int(annees_historiques["annee_historique_initiale"])
+            annee_historique_finale = int(annees_historiques["annee_historique_finale"])
             annee_courante = annee_historique_initiale
             while annee_courante <= annee_historique_finale:
                 annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(annee_courante))
@@ -819,13 +820,27 @@ def run_gui(frame):
                     for zone_frames in zone_notebook.winfo_children():
                         global information_champs
                         if index_zone < int(information_champs[index_champs]["nombre_de_zone_de_gestion"]):
-                            regies_historique_frame = zone_frames.winfo_children()[0]
-                            regies_projection_frame = zone_frames.winfo_children()[1]
-                            regies_historique = get_regies(regies_historique_frame)
-                            regies_projection = get_regies(regies_projection_frame)
-                            zone_list.append({"regies_projection": regies_projection,
-                                              "regies_historique": regies_historique})
-                            index_zone += 1
+                            if show_regie_historique is True:
+                                regies_historique_frame = zone_frames.winfo_children()[0]
+                                regies_projection_frame = zone_frames.winfo_children()[1]
+                                regies_historique = get_regies(regies_historique_frame)
+                                regies_projection = get_regies(regies_projection_frame)
+                                zone_list.append({"regies_projection": regies_projection,
+                                                  "regies_historique": regies_historique})
+                                index_zone += 1
+                            else:
+                                regies_projection_frame = zone_frames.winfo_children()[0]
+                                regies_projection = get_regies(regies_projection_frame)
+                                nombre_annee_rechauffement_defaut = 10
+                                compteur_annee = 0
+                                regies_historique = []
+                                while compteur_annee < nombre_annee_rechauffement_defaut:
+                                    regie_annee_courante = regies_projection[compteur_annee % len(regies_projection)]
+                                    regies_historique.append(regie_annee_courante)
+                                    compteur_annee += 1
+                                zone_list.append({"regies_projection": regies_projection,
+                                                  "regies_historique": regies_historique})
+                                index_zone += 1
                 champs_list.append(zone_list)
                 index_champs += 1
             champs_attributs = []
@@ -852,11 +867,12 @@ def run_gui(frame):
 
             global nom_entreprise
             entreprise_agricole = {"nom": nom_entreprise,
-                                   "champs": champs}
+                                   "champs": champs_attributs}
             global duree_simulation
             simulation = {
                 "annee_initiale_projection": int(duree_simulation[index_simulation]["annee_projection_initiale"]),
-                "annee_finale_projection": int(duree_simulation[index_simulation]["annee_projection_finale"]),
+                "annee_finale_projection": int(duree_simulation[index_simulation]["annee_projection_initiale"]) + int(
+                    duree_simulation[index_simulation]["duree_projection"]),
                 "entreprise_agricole": entreprise_agricole}
             return simulation
 
@@ -888,8 +904,10 @@ def run_gui(frame):
                 grid_size = composante_amendement_liste.grid_size()
                 amendements = []
                 while index_composante_amendement < grid_size[1] - 1:
-                    amendement = composante_amendement_liste.grid_slaves([index_composante_amendement], column=1)[0].get()
-                    apport = float(composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[0].get())
+                    amendement = composante_amendement_liste.grid_slaves([index_composante_amendement], column=1)[
+                        0].get()
+                    apport = float(
+                        composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[0].get())
                     amendements.append({"amendement": amendement,
                                         "apport": apport})
                     index_composante_amendement += 2
@@ -907,7 +925,245 @@ def run_gui(frame):
 
         simulation_notebook.pack(expand=1, fill="both")
 
-    show_entreprise_set_up(frame)
+        def editer_caracteristique_physique_entreprise():
+            root.withdraw()
+            edition_window = tk.Toplevel()
+            edition_frame = ttk.Frame(edition_window)
+            canvas = tk.Canvas(edition_frame)
+            scrollbar = ttk.Scrollbar(edition_frame, orient="vertical", command=canvas.yview)
+            scrollable_frame = ttk.Frame(canvas)
+            scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+            canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+            canvas.configure(yscrollcommand=scrollbar.set)
+            entreprise_label_frame = ttk.LabelFrame(scrollable_frame, text="Entreprise")
+            nom_entreprise_label = ttk.Label(entreprise_label_frame, text="Nom de l'entreprise: ")
+            nom_entreprise_entry = ttk.Entry(entreprise_label_frame)
+            global nom_entreprise
+            nom_entreprise_entry.insert(0, nom_entreprise)
+            nom_entreprise_label.grid(row=0, column=0)
+            nom_entreprise_entry.grid(row=0, column=1)
+            champs_row_index = 1
+            global nombre_de_champs
+            for champs_index in range(nombre_de_champs):
+                champs_label_frame = ttk.LabelFrame(entreprise_label_frame, text="Champs " + str(champs_index + 1))
+                global information_champs
+                nom_champs_label = ttk.Label(champs_label_frame, text="Nom du champs: ")
+                nom_champs_entry = ttk.Entry(champs_label_frame)
+                nom_champs_entry.insert(0, information_champs[champs_index]["nom_du_champs"])
+                nom_champs_label.grid(row=0, column=0)
+                nom_champs_entry.grid(row=0, column=1)
+                zone_row_index = 1
+                information_zones_de_gestion = information_champs[champs_index]["information_zone_de_gestion"]
+                for zone_index in range(int(information_champs[champs_index]["nombre_de_zone_de_gestion"])):
+                    information_zone_de_gestion = information_zones_de_gestion[zone_index]
+                    zone_label_frame = ttk.LabelFrame(champs_label_frame, text="Zone de gestion " + str(zone_index + 1))
+                    taux_matiere_organique_label = ttk.Label(zone_label_frame,
+                                                             text="Taux matière organique (en %): ")
+                    taux_matiere_organique_entry = ttk.Entry(zone_label_frame)
+                    taux_matiere_organique_entry.insert(0, information_zone_de_gestion["taux_matiere_organique"])
+                    municipalite_label = ttk.Label(zone_label_frame, text="Municipalité: ")
+                    municipalite_combobox = ttk.Combobox(zone_label_frame)
+                    municipalite_combobox.set(information_zone_de_gestion["municipalite"])
+                    serie_de_sol_label = ttk.Label(zone_label_frame, text="Série de sol: ")
+                    serie_de_sol_combobox = ttk.Combobox(zone_label_frame)
+                    serie_de_sol_combobox.set(information_zone_de_gestion["serie_de_sol"])
+                    classe_de_drainage_label = ttk.Label(zone_label_frame, text="Classe de drainage: ")
+                    classe_de_drainage_combobox = ttk.Combobox(zone_label_frame)
+                    classe_de_drainage_combobox.set(information_zone_de_gestion["classe_de_drainage"])
+                    masse_volumique_apparente_label = ttk.Label(zone_label_frame,
+                                                                text="Masse volumique apparente (g/cm3): ")
+                    masse_volumique_apparente_entry = ttk.Entry(zone_label_frame)
+                    masse_volumique_apparente_entry.insert(0, information_zone_de_gestion["masse_volumique_apparente"])
+                    profondeur_label = ttk.Label(zone_label_frame, text="Profondeur (cm): ")
+                    profondeur_entry = ttk.Entry(zone_label_frame)
+                    profondeur_entry.insert(0, information_zone_de_gestion["profondeur"])
+                    superficie_de_la_zone_label = ttk.Label(zone_label_frame,
+                                                            text="Superficie de la zone (ha): ")
+                    superficie_de_la_zone_entry = ttk.Entry(zone_label_frame)
+                    superficie_de_la_zone_entry.insert(0, information_zone_de_gestion["superficie_de_la_zone"])
+                    taux_matiere_organique_label.grid(row=0, column=0)
+                    taux_matiere_organique_entry.grid(row=0, column=1)
+                    municipalite_label.grid(row=1, column=0)
+                    municipalite_combobox.grid(row=1, column=1)
+                    serie_de_sol_label.grid(row=2, column=0)
+                    serie_de_sol_combobox.grid(row=2, column=1)
+                    classe_de_drainage_label.grid(row=3, column=0)
+                    classe_de_drainage_combobox.grid(row=3, column=1)
+                    masse_volumique_apparente_label.grid(row=4, column=0)
+                    masse_volumique_apparente_entry.grid(row=4, column=1)
+                    profondeur_label.grid(row=5, column=0)
+                    profondeur_entry.grid(row=5, column=1)
+                    superficie_de_la_zone_label.grid(row=6, column=0)
+                    superficie_de_la_zone_entry.grid(row=6, column=1)
+                    zone_label_frame.grid(row=zone_row_index, column=0, columnspan=2)
+                    zone_row_index += 1
+                champs_label_frame.grid(row=champs_row_index, column=0, columnspan=2)
+                champs_row_index += 1
+            entreprise_label_frame.pack()
+            canvas.pack(side="left", fill="x", expand=True)
+            scrollbar.pack(side="right", fill="y")
+
+            def effectuer_la_sauvegarde():
+                root.deiconify()
+                global nom_entreprise
+                nom_entreprise = nom_entreprise_entry.get()
+                global information_champs
+                information_champs = []
+                champs_label_frame_index = 2
+                entreprise_widgets = entreprise_label_frame.winfo_children()
+                while champs_label_frame_index < len(entreprise_widgets):
+                    champs_frame = entreprise_widgets[champs_label_frame_index]
+                    nom_du_champs = nom_champs_entry.get()
+                    champs_widgets = champs_frame.winfo_children()
+                    zone_label_frame_index = 2
+                    info_zones_de_gestion = []
+                    while zone_label_frame_index < len(champs_widgets):
+                        zone_frame = champs_widgets[zone_label_frame_index]
+                        info_zones_de_gestion.append({"taux_matiere_organique": taux_matiere_organique_entry.get(),
+                                                      "municipalite": municipalite_combobox.get(),
+                                                      "serie_de_sol": serie_de_sol_combobox.get(),
+                                                      "classe_de_drainage": classe_de_drainage_combobox.get(),
+                                                      "masse_volumique_apparente": masse_volumique_apparente_entry.get(),
+                                                      "profondeur": profondeur_entry.get(),
+                                                      "superficie_de_la_zone": superficie_de_la_zone_entry.get()})
+                        zone_label_frame_index += 1
+                    information_champs.append({"nom_du_champs": nom_du_champs,
+                                               "nombre_de_zone_de_gestion": str(len(champs_widgets) - 1),
+                                               "information_zone_de_gestion": info_zones_de_gestion})
+                    champs_label_frame_index += 1
+
+                effectuer_les_modifications_a_la_fenetre_principale()
+                sauvegarder_attributs_entreprise_apres_modification()
+                edition_window.destroy()
+
+            def effectuer_les_modifications_a_la_fenetre_principale():
+                index_simulation_frame = 0
+                simulation_frames = simulation_notebook.winfo_children()
+                global information_champs
+                for simulation_frame in simulation_frames:
+                    if index_simulation_frame < len(simulation_frames) - 1:
+                        champs_notebook = simulation_frame.winfo_children()[0]
+                        index_champs_frame = 0
+                        while index_champs_frame < len(champs_notebook.winfo_children()) - 1:
+                            champs_notebook.tab(index_champs_frame,
+                                                text=information_champs[index_champs_frame]["nom_du_champs"])
+                            index_champs_frame += 1
+
+                    index_simulation_frame += 1
+
+            sauvegarde_des_modifications_button = ttk.Button(scrollable_frame, text="Sauvegarder",
+                                                             command=effectuer_la_sauvegarde)
+            sauvegarde_des_modifications_button.pack()
+
+            edition_frame.pack()
+
+    def question_ajout_regie_historique(question_mainframe):
+        question_frame = ttk.Frame(question_mainframe)
+        question_label = ttk.Label(question_frame,
+                                   text="Voulez-vous utiliser une régie historique pour réchauffer le modèle?")
+        oui_button = ttk.Button(question_frame, text="Oui",
+                                command=lambda: set_up_annees_historiques(question_mainframe))
+        non_button = ttk.Button(question_frame, text="Non",
+                                command=lambda: show_creation_des_regies(question_mainframe,
+                                                                         show_regie_historique=False))
+        question_label.grid(row=0, column=0, columnspan=2)
+        oui_button.grid(row=1, column=0)
+        non_button.grid(row=1, column=1)
+        question_frame.pack()
+
+    def set_up_annees_historiques(annee_historique_mainframe):
+        def get_annees_historiques():
+            global annees_historiques
+            annee_historique_initiale = annee_historique_initiale_entry.get()
+            annee_historique_finale = annee_historique_finale_entry.get()
+            annees_historiques = {"annee_historique_initiale": annee_historique_initiale,
+                                  "annee_historique_finale": annee_historique_finale}
+            show_creation_des_regies(annee_historique_mainframe, show_regie_historique=True)
+
+        for widget in annee_historique_mainframe.winfo_children():
+            widget.destroy()
+        annee_historique_frame = ttk.Frame(annee_historique_mainframe)
+        annee_historique_initiale_label = ttk.Label(annee_historique_frame,
+                                                    text="Année historique initiale: ")
+        annee_historique_initiale_entry = ttk.Entry(annee_historique_frame)
+        annee_historique_finale_label = ttk.Label(annee_historique_frame, text="Année historique finale: ")
+        annee_historique_finale_entry = ttk.Entry(annee_historique_frame)
+
+        annee_historique_initiale_label.grid(row=0, column=0)
+        annee_historique_initiale_entry.grid(row=0, column=1)
+        annee_historique_finale_label.grid(row=1, column=0)
+        annee_historique_finale_entry.grid(row=1, column=1)
+
+        get_annees_historiques_button = ttk.Button(annee_historique_frame, text="Confirmer",
+                                                   command=get_annees_historiques)
+        get_annees_historiques_button.grid(row=2, column=0, columnspan=2)
+
+        annee_historique_frame.pack()
+
+    def menu_initial_ogemos(menu_frame):
+        def creation_nouvelle_entreprise():
+            for widget in menu_frame.winfo_children():
+                widget.destroy()
+            show_entreprise_set_up(menu_frame)
+
+        def charger_entreprise():
+            for widget in menu_frame.winfo_children():
+                widget.destroy()
+            root.withdraw()
+            filename = filedialog.askopenfilename(initialdir="/", title="Select file",
+                                                       filetypes=(("json files", "*.json"), ("all files", "*.*")))
+            root.deiconify()
+
+            with open(filename) as file:
+                data = json.load(file)
+            global nom_entreprise
+            global nombre_de_champs
+            global information_champs
+            nom_entreprise = data["nom_entreprise"]
+            nombre_de_champs = data["nombre_de_champs"]
+            information_champs = data["information_champs"]
+
+            question_ajout_regie_historique(menu_frame)
+
+
+        bienvenue_label = ttk.Label(menu_frame, text="Bienvenue dans OGEMOS!")
+        nouvelle_entreprise_button = ttk.Button(menu_frame, text="Créer une nouvelle entreprise",
+                                                command=creation_nouvelle_entreprise)
+        charger_entreprise_button = ttk.Button(menu_frame, text="Charger une entreprise", command=charger_entreprise)
+
+        bienvenue_label.pack()
+        nouvelle_entreprise_button.pack()
+        charger_entreprise_button.pack()
+
+    def sauvergarder_attirbuts_entreprise_apres_creation():
+        root.withdraw()
+        global filename
+        filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer",
+                                                filetypes=(("json files", "*.json"), ("all files", "*.*")))
+        filename = filename + ".json"
+        global nom_entreprise
+        global nombre_de_champs
+        global information_champs
+        save_dict = {"nom_entreprise": nom_entreprise,
+                     "nombre_de_champs": nombre_de_champs,
+                     "information_champs": information_champs}
+
+        with open(filename, 'w') as json_file:
+            json.dump(save_dict, json_file)
+        root.deiconify()
+
+    def sauvegarder_attributs_entreprise_apres_modification():
+        global nom_entreprise
+        global nombre_de_champs
+        global information_champs
+        save_dict = {"nom_entreprise": nom_entreprise,
+                     "nombre_de_champs": nombre_de_champs,
+                     "information_champs": information_champs}
+        global filename
+        with open(filename, 'w') as json_file:
+            json.dump(save_dict, json_file)
+
+    menu_initial_ogemos(frame)
 
 
 run_gui(mainframe)
