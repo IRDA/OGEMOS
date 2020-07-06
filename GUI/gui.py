@@ -1,7 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
+from tkinter import messagebox
 import json
+import copy
+import GUI.fonction_utilitaire as util
 
 root = tk.Tk()
 root.title("OGEMOS")
@@ -14,12 +17,16 @@ def run_gui(frame):
         def get_information_entreprise():
             global nom_entreprise
             nom_entreprise = nom_entreprise_entry.get()
-            global nombre_de_champs
-            nombre_de_champs = int(nombre_de_champs_entry.get())
-
-            for widget in frame_entreprise.winfo_children():
-                widget.destroy()
-            show_creation_champs(frame)
+            nombre_de_champs_string = nombre_de_champs_entry.get()
+            if nombre_de_champs_string.isdigit() and int(nombre_de_champs_string) > 0:
+                global nombre_de_champs
+                nombre_de_champs = int(nombre_de_champs_string)
+                for widget in frame_entreprise.winfo_children():
+                    widget.destroy()
+                show_creation_champs(frame)
+            else:
+                messagebox.showwarning("Warning",
+                                       "L'entrée \"Nombre de champs\" est invalide.Veuillez entrer un nombre naturel plus grand que 0.")
 
         nom_entreprise_label = ttk.Label(frame_entreprise, text="Nom de l'entreprise: ")
         nom_entreprise_entry = ttk.Entry(frame_entreprise)
@@ -32,13 +39,14 @@ def run_gui(frame):
         nombre_de_champs_label.grid(row=1, column=0)
         nombre_de_champs_entry.grid(row=1, column=1)
 
-        creer_bouton = ttk.Button(frame_entreprise, command=get_information_entreprise)
+        creer_bouton = ttk.Button(frame_entreprise, text="Créer", command=get_information_entreprise)
         creer_bouton.grid(columnspan=2, row=2, column=0)
 
     def show_creation_champs(frame_champs_list):
         def get_information_champs(scrollable_frame):
             global information_champs
             information_champs = []
+            champs_valides = True
             for scrollable_frame_widget in scrollable_frame.winfo_children():
                 if isinstance(scrollable_frame_widget, ttk.LabelFrame):
                     grid_slave0_1 = scrollable_frame_widget.grid_slaves(row=0, column=1)
@@ -47,14 +55,21 @@ def run_gui(frame):
                     grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
                     for entry in grid_slave1_1:
                         nombre_de_zone_de_gestion = entry.get()
-                    information_champs.append({"nom_du_champs": nom_du_champs,
-                                               "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion,
-                                               "information_zone_de_gestion": []})
+                    if nombre_de_zone_de_gestion.isdigit() and int(nombre_de_zone_de_gestion) > 0:
+                        information_champs.append({"nom_du_champs": nom_du_champs,
+                                                   "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion,
+                                                   "information_zone_de_gestion": []})
+                    else:
+                        champs_valides = False
+                        information_champs = []
+                        messagebox.showwarning("Warning",
+                                               "Une entrée \"Nombre de zone de gestion\" est invalide.Veuillez entrer un nombre naturel plus grand que 0.")
+                        break
+            if champs_valides:
+                for widget in frame_champs_list.winfo_children():
+                    widget.destroy()
 
-            for widget in frame_champs_list.winfo_children():
-                widget.destroy()
-
-            show_creation_zone_de_gestion(frame_champs_list)
+                show_creation_zone_de_gestion(frame_champs_list)
 
         canvas = tk.Canvas(frame_champs_list)
         scrollbar = ttk.Scrollbar(frame_champs_list, orient="vertical", command=canvas.yview)
@@ -80,38 +95,65 @@ def run_gui(frame):
         canvas.pack(side="left", fill="x", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        creation_champs_bouton = ttk.Button(scrollable_frame, command=lambda: get_information_champs(scrollable_frame))
+        creation_champs_bouton = ttk.Button(scrollable_frame, text="Créer",
+                                            command=lambda: get_information_champs(scrollable_frame))
         creation_champs_bouton.pack()
 
     def show_creation_zone_de_gestion(zone_de_gestion_mainframe):
         def get_information_zone_de_gestion(scrollable_frame):
+            entree_invalide_liste = []
+            global information_champs
+            info_champs_temporaire = copy.deepcopy(information_champs)
             index = 0
             for scrollable_frame_widget in scrollable_frame.winfo_children():
                 if isinstance(scrollable_frame_widget, ttk.LabelFrame):
+                    index_zone = 1
                     for champs_frame_widget in scrollable_frame_widget.winfo_children():
                         if isinstance(champs_frame_widget, ttk.LabelFrame):
                             grid_slave0_1 = champs_frame_widget.grid_slaves(row=0, column=1)
                             for entry in grid_slave0_1:
                                 taux_matiere_organique = entry.get()
+                                if not util.is_decimal_number(taux_matiere_organique) or float(
+                                        taux_matiere_organique) < 0:
+                                    entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
+                                                                  "Zone de gestion" + str(index_zone),
+                                                                  "\"Taux de matière organique\" doit être un entier positif"))
                             grid_slave1_1 = champs_frame_widget.grid_slaves(row=1, column=1)
                             for entry in grid_slave1_1:
+                                # TODO: ajouter la validation après avoir call l'API pour les données
                                 municipalite = entry.get()
                             grid_slave2_1 = champs_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
+                                # TODO: ajouter la validation après avoir call l'API pour les données
                                 serie_de_sol = entry.get()
                             grid_slave3_1 = champs_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
+                                # TODO: ajouter la validation après avoir call l'API pour les données
                                 classe_de_drainage = entry.get()
                             grid_slave4_1 = champs_frame_widget.grid_slaves(row=4, column=1)
                             for entry in grid_slave4_1:
                                 masse_volumique_apparente = entry.get()
+                                if not util.is_decimal_number(masse_volumique_apparente) or float(
+                                        masse_volumique_apparente) < 0:
+                                    entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
+                                                                  "Zone de gestion" + str(index_zone),
+                                                                  "\"Masse volumique apparente\" doit être un entier positif"))
                             grid_slave5_1 = champs_frame_widget.grid_slaves(row=5, column=1)
                             for entry in grid_slave5_1:
                                 profondeur = entry.get()
+                                if not util.is_decimal_number(profondeur) or float(
+                                        profondeur) < 0:
+                                    entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
+                                                                  "Zone de gestion" + str(index_zone),
+                                                                  "\"Profondeur\" doit être un entier positif"))
                             grid_slave6_1 = champs_frame_widget.grid_slaves(row=6, column=1)
                             for entry in grid_slave6_1:
                                 superficie_de_la_zone = entry.get()
-                            global information_champs
+                                if not util.is_decimal_number(superficie_de_la_zone) or float(
+                                        superficie_de_la_zone) < 0:
+                                    entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
+                                                                  "Zone de gestion" + str(index_zone),
+                                                                  "\"Superficie de la zone\" doit être un entier positif"))
                             information_champs[index]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
@@ -120,12 +162,21 @@ def run_gui(frame):
                                  "masse_volumique_apparente": masse_volumique_apparente,
                                  "profondeur": profondeur,
                                  "superficie_de_la_zone": superficie_de_la_zone})
+                            index_zone += 1
                 index += 1
-            sauvergarder_attirbuts_entreprise_apres_creation()
-            for widget in zone_de_gestion_mainframe.winfo_children():
-                widget.destroy()
+            if len(entree_invalide_liste) == 0:
+                sauvergarder_attributs_entreprise_apres_creation()
+                for widget in zone_de_gestion_mainframe.winfo_children():
+                    widget.destroy()
 
-            question_ajout_regie_historique(zone_de_gestion_mainframe)
+                question_ajout_regie_historique(zone_de_gestion_mainframe)
+            else:
+                information_champs = info_champs_temporaire
+                message = ""
+                for entree_invalide in entree_invalide_liste:
+                    message = message + "Dans le " + entree_invalide[0] + " et la " + entree_invalide[
+                        1] + " l'entrée " + entree_invalide[2] + "\n"
+                messagebox.showwarning("Warning", message)
 
         canvas = tk.Canvas(zone_de_gestion_mainframe)
         scrollbar = ttk.Scrollbar(zone_de_gestion_mainframe, orient="vertical", command=canvas.yview)
@@ -177,13 +228,15 @@ def run_gui(frame):
         canvas.pack(side="left", fill="x", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame,
+        creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame, text="Créer",
                                                      command=lambda: get_information_zone_de_gestion(scrollable_frame))
         creation_zone_de_gestion_bouton.pack()
 
     def show_creation_des_regies(parent_frame_tabs, show_regie_historique):
         for widget in parent_frame_tabs.winfo_children():
             widget.destroy()
+
+        donnees_de_rechauffement_label_frame = ttk.LabelFrame(parent_frame_tabs, text="Données de réchauffement")
         simulation_notebook = ttk.Notebook(parent_frame_tabs)
         global nombre_simulations
         nombre_simulations = 0
@@ -214,15 +267,33 @@ def run_gui(frame):
                         root.deiconify()
                         annee_projection_initiale = annee_projection_initiale_entry.get()
                         duree_projection = duree_projection_entry.get()
-                        nombre_annee_rotation = nombre_annee_rotation_projection_entry.get()
+                        global annees_historiques
+                        annee_projection_initiale_valide = True
+                        try:
+                            if int(annees_historiques["annee_historique_finale"]) + 1 != int(annee_projection_initiale):
+                                annee_projection_initiale_valide = False
+                        except NameError:
+                            pass
+                        if annee_projection_initiale.isdigit() and duree_projection.isdigit() and int(
+                                duree_projection) > 0 and annee_projection_initiale_valide:
+                            global duree_simulation
+                            duree_simulation.append({"annee_projection_initiale": annee_projection_initiale,
+                                                     "duree_projection": duree_projection})
 
-                        global duree_simulation
-                        duree_simulation.append({"annee_projection_initiale": annee_projection_initiale,
-                                                 "duree_projection": duree_projection,
-                                                 "nombre_annee_rotation": nombre_annee_rotation})
-
-                        duree_simulation_window.destroy()
-                        set_up_simulation(simulation_notebook)
+                            duree_simulation_window.destroy()
+                            set_up_simulation(simulation_notebook)
+                        else:
+                            entree_invalide_liste = []
+                            message = ""
+                            if not annee_projection_initiale.isdigit() or annee_projection_initiale_valide:
+                                entree_invalide_liste.append(
+                                    "L'entrée \"Année de projection initiale\" est invalide. Si il y a une année historique finale, elle doit être supérieur d'une année à celle-ci et être un nombre naturel plus grand que 0.")
+                            if not duree_projection.isdigit() or int(duree_projection) <= 0:
+                                entree_invalide_liste.append(
+                                    "L'entrée \"Durée de la projection\" est invalide. Elle doit être un nombre naturel plus grand que 0.")
+                            for entree_invalide in entree_invalide_liste:
+                                message = message + entree_invalide
+                            messagebox.showwarning("Warning", message)
 
                     root.withdraw()
                     duree_simulation_window = tk.Toplevel()
@@ -235,16 +306,11 @@ def run_gui(frame):
                                                        text="Durée de la projection: ")
                     duree_projection_entry = ttk.Entry(duree_simulation_frame)
                     duree_projection_entry.insert(0, "30")
-                    nombre_annee_rotation_projection_label = ttk.Label(duree_simulation_frame,
-                                                                       text="Nombre d'année de la rotation de culture: ")
-                    nombre_annee_rotation_projection_entry = ttk.Entry(duree_simulation_frame)
 
                     annee_projection_initiale_label.grid(row=0, column=0)
                     annee_projection_initiale_entry.grid(row=0, column=1)
                     duree_projection_label.grid(row=1, column=0)
                     duree_projection_entry.grid(row=1, column=1)
-                    nombre_annee_rotation_projection_label.grid(row=2, column=0)
-                    nombre_annee_rotation_projection_entry.grid(row=2, column=1)
 
                     creer_simulation_bouton = ttk.Button(duree_simulation_frame,
                                                          command=get_duree_de_la_simulation)
@@ -599,7 +665,7 @@ def run_gui(frame):
                             tab = ttk.Frame(champs_courant_zone_notebook)
                             champs_courant_zone_notebook.add(tab, text="Zone de gestion " + str(
                                 len(champs_courant_zone_notebook.winfo_children())))
-                            set_up_regies(tab, index)
+                            set_up_regies_projections(tab, index)
 
                             new_zone_tab = ttk.Frame(champs_courant_zone_notebook)
                             champs_courant_zone_notebook.add(new_zone_tab, text="+")
@@ -612,27 +678,13 @@ def run_gui(frame):
             for zone in range(int(nombre_de_zone)):
                 zone_tab = ttk.Frame(zone_notebook)
                 zone_notebook.add(zone_tab, text="Zone de gestion " + str(zone + 1))
-                set_up_regies(zone_tab, simulation_index)
+                set_up_regies_projections(zone_tab, simulation_index)
 
             new_tab = ttk.Frame(zone_notebook)
             zone_notebook.add(new_tab, text="+")
             zone_notebook.pack()
 
-        def set_up_regies(zone_tab, index):
-            if show_regie_historique is True:
-                historique_frame = ttk.LabelFrame(zone_tab, text="Régies historiques")
-                canvas_historique = tk.Canvas(historique_frame)
-                scrollbar_historique = ttk.Scrollbar(historique_frame, orient="vertical",
-                                                     command=canvas_historique.yview)
-                scrollable_frame_historique = ttk.Frame(canvas_historique)
-                scrollable_frame_historique.bind("<Configure>", lambda e: canvas_historique.configure(
-                    scrollregion=canvas_historique.bbox("all")))
-                add_regies_historiques(scrollable_frame_historique, index)
-                canvas_historique.create_window((0, 0), window=scrollable_frame_historique, anchor="nw")
-                canvas_historique.configure(yscrollcommand=scrollbar_historique.set)
-                canvas_historique.pack(side="left", fill="both", expand=True)
-                scrollbar_historique.pack(side="right", fill="y")
-                historique_frame.grid(row=0, column=0, columnspan=2)
+        def set_up_regies_projections(zone_tab, index):
             projection_frame = ttk.LabelFrame(zone_tab, text="Régies de la projection")
             canvas_projection = tk.Canvas(projection_frame)
             scrollbar_projection = ttk.Scrollbar(projection_frame, orient="vertical",
@@ -640,11 +692,11 @@ def run_gui(frame):
             scrollable_frame_projection = ttk.Frame(canvas_projection)
             scrollable_frame_projection.bind("<Configure>", lambda e: canvas_projection.configure(
                 scrollregion=canvas_projection.bbox("all")))
-            add_regies_projection(scrollable_frame_projection, index)
             canvas_projection.create_window((0, 0), window=scrollable_frame_projection, anchor="nw")
             canvas_projection.configure(yscrollcommand=scrollbar_projection.set)
             canvas_projection.pack(side="left", fill="both", expand=True)
             scrollbar_projection.pack(side="right", fill="y")
+            ajouter_une_annee_a_la_rotation(scrollable_frame_projection)
             projection_frame.grid(row=1, column=0, columnspan=2)
             get_information_simulation_button = ttk.Button(zone_tab, text="Créer rapport",
                                                            command=get_information_toutes_les_simulations)
@@ -653,7 +705,61 @@ def run_gui(frame):
                                                               command=editer_caracteristique_physique_entreprise)
             editer_information_entreprise_button.grid(row=2, column=1)
 
-        def add_regies_historiques(scrollable_frame, index):
+        def ajouter_une_annee_a_la_rotation(scrollable_frame_projection):
+            if len(scrollable_frame_projection.winfo_children()) == 0:
+                index = len(scrollable_frame_projection.winfo_children()) + 1
+                add_regies_projection(scrollable_frame_projection, index)
+                button_frame = ttk.Frame(scrollable_frame_projection)
+
+                ajouter_une_annee_a_la_rotation_button = ttk.Button(button_frame, text="Ajouter une année de rotation",
+                                                                    command=lambda: ajouter_une_annee_a_la_rotation(
+                                                                        scrollable_frame_projection))
+                ajouter_une_annee_a_la_rotation_button.grid(row=0, column=0)
+                enlever_une_annee_a_la_rotation_button = ttk.Button(button_frame, text="Enlever une année de rotation",
+                                                                    state="disabled")
+                enlever_une_annee_a_la_rotation_button.grid(row=0, column=1)
+                button_frame.pack()
+            else:
+                scrollable_frame_projection.winfo_children()[
+                    len(scrollable_frame_projection.winfo_children()) - 1].destroy()
+                index = len(scrollable_frame_projection.winfo_children()) + 1
+                add_regies_projection(scrollable_frame_projection, index)
+                button_frame = ttk.Frame(scrollable_frame_projection)
+
+                ajouter_une_annee_a_la_rotation_button = ttk.Button(button_frame, text="Ajouter une année de rotation",
+                                                                    command=lambda: ajouter_une_annee_a_la_rotation(
+                                                                        scrollable_frame_projection))
+                ajouter_une_annee_a_la_rotation_button.grid(row=0, column=0)
+                enlever_une_annee_a_la_rotation_button = ttk.Button(button_frame, text="Enlever une année de rotation",
+                                                                    command=lambda: enlever_une_annee_a_la_rotation(
+                                                                        scrollable_frame_projection))
+                enlever_une_annee_a_la_rotation_button.grid(row=0, column=1)
+                button_frame.pack()
+
+        def enlever_une_annee_a_la_rotation(scrollable_frame_projection):
+            if len(scrollable_frame_projection.winfo_children()) > 1:
+                scrollable_frame_projection.winfo_children()[len(scrollable_frame_projection.winfo_children()) - 2].destroy()
+            if len(scrollable_frame_projection.winfo_children()) - 1 == 1:
+                scrollable_frame_projection.winfo_children()[len(scrollable_frame_projection.winfo_children())-1].grid_slaves(row=0, column=1)[0].configure(state="disabled")
+
+        def set_up_regies_rechauffement(rechauffement_frame, show_regie_historique):
+            if show_regie_historique:
+                historique_frame = ttk.LabelFrame(rechauffement_frame, text="Régies historiques")
+                canvas_historique = tk.Canvas(historique_frame)
+                scrollbar_historique = ttk.Scrollbar(historique_frame, orient="vertical",
+                                                     command=canvas_historique.yview)
+                scrollable_frame_historique = ttk.Frame(canvas_historique)
+                scrollable_frame_historique.bind("<Configure>", lambda e: canvas_historique.configure(
+                    scrollregion=canvas_historique.bbox("all")))
+                add_regies_historiques(scrollable_frame_historique)
+                canvas_historique.create_window((0, 0), window=scrollable_frame_historique, anchor="nw")
+                canvas_historique.configure(yscrollcommand=scrollbar_historique.set)
+                canvas_historique.pack(side="left", fill="both", expand=True)
+                scrollbar_historique.pack(side="right", fill="y")
+                historique_frame.grid(row=0, column=0, columnspan=2)
+            # TODO: Continuer la fonction avec un else et le nombre d'année de rotation
+
+        def add_regies_historiques(scrollable_frame):
             global annees_historiques
             annee_historique_initiale = int(annees_historiques["annee_historique_initiale"])
             annee_historique_finale = int(annees_historiques["annee_historique_finale"])
@@ -662,26 +768,26 @@ def run_gui(frame):
                 annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(annee_courante))
                 culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
                 culture_principale_combobox = ttk.Combobox(annee_courante_frame)
-                rendement_label = ttk.Label(annee_courante_frame, text="Rendement: ")
+                rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
                 rendement_entry = ttk.Entry(annee_courante_frame)
-                proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté: ")
+                proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté [0-1]: ")
                 proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
                 production_non_recolte_label = ttk.Label(annee_courante_frame, text="Production non récoltée: ")
                 production_non_recolte_combobox = ttk.Combobox(annee_courante_frame)
-                taux_matiere_seche_label = ttk.Label(annee_courante_frame, text="Taux de matière sèche: ")
+                taux_matiere_seche_label = ttk.Label(annee_courante_frame, text="Taux de matière sèche [0-1]: ")
                 taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
                 travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
                 travail_du_sol_combobox = ttk.Combobox(annee_courante_frame)
-                profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maximale: ")
+                profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maximale (cm): ")
                 profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
                 culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
                 culture_secondaire_combobox = ttk.Combobox(annee_courante_frame)
                 rendement_culture_secondaire_label = ttk.Label(annee_courante_frame,
-                                                               text="Rendement culture secondaire: ")
+                                                               text="Rendement culture secondaire (t/ha): ")
                 rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
 
                 amendement_frame = ttk.LabelFrame(annee_courante_frame, text="Liste des amendements")
-                ajouter_des_boutons(amendement_frame)
+                ajouter_des_amendements(amendement_frame)
 
                 culture_principale_label.grid(row=0, column=0)
                 culture_principale_combobox.grid(row=0, column=1)
@@ -706,10 +812,10 @@ def run_gui(frame):
                 annee_courante += 1
                 annee_courante_frame.pack()
 
-        def ajouter_des_boutons(amendement_frame):
+        def ajouter_des_amendements(amendement_frame):
             amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
             amendement_combobox = ttk.Combobox(amendement_frame)
-            apport_amendement_label = ttk.Label(amendement_frame, text="Apport:")
+            apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
             apport_amendement_entry = ttk.Entry(amendement_frame)
             ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
                                                  command=lambda: ajouter_amendement_regie(amendement_frame))
@@ -728,7 +834,7 @@ def run_gui(frame):
             amendement_frame.grid_slaves(grid_size[1] - 1, grid_size[0] - 2)[0].destroy()
             amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
             amendement_combobox = ttk.Combobox(amendement_frame)
-            apport_amendement_label = ttk.Label(amendement_frame, text="Apport:")
+            apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
             apport_amendement_entry = ttk.Entry(amendement_frame)
             ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
                                                  command=lambda: ajouter_amendement_regie(amendement_frame))
@@ -746,56 +852,50 @@ def run_gui(frame):
             pass
 
         def add_regies_projection(scrollable_frame, index):
-            global duree_simulation
-            nombre_annee_rotation = int(duree_simulation[index]["nombre_annee_rotation"])
-            annee_courante = 1
-            while annee_courante <= nombre_annee_rotation:
-                annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(annee_courante))
-                culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
-                culture_principale_combobox = ttk.Combobox(annee_courante_frame)
-                rendement_label = ttk.Label(annee_courante_frame, text="Rendement: ")
-                rendement_entry = ttk.Entry(annee_courante_frame)
-                proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté: ")
-                proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
-                production_non_recolte_label = ttk.Label(annee_courante_frame, text="Production non récoltée: ")
-                production_non_recolte_combobox = ttk.Combobox(annee_courante_frame)
-                taux_matiere_seche_label = ttk.Label(annee_courante_frame, text="Taux de matière sèche: ")
-                taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
-                travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
-                travail_du_sol_combobox = ttk.Combobox(annee_courante_frame)
-                profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maxiamle: ")
-                profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
-                culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
-                culture_secondaire_combobox = ttk.Combobox(annee_courante_frame)
-                rendement_culture_secondaire_label = ttk.Label(annee_courante_frame,
-                                                               text="Rendement culture secondaire: ")
-                rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
+            annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(index))
+            culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
+            culture_principale_combobox = ttk.Combobox(annee_courante_frame)
+            rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
+            rendement_entry = ttk.Entry(annee_courante_frame)
+            proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté [0-1]: ")
+            proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
+            production_non_recolte_label = ttk.Label(annee_courante_frame, text="Production non récoltée: ")
+            production_non_recolte_combobox = ttk.Combobox(annee_courante_frame)
+            taux_matiere_seche_label = ttk.Label(annee_courante_frame, text="Taux de matière sèche [0-1]: ")
+            taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
+            travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
+            travail_du_sol_combobox = ttk.Combobox(annee_courante_frame)
+            profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maxiamle (cm): ")
+            profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
+            culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
+            culture_secondaire_combobox = ttk.Combobox(annee_courante_frame)
+            rendement_culture_secondaire_label = ttk.Label(annee_courante_frame,
+                                                           text="Rendement culture secondaire (t/ha): ")
+            rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
 
-                amendement_frame = ttk.LabelFrame(annee_courante_frame, text="Liste des amendements")
-                ajouter_des_boutons(amendement_frame)
+            amendement_frame = ttk.LabelFrame(annee_courante_frame, text="Liste des amendements")
+            ajouter_des_amendements(amendement_frame)
 
-                culture_principale_label.grid(row=0, column=0)
-                culture_principale_combobox.grid(row=0, column=1)
-                rendement_label.grid(row=1, column=0)
-                rendement_entry.grid(row=1, column=1)
-                proportion_tige_exporte_label.grid(row=2, column=0)
-                proportion_tige_exporte_entry.grid(row=2, column=1)
-                production_non_recolte_label.grid(row=3, column=0)
-                production_non_recolte_combobox.grid(row=3, column=1)
-                taux_matiere_seche_label.grid(row=4, column=0)
-                taux_matiere_seche_entry.grid(row=4, column=1)
-                travail_du_sol_label.grid(row=5, column=0)
-                travail_du_sol_combobox.grid(row=5, column=1)
-                profondeur_maximale_label.grid(row=6, column=0)
-                profondeur_maximale_entry.grid(row=6, column=1)
-                culture_secondaire_label.grid(row=7, column=0)
-                culture_secondaire_combobox.grid(row=7, column=1)
-                rendement_culture_secondaire_label.grid(row=8, column=0)
-                rendement_culture_secondaire_entry.grid(row=8, column=1)
-                amendement_frame.grid(row=9, column=0, columnspan=2)
-
-                annee_courante += 1
-                annee_courante_frame.pack()
+            culture_principale_label.grid(row=0, column=0)
+            culture_principale_combobox.grid(row=0, column=1)
+            rendement_label.grid(row=1, column=0)
+            rendement_entry.grid(row=1, column=1)
+            proportion_tige_exporte_label.grid(row=2, column=0)
+            proportion_tige_exporte_entry.grid(row=2, column=1)
+            production_non_recolte_label.grid(row=3, column=0)
+            production_non_recolte_combobox.grid(row=3, column=1)
+            taux_matiere_seche_label.grid(row=4, column=0)
+            taux_matiere_seche_entry.grid(row=4, column=1)
+            travail_du_sol_label.grid(row=5, column=0)
+            travail_du_sol_combobox.grid(row=5, column=1)
+            profondeur_maximale_label.grid(row=6, column=0)
+            profondeur_maximale_entry.grid(row=6, column=1)
+            culture_secondaire_label.grid(row=7, column=0)
+            culture_secondaire_combobox.grid(row=7, column=1)
+            rendement_culture_secondaire_label.grid(row=8, column=0)
+            rendement_culture_secondaire_entry.grid(row=8, column=1)
+            amendement_frame.grid(row=9, column=0, columnspan=2)
+            annee_courante_frame.pack()
 
         def get_information_toutes_les_simulations():
             simulations = []
@@ -828,6 +928,7 @@ def run_gui(frame):
                                 zone_list.append({"regies_projection": regies_projection,
                                                   "regies_historique": regies_historique})
                                 index_zone += 1
+                            # TODO: changer pour prendre les données du scénario de référence plutot que chaque régie pour garder la consistence
                             else:
                                 regies_projection_frame = zone_frames.winfo_children()[0]
                                 regies_projection = get_regies(regies_projection_frame)
@@ -880,42 +981,45 @@ def run_gui(frame):
             regies = []
             regies_canvas = regies_frame.winfo_children()[0]
             regies_scrollable_frame = regies_canvas.winfo_children()[0]
+            compteur_regie = 0
             for regie in regies_scrollable_frame.winfo_children():
-                culture_principale = regie.grid_slaves(row=0, column=1)[0].get()
-                rendement = float(regie.grid_slaves(row=1, column=1)[0].get())
-                proportion_tige_exporte = float(regie.grid_slaves(row=2, column=1)[0].get())
-                production_non_recolte = regie.grid_slaves(row=3, column=1)[0].get()
-                taux_matiere_seche = float(regie.grid_slaves(row=4, column=1)[0].get())
-                culture_principale_dict = {"culture_principale": culture_principale,
-                                           "rendement": rendement,
-                                           "proportion_tige_exporte": proportion_tige_exporte,
-                                           "produit_non_recolte": production_non_recolte,
-                                           "taux_matiere_seche": taux_matiere_seche}
-                travail_du_sol = regie.grid_slaves(row=5, column=1)[0].get()
-                profondeur = int(regie.grid_slaves(row=6, column=1)[0].get())
-                travail_du_sol_dict = {"travail_du_sol": travail_du_sol,
-                                       "profondeur_du_travail": profondeur}
-                culture_secondaire = regie.grid_slaves(row=7, column=1)[0].get()
-                rendement_culture_secondaire = regie.grid_slaves(row=8, column=1)[0].get()
-                culture_secondaire_dict = {"culture_secondaire": culture_secondaire,
-                                           "rendement": rendement_culture_secondaire}
-                index_composante_amendement = 0
-                composante_amendement_liste = regie.grid_slaves(row=9, column=0)[0]
-                grid_size = composante_amendement_liste.grid_size()
-                amendements = []
-                while index_composante_amendement < grid_size[1] - 1:
-                    amendement = composante_amendement_liste.grid_slaves([index_composante_amendement], column=1)[
-                        0].get()
-                    apport = float(
-                        composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[0].get())
-                    amendements.append({"amendement": amendement,
-                                        "apport": apport})
-                    index_composante_amendement += 2
-                regie_dict = {"culture_principale": culture_principale_dict,
-                              "culture_secondaire": culture_secondaire_dict,
-                              "amendements": amendements,
-                              "travail_du_sol": travail_du_sol_dict}
-                regies.append(regie_dict)
+                if compteur_regie < len(regies_scrollable_frame.winfo_children())-1:
+                    culture_principale = regie.grid_slaves(row=0, column=1)[0].get()
+                    rendement = float(regie.grid_slaves(row=1, column=1)[0].get())
+                    proportion_tige_exporte = float(regie.grid_slaves(row=2, column=1)[0].get())
+                    production_non_recolte = regie.grid_slaves(row=3, column=1)[0].get()
+                    taux_matiere_seche = float(regie.grid_slaves(row=4, column=1)[0].get())
+                    culture_principale_dict = {"culture_principale": culture_principale,
+                                               "rendement": rendement,
+                                               "proportion_tige_exporte": proportion_tige_exporte,
+                                               "produit_non_recolte": production_non_recolte,
+                                               "taux_matiere_seche": taux_matiere_seche}
+                    travail_du_sol = regie.grid_slaves(row=5, column=1)[0].get()
+                    profondeur = int(regie.grid_slaves(row=6, column=1)[0].get())
+                    travail_du_sol_dict = {"travail_du_sol": travail_du_sol,
+                                           "profondeur_du_travail": profondeur}
+                    culture_secondaire = regie.grid_slaves(row=7, column=1)[0].get()
+                    rendement_culture_secondaire = regie.grid_slaves(row=8, column=1)[0].get()
+                    culture_secondaire_dict = {"culture_secondaire": culture_secondaire,
+                                               "rendement": rendement_culture_secondaire}
+                    index_composante_amendement = 0
+                    composante_amendement_liste = regie.grid_slaves(row=9, column=0)[0]
+                    grid_size = composante_amendement_liste.grid_size()
+                    amendements = []
+                    while index_composante_amendement < grid_size[1] - 1:
+                        amendement = composante_amendement_liste.grid_slaves([index_composante_amendement], column=1)[
+                            0].get()
+                        apport = float(
+                            composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[0].get())
+                        amendements.append({"amendement": amendement,
+                                            "apport": apport})
+                        index_composante_amendement += 2
+                    regie_dict = {"culture_principale": culture_principale_dict,
+                                  "culture_secondaire": culture_secondaire_dict,
+                                  "amendements": amendements,
+                                  "travail_du_sol": travail_du_sol_dict}
+                    regies.append(regie_dict)
+                compteur_regie += 1
             return regies
 
         simulation_notebook.bind("<Button-1>", add_new_simulation_tab)
@@ -923,7 +1027,8 @@ def run_gui(frame):
 
         simulation_notebook.add(tab1, text="+")
 
-        simulation_notebook.pack(expand=1, fill="both")
+        simulation_notebook.grid(row=0, column=0)
+        donnees_de_rechauffement_label_frame.grid(row=0, column=1)
 
         def editer_caracteristique_physique_entreprise():
             root.withdraw()
@@ -1019,16 +1124,17 @@ def run_gui(frame):
                     info_zones_de_gestion = []
                     while zone_label_frame_index < len(champs_widgets):
                         zone_frame = champs_widgets[zone_label_frame_index]
-                        info_zones_de_gestion.append({"taux_matiere_organique": taux_matiere_organique_entry.get(),
-                                                      "municipalite": municipalite_combobox.get(),
-                                                      "serie_de_sol": serie_de_sol_combobox.get(),
-                                                      "classe_de_drainage": classe_de_drainage_combobox.get(),
-                                                      "masse_volumique_apparente": masse_volumique_apparente_entry.get(),
-                                                      "profondeur": profondeur_entry.get(),
-                                                      "superficie_de_la_zone": superficie_de_la_zone_entry.get()})
+                        info_zones_de_gestion.append(
+                            {"taux_matiere_organique": zone_frame.grid_slaves(row=0, column=1)[0].get(),
+                             "municipalite": zone_frame.grid_slaves(row=1, column=1)[0].get(),
+                             "serie_de_sol": zone_frame.grid_slaves(row=2, column=1)[0].get(),
+                             "classe_de_drainage": zone_frame.grid_slaves(row=3, column=1)[0].get(),
+                             "masse_volumique_apparente": zone_frame.grid_slaves(row=4, column=1)[0].get(),
+                             "profondeur": zone_frame.grid_slaves(row=5, column=1)[0].get(),
+                             "superficie_de_la_zone": zone_frame.grid_slaves(row=6, column=1)[0].get()})
                         zone_label_frame_index += 1
                     information_champs.append({"nom_du_champs": nom_du_champs,
-                                               "nombre_de_zone_de_gestion": str(len(champs_widgets) - 1),
+                                               "nombre_de_zone_de_gestion": str(len(champs_widgets) - 2),
                                                "information_zone_de_gestion": info_zones_de_gestion})
                     champs_label_frame_index += 1
 
@@ -1110,8 +1216,9 @@ def run_gui(frame):
             for widget in menu_frame.winfo_children():
                 widget.destroy()
             root.withdraw()
+            global filename
             filename = filedialog.askopenfilename(initialdir="/", title="Select file",
-                                                       filetypes=(("json files", "*.json"), ("all files", "*.*")))
+                                                  filetypes=(("json files", "*.json"), ("all files", "*.*")))
             root.deiconify()
 
             with open(filename) as file:
@@ -1125,7 +1232,6 @@ def run_gui(frame):
 
             question_ajout_regie_historique(menu_frame)
 
-
         bienvenue_label = ttk.Label(menu_frame, text="Bienvenue dans OGEMOS!")
         nouvelle_entreprise_button = ttk.Button(menu_frame, text="Créer une nouvelle entreprise",
                                                 command=creation_nouvelle_entreprise)
@@ -1135,12 +1241,13 @@ def run_gui(frame):
         nouvelle_entreprise_button.pack()
         charger_entreprise_button.pack()
 
-    def sauvergarder_attirbuts_entreprise_apres_creation():
+    def sauvergarder_attributs_entreprise_apres_creation():
         root.withdraw()
         global filename
         filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer",
                                                 filetypes=(("json files", "*.json"), ("all files", "*.*")))
-        filename = filename + ".json"
+        if ".json" not in filename:
+            filename = filename + ".json"
         global nom_entreprise
         global nombre_de_champs
         global information_champs
