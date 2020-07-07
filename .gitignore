@@ -225,3 +225,5 @@ $RECYCLE.BIN/
 /GUI/gui_simulation.py
 /GUI/test.py
 /GUI/gui_entreprise.py
+/GUI/.json
+/GUI/*.json
