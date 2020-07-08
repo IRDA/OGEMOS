@@ -116,7 +116,7 @@ def run_gui(frame):
                                 if not util.is_decimal_number(taux_matiere_organique) or float(
                                         taux_matiere_organique) < 0:
                                     entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
-                                                                  "Zone de gestion" + str(index_zone),
+                                                                  "Zone de gestion " + str(index_zone),
                                                                   "\"Taux de matière organique\" doit être un entier positif"))
                             grid_slave1_1 = champs_frame_widget.grid_slaves(row=1, column=1)
                             for entry in grid_slave1_1:
@@ -136,7 +136,7 @@ def run_gui(frame):
                                 if not util.is_decimal_number(masse_volumique_apparente) or float(
                                         masse_volumique_apparente) < 0:
                                     entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
-                                                                  "Zone de gestion" + str(index_zone),
+                                                                  "Zone de gestion " + str(index_zone),
                                                                   "\"Masse volumique apparente\" doit être un entier positif"))
                             grid_slave5_1 = champs_frame_widget.grid_slaves(row=5, column=1)
                             for entry in grid_slave5_1:
@@ -144,7 +144,7 @@ def run_gui(frame):
                                 if not util.is_decimal_number(profondeur) or float(
                                         profondeur) < 0:
                                     entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
-                                                                  "Zone de gestion" + str(index_zone),
+                                                                  "Zone de gestion " + str(index_zone),
                                                                   "\"Profondeur\" doit être un entier positif"))
                             grid_slave6_1 = champs_frame_widget.grid_slaves(row=6, column=1)
                             for entry in grid_slave6_1:
@@ -152,7 +152,7 @@ def run_gui(frame):
                                 if not util.is_decimal_number(superficie_de_la_zone) or float(
                                         superficie_de_la_zone) < 0:
                                     entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
-                                                                  "Zone de gestion" + str(index_zone),
+                                                                  "Zone de gestion " + str(index_zone),
                                                                   "\"Superficie de la zone\" doit être un entier positif"))
                             information_champs[index]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
@@ -366,8 +366,10 @@ def run_gui(frame):
                     donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0].winfo_children()[
                         index_clicked_tab].destroy()
                     champs_index = index_clicked_tab
-                    while champs_index < len(donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0].winfo_children()):
-                        donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0].winfo_children()[champs_index].configure(text=information_champs[champs_index]["nom_du_champs"])
+                    while champs_index < len(donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[
+                                                 0].winfo_children()):
+                        donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0].winfo_children()[
+                            champs_index].configure(text=information_champs[champs_index]["nom_du_champs"])
                         champs_index += 1
                     for simulation_frame in simulation_notebook.winfo_children():
                         if len(simulation_frame.winfo_children()) == 0:
@@ -389,9 +391,7 @@ def run_gui(frame):
                 champs_notebook.add(tab, text=champs["nom_du_champs"])
                 zone_de_gestion_notebook = ttk.Notebook(tab)
                 global duree_simulation
-                simulation_index = len(duree_simulation) - 1
-                set_up_champs(zone_de_gestion_notebook, int(champs["nombre_de_zone_de_gestion"]), champs_notebook,
-                              simulation_index)
+                set_up_champs(zone_de_gestion_notebook, int(champs["nombre_de_zone_de_gestion"]), champs_notebook)
 
             tab = ttk.Frame(champs_notebook)
             champs_notebook.add(tab, text="+")
@@ -400,96 +400,153 @@ def run_gui(frame):
 
         def set_up_new_champs():
             new_champs_window = tk.Toplevel()
+            global nombre_de_champs_modifie
+            nombre_de_champs_modifie = False
+            global information_champs_modifie
+            information_champs_modifie = False
+
+            def revenir_a_etat_initial():
+                global nombre_de_champs_modifie
+                if nombre_de_champs_modifie:
+                    global nombre_de_champs
+                    nombre_de_champs -= 1
+                global information_champs_modifie
+                if information_champs_modifie:
+                    global information_champs
+                    information_champs.pop(len(information_champs) - 1)
+                new_champs_window.destroy()
+
+            new_champs_window.protocol("WM_DELETE_WINDOW", revenir_a_etat_initial)
 
             def creation_des_zone_de_gestion_du_nouveau_champs():
                 nom_du_champs = nom_du_champs_entry.get()
                 nombre_de_zone_de_gestion = nombre_de_zone_de_gestion_entry.get()
-                global information_champs
-                information_champs.append({"nom_du_champs": nom_du_champs,
-                                           "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion,
-                                           "information_zone_de_gestion": []})
-                global nombre_de_champs
-                nombre_de_champs += 1
-                for widget in new_champs_window.winfo_children():
-                    widget.destroy()
-                creation_zone_frame = ttk.Frame(new_champs_window)
-                canvas = tk.Canvas(creation_zone_frame)
-                scrollbar = ttk.Scrollbar(creation_zone_frame, orient="vertical", command=canvas.yview)
-                scrollable_frame = ttk.Frame(canvas)
-                scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-                canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-                canvas.configure(yscrollcommand=scrollbar.set)
-                for index_zone_de_gestion_nouveau_champs in range(
-                        int(nombre_de_zone_de_gestion)):
-                    zone_de_gestion_frame = ttk.LabelFrame(scrollable_frame,
-                                                           text="Zone de gestion " + str(
-                                                               index_zone_de_gestion_nouveau_champs + 1))
-                    taux_matiere_organique_label = ttk.Label(zone_de_gestion_frame,
-                                                             text="Taux matière organique (en %): ")
-                    taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
-                    municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
-                    municipalite_combobox = ttk.Combobox(zone_de_gestion_frame)
-                    serie_de_sol_label = ttk.Label(zone_de_gestion_frame, text="Série de sol: ")
-                    serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame)
-                    classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
-                    classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame)
-                    masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
-                                                                text="Masse volumique apparente (g/cm3): ")
-                    masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
-                    profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur (cm): ")
-                    profondeur_entry = ttk.Entry(zone_de_gestion_frame)
-                    superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
-                                                            text="Superficie de la zone (ha): ")
-                    superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
-                    taux_matiere_organique_label.grid(row=0, column=0)
-                    taux_matiere_organique_entry.grid(row=0, column=1)
-                    municipalite_label.grid(row=1, column=0)
-                    municipalite_combobox.grid(row=1, column=1)
-                    serie_de_sol_label.grid(row=2, column=0)
-                    serie_de_sol_combobox.grid(row=2, column=1)
-                    classe_de_drainage_label.grid(row=3, column=0)
-                    classe_de_drainage_combobox.grid(row=3, column=1)
-                    masse_volumique_apparente_label.grid(row=4, column=0)
-                    masse_volumique_apparente_entry.grid(row=4, column=1)
-                    profondeur_label.grid(row=5, column=0)
-                    profondeur_entry.grid(row=5, column=1)
-                    superficie_de_la_zone_label.grid(row=6, column=0)
-                    superficie_de_la_zone_entry.grid(row=6, column=1)
+                if nombre_de_zone_de_gestion.isdigit() and int(nombre_de_zone_de_gestion) > 0:
+                    global information_champs
+                    information_champs.append({"nom_du_champs": nom_du_champs,
+                                               "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion,
+                                               "information_zone_de_gestion": []})
+                    global nombre_de_champs
+                    nombre_de_champs += 1
+                    global nombre_de_champs_modifie
+                    nombre_de_champs_modifie = True
+                    global information_champs_modifie
+                    information_champs_modifie = True
 
-                    zone_de_gestion_frame.pack()
+                    for widget in new_champs_window.winfo_children():
+                        widget.destroy()
+                    creation_zone_frame = ttk.Frame(new_champs_window)
+                    canvas = tk.Canvas(creation_zone_frame)
+                    scrollbar = ttk.Scrollbar(creation_zone_frame, orient="vertical", command=canvas.yview)
+                    scrollable_frame = ttk.Frame(canvas)
+                    scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+                    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+                    canvas.configure(yscrollcommand=scrollbar.set)
+                    for index_zone_de_gestion_nouveau_champs in range(
+                            int(nombre_de_zone_de_gestion)):
+                        zone_de_gestion_frame = ttk.LabelFrame(scrollable_frame,
+                                                               text="Zone de gestion " + str(
+                                                                   index_zone_de_gestion_nouveau_champs + 1))
+                        taux_matiere_organique_label = ttk.Label(zone_de_gestion_frame,
+                                                                 text="Taux matière organique (en %): ")
+                        taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
+                        municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
+                        municipalite_combobox = ttk.Combobox(zone_de_gestion_frame)
+                        serie_de_sol_label = ttk.Label(zone_de_gestion_frame, text="Série de sol: ")
+                        serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame)
+                        classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
+                        classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame)
+                        masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
+                                                                    text="Masse volumique apparente (g/cm3): ")
+                        masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
+                        profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur (cm): ")
+                        profondeur_entry = ttk.Entry(zone_de_gestion_frame)
+                        superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
+                                                                text="Superficie de la zone (ha): ")
+                        superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
+                        taux_matiere_organique_label.grid(row=0, column=0)
+                        taux_matiere_organique_entry.grid(row=0, column=1)
+                        municipalite_label.grid(row=1, column=0)
+                        municipalite_combobox.grid(row=1, column=1)
+                        serie_de_sol_label.grid(row=2, column=0)
+                        serie_de_sol_combobox.grid(row=2, column=1)
+                        classe_de_drainage_label.grid(row=3, column=0)
+                        classe_de_drainage_combobox.grid(row=3, column=1)
+                        masse_volumique_apparente_label.grid(row=4, column=0)
+                        masse_volumique_apparente_entry.grid(row=4, column=1)
+                        profondeur_label.grid(row=5, column=0)
+                        profondeur_entry.grid(row=5, column=1)
+                        superficie_de_la_zone_label.grid(row=6, column=0)
+                        superficie_de_la_zone_entry.grid(row=6, column=1)
 
-                creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame,
-                                                             command=lambda: add_new_zone_tab())
-                creation_zone_de_gestion_bouton.pack()
-                canvas.pack(side="left", fill="x", expand=True)
-                scrollbar.pack(side="right", fill="y")
-                creation_zone_frame.pack()
+                        zone_de_gestion_frame.pack()
+
+                    creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame, text="Créer",
+                                                                 command=lambda: add_new_zone_tab())
+                    creation_zone_de_gestion_bouton.pack()
+                    canvas.pack(side="left", fill="x", expand=True)
+                    scrollbar.pack(side="right", fill="y")
+                    creation_zone_frame.pack()
+                else:
+                    message = "L'entrée \"Nombre de zone de gestion\" est invalide. Elle doit être un nombre naturel plus grand que 0."
+                    messagebox.showwarning("Warning", message)
+                    new_champs_window.focus()
 
                 def add_new_zone_tab():
+                    entree_invalide_liste = []
+                    global nomde_de_champs
+                    global information_champs
+                    index_zone = 0
                     for scrollable_frame_widget in scrollable_frame.winfo_children():
                         if isinstance(scrollable_frame_widget, ttk.LabelFrame):
                             grid_slave0_1 = scrollable_frame_widget.grid_slaves(row=0, column=1)
                             for entry in grid_slave0_1:
                                 taux_matiere_organique = entry.get()
+                                if not util.is_decimal_number(taux_matiere_organique) or float(
+                                        taux_matiere_organique) < 0:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone+1),
+                                         "\"Taux de matière organique\" doit être un entier positif"))
                             grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
                             for entry in grid_slave1_1:
+                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 municipalite = entry.get()
                             grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
+                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 serie_de_sol = entry.get()
                             grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
+                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 classe_de_drainage = entry.get()
                             grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
                             for entry in grid_slave4_1:
                                 masse_volumique_apparente = entry.get()
+                                if not util.is_decimal_number(masse_volumique_apparente) or float(
+                                        masse_volumique_apparente) < 0:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone+1),
+                                         "\"Masse volumique apparente\" doit être un entier positif"))
                             grid_slave5_1 = scrollable_frame_widget.grid_slaves(row=5, column=1)
                             for entry in grid_slave5_1:
                                 profondeur = entry.get()
+                                if not util.is_decimal_number(profondeur) or float(
+                                        profondeur) < 0:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone+1),
+                                         "\"Profondeur\" doit être un entier positif"))
                             grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
                             for entry in grid_slave6_1:
                                 superficie_de_la_zone = entry.get()
-                            global information_champs
+                                if not util.is_decimal_number(superficie_de_la_zone) or float(
+                                        superficie_de_la_zone) < 0:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone+1),
+                                         "\"Superficie de la zone\" doit être un entier positif"))
                             information_champs[len(information_champs) - 1]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
@@ -498,39 +555,49 @@ def run_gui(frame):
                                  "masse_volumique_apparente": masse_volumique_apparente,
                                  "profondeur": profondeur,
                                  "superficie_de_la_zone": superficie_de_la_zone})
-                            sauvegarder_attributs_entreprise_apres_modification()
-                    new_champs_window.destroy()
-                    for simulation_frame in simulation_notebook.winfo_children():
-                        if len(simulation_frame.winfo_children()) == 0:
-                            pass
-                        else:
-                            notebook = simulation_frame.winfo_children()[0]
-                            for champs_frame in notebook.winfo_children():
-                                if len(champs_frame.winfo_children()) == 0:
-                                    champs_frame.destroy()
-                                else:
-                                    pass
-                            tab = ttk.Frame(notebook)
-                            notebook.add(tab, text=nom_du_champs)
-                            zone_notebook = ttk.Notebook(tab)
-                            set_up_champs(zone_notebook, nombre_de_zone_de_gestion, notebook,
-                                          simulation_notebook.index(simulation_frame))
-                            new_tab = ttk.Frame(notebook)
-                            notebook.add(new_tab, text="+")
-                    rechauffement_champs_label_frame = ttk.LabelFrame(
-                        donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0],
-                        text=nom_du_champs)
-                    rechauffement_champs_label_frame.pack()
-                    index = 0
-                    while index < int(nombre_de_zone_de_gestion):
-                        rechauffement_zone_label_frame = ttk.LabelFrame(rechauffement_champs_label_frame,
-                                                                        text="Zone de gestion " + str(index + 1))
-                        rechauffement_zone_label_frame.pack()
-                        if show_regie_historique:
-                            add_regies_historiques(rechauffement_zone_label_frame)
-                        else:
-                            ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame)
-                        index += 1
+                        index_zone += 1
+                    if len(entree_invalide_liste) == 0:
+                        sauvegarder_attributs_entreprise_apres_modification()
+                        new_champs_window.destroy()
+                        for simulation_frame in simulation_notebook.winfo_children():
+                            if len(simulation_frame.winfo_children()) == 0:
+                                pass
+                            else:
+                                notebook = simulation_frame.winfo_children()[0]
+                                for champs_frame in notebook.winfo_children():
+                                    if len(champs_frame.winfo_children()) == 0:
+                                        champs_frame.destroy()
+                                    else:
+                                        pass
+                                tab = ttk.Frame(notebook)
+                                notebook.add(tab, text=nom_du_champs)
+                                zone_notebook = ttk.Notebook(tab)
+                                set_up_champs(zone_notebook, nombre_de_zone_de_gestion, notebook)
+                                new_tab = ttk.Frame(notebook)
+                                notebook.add(new_tab, text="+")
+                        rechauffement_champs_label_frame = ttk.LabelFrame(
+                            donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0],
+                            text=nom_du_champs)
+                        rechauffement_champs_label_frame.pack()
+                        index_zone = 0
+                        while index_zone < int(nombre_de_zone_de_gestion):
+                            rechauffement_zone_label_frame = ttk.LabelFrame(rechauffement_champs_label_frame,
+                                                                            text="Zone de gestion " + str(
+                                                                                index_zone + 1))
+                            rechauffement_zone_label_frame.pack()
+                            if show_regie_historique:
+                                add_regies_historiques(rechauffement_zone_label_frame)
+                            else:
+                                ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame)
+                            index_zone += 1
+                    else:
+                        information_champs[nombre_de_champs - 1]["information_zone_de_gestion"] = []
+                        message = ""
+                        for entree_invalide in entree_invalide_liste:
+                            message = message + "Dans le " + entree_invalide[0] + " et la " + entree_invalide[
+                                1] + " l'entrée " + entree_invalide[2] + "\n"
+                        messagebox.showwarning("Warning", message)
+                        new_champs_window.focus()
 
             nouveau_champs_frame = ttk.Frame(new_champs_window)
             nom_du_champs_label = ttk.Label(nouveau_champs_frame, text="Nom du champs: ")
@@ -542,12 +609,12 @@ def run_gui(frame):
             nom_du_champs_entry.grid(row=0, column=1)
             nombre_de_zone_de_gestion_label.grid(row=1, column=0)
             nombre_de_zone_de_gestion_entry.grid(row=1, column=1)
-            creer_nouveau_champs_bouton = ttk.Button(nouveau_champs_frame,
+            creer_nouveau_champs_bouton = ttk.Button(nouveau_champs_frame, text="Créer",
                                                      command=creation_des_zone_de_gestion_du_nouveau_champs)
             creer_nouveau_champs_bouton.grid(row=3, column=0, columnspan=2)
             nouveau_champs_frame.pack()
 
-        def set_up_champs(zone_notebook, nombre_de_zone, champs_notebook, simulation_index):
+        def set_up_champs(zone_notebook, nombre_de_zone, champs_notebook):
 
             def add_new_zone_de_gestion_tab(event):
                 clicked_tab = zone_notebook.tk.call(zone_notebook._w, "identify", "tab", event.x, event.y)
@@ -571,9 +638,12 @@ def run_gui(frame):
                     donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0].winfo_children()[
                         champs_index].winfo_children()[index_clicked_tab].destroy()
                     zone_index = index_clicked_tab
-                    while zone_index < len(donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0].winfo_children()[
-                        champs_index].winfo_children()):
-                        donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0].winfo_children()[champs_index].winfo_children()[zone_index].configure(text="Zone de gestion "+ str(zone_index + 1))
+                    while zone_index < len(donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[
+                                               0].winfo_children()[
+                                               champs_index].winfo_children()):
+                        donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0].winfo_children()[
+                            champs_index].winfo_children()[zone_index].configure(
+                            text="Zone de gestion " + str(zone_index + 1))
                         zone_index += 1
                     for simulation_frame in simulation_notebook.winfo_children():
                         if len(simulation_frame.winfo_children()) == 0:
@@ -592,7 +662,15 @@ def run_gui(frame):
                                 current_index += 1
 
             def set_up_new_zone_de_gestion(champs_index):
+                global information_champs
+
+                def remise_a_etat_initial():
+                    information_champs[champs_index]["nombre_de_zone_de_gestion"] = str(
+                        int(information_champs[champs_index]["nombre_de_zone_de_gestion"]) - 1)
+                    new_zone_window.destroy()
+
                 new_zone_window = tk.Toplevel()
+                new_zone_window.protocol("WM_DELETE_WINDOW", remise_a_etat_initial)
                 creation_zone_frame = ttk.Frame(new_zone_window)
                 canvas = tk.Canvas(creation_zone_frame)
                 scrollbar = ttk.Scrollbar(creation_zone_frame, orient="vertical", command=canvas.yview)
@@ -600,7 +678,6 @@ def run_gui(frame):
                 scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
                 canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
                 canvas.configure(yscrollcommand=scrollbar.set)
-                global information_champs
                 zone_de_gestion_frame = ttk.LabelFrame(scrollable_frame,
                                                        text="Zone de gestion " + str(
                                                            information_champs[champs_index][
@@ -639,7 +716,7 @@ def run_gui(frame):
 
                 zone_de_gestion_frame.pack()
 
-                creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame,
+                creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame, text="Créer",
                                                              command=lambda: add_new_tab())
                 creation_zone_de_gestion_bouton.pack()
                 canvas.pack(side="left", fill="x", expand=True)
@@ -647,31 +724,59 @@ def run_gui(frame):
                 creation_zone_frame.pack()
 
                 def add_new_tab():
-                    index = 0
+                    entree_invalide_liste = []
+                    global information_champs
+                    index_zone = 0
                     for scrollable_frame_widget in scrollable_frame.winfo_children():
                         if isinstance(scrollable_frame_widget, ttk.LabelFrame):
                             grid_slave0_1 = scrollable_frame_widget.grid_slaves(row=0, column=1)
                             for entry in grid_slave0_1:
                                 taux_matiere_organique = entry.get()
+                                if not util.is_decimal_number(taux_matiere_organique) or float(
+                                        taux_matiere_organique) < 0:
+                                    entree_invalide_liste.append(
+                                        (information_champs[champs_index]["nom_du_champs"],
+                                         "Zone de gestion " + str(information_champs[champs_index]["nombre_de_zone_de_gestion"]),
+                                         "\"Taux de matière organique\" doit être un entier positif"))
                             grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
                             for entry in grid_slave1_1:
+                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 municipalite = entry.get()
                             grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
+                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 serie_de_sol = entry.get()
                             grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
+                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 classe_de_drainage = entry.get()
                             grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
                             for entry in grid_slave4_1:
                                 masse_volumique_apparente = entry.get()
+                                if not util.is_decimal_number(masse_volumique_apparente) or float(
+                                        masse_volumique_apparente) < 0:
+                                    entree_invalide_liste.append(
+                                        (information_champs[champs_index]["nom_du_champs"],
+                                         "Zone de gestion " + str(information_champs[champs_index]["nombre_de_zone_de_gestion"]),
+                                         "\"Masse volumique apparente\" doit être un entier positif"))
                             grid_slave5_1 = scrollable_frame_widget.grid_slaves(row=5, column=1)
                             for entry in grid_slave5_1:
                                 profondeur = entry.get()
+                                if not util.is_decimal_number(profondeur) or float(
+                                        profondeur) < 0:
+                                    entree_invalide_liste.append(
+                                        (information_champs[champs_index]["nom_du_champs"],
+                                         "Zone de gestion " + str(information_champs[champs_index]["nombre_de_zone_de_gestion"]),
+                                         "\"Profondeur\" doit être un entier positif"))
                             grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
                             for entry in grid_slave6_1:
                                 superficie_de_la_zone = entry.get()
-                            global information_champs
+                                if not util.is_decimal_number(superficie_de_la_zone) or float(
+                                        superficie_de_la_zone) < 0:
+                                    entree_invalide_liste.append(
+                                        (information_champs[champs_index]["nom_du_champs"],
+                                         "Zone de gestion " + str(information_champs[champs_index]["nombre_de_zone_de_gestion"]),
+                                         "\"Superficie de la zone\" doit être un entier positif"))
                             information_champs[champs_index]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
@@ -680,39 +785,48 @@ def run_gui(frame):
                                  "masse_volumique_apparente": masse_volumique_apparente,
                                  "profondeur": profondeur,
                                  "superficie_de_la_zone": superficie_de_la_zone})
-                        index += 1
-                    sauvegarder_attributs_entreprise_apres_modification()
-                    rechauffement_champs_label_frame = \
-                    donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0].winfo_children()[
-                        champs_index]
-                    rechauffement_champs_new_zone_label_frame = ttk.LabelFrame(rechauffement_champs_label_frame,
-                                                                               text="Zone de gestion " + str(len(
-                                                                                   rechauffement_champs_label_frame.winfo_children()) + 1))
-                    rechauffement_champs_new_zone_label_frame.pack()
-                    if show_regie_historique:
-                        add_regies_historiques(rechauffement_champs_new_zone_label_frame)
-                    else:
-                        ajouter_une_annee_a_la_rotation(rechauffement_champs_new_zone_label_frame)
-                    new_zone_window.destroy()
-
-                    index = 0
-                    for simulation_frame in simulation_notebook.winfo_children():
-                        if len(simulation_frame.winfo_children()) == 0:
-                            pass
+                        index_zone += 1
+                    if len(entree_invalide_liste) == 0:
+                        sauvegarder_attributs_entreprise_apres_modification()
+                        rechauffement_champs_label_frame = \
+                            donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0].winfo_children()[
+                                champs_index]
+                        rechauffement_champs_new_zone_label_frame = ttk.LabelFrame(rechauffement_champs_label_frame,
+                                                                                   text="Zone de gestion " + str(len(
+                                                                                       rechauffement_champs_label_frame.winfo_children()) + 1))
+                        rechauffement_champs_new_zone_label_frame.pack()
+                        if show_regie_historique:
+                            add_regies_historiques(rechauffement_champs_new_zone_label_frame)
                         else:
-                            notebook = simulation_frame.winfo_children()[0]
-                            champs_courant_zone_notebook = \
-                                notebook.winfo_children()[champs_index].winfo_children()[0]
-                            champs_courant_zone_notebook.winfo_children()[
-                                len(champs_courant_zone_notebook.winfo_children()) - 1].destroy()
-                            tab = ttk.Frame(champs_courant_zone_notebook)
-                            champs_courant_zone_notebook.add(tab, text="Zone de gestion " + str(
-                                len(champs_courant_zone_notebook.winfo_children())))
-                            set_up_regies_projections(tab)
+                            ajouter_une_annee_a_la_rotation(rechauffement_champs_new_zone_label_frame)
+                        new_zone_window.destroy()
 
-                            new_zone_tab = ttk.Frame(champs_courant_zone_notebook)
-                            champs_courant_zone_notebook.add(new_zone_tab, text="+")
-                        index += 1
+                        index = 0
+                        for simulation_frame in simulation_notebook.winfo_children():
+                            if len(simulation_frame.winfo_children()) == 0:
+                                pass
+                            else:
+                                notebook = simulation_frame.winfo_children()[0]
+                                champs_courant_zone_notebook = \
+                                    notebook.winfo_children()[champs_index].winfo_children()[0]
+                                champs_courant_zone_notebook.winfo_children()[
+                                    len(champs_courant_zone_notebook.winfo_children()) - 1].destroy()
+                                tab = ttk.Frame(champs_courant_zone_notebook)
+                                champs_courant_zone_notebook.add(tab, text="Zone de gestion " + str(
+                                    len(champs_courant_zone_notebook.winfo_children())))
+                                set_up_regies_projections(tab)
+
+                                new_zone_tab = ttk.Frame(champs_courant_zone_notebook)
+                                champs_courant_zone_notebook.add(new_zone_tab, text="+")
+                            index += 1
+                    else:
+                        information_champs[champs_index]["information_zone_de_gestion"].pop(len(information_champs[champs_index]["information_zone_de_gestion"])-1)
+                        message = ""
+                        for entree_invalide in entree_invalide_liste:
+                            message = message + "Dans le " + entree_invalide[0] + " et la " + entree_invalide[
+                                1] + " l'entrée " + entree_invalide[2] + "\n"
+                        messagebox.showwarning("Warning", message)
+                        new_zone_window.focus()
 
             zone_notebook.bind("<Button-1>", add_new_zone_de_gestion_tab)
             zone_notebook.bind("<Button-3>", delete_zone_de_gestion_tab)
@@ -1057,6 +1171,7 @@ def run_gui(frame):
                 "annee_finale_projection": int(duree_simulation[index_simulation]["annee_projection_initiale"]) + int(
                     duree_simulation[index_simulation]["duree_projection"]),
                 "entreprise_agricole": entreprise_agricole}
+            print(simulation)
             return simulation
 
         def get_regies(regies_frame):
