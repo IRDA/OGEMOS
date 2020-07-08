@@ -81,8 +81,10 @@ def __zone_de_gestion_mapping(data):
         classe_de_drainage = zone_de_gestion["classe_de_drainage"]
         masse_volumique_apparente = zone_de_gestion["masse_volumique_apparente"]
         profondeur = zone_de_gestion["profondeur"]
-        regies_sol_et_culture_projection = __regie_sol_et_culture_mapping(zone_de_gestion["regies_sol_et_culture_projection"])
-        regies_sol_et_culture_historique = __regie_sol_et_culture_mapping(zone_de_gestion["regies_sol_et_culture_historique"])
+        regies_sol_et_culture_projection = __regie_sol_et_culture_mapping(
+            zone_de_gestion["regies_sol_et_culture_projection"], municipalite)
+        regies_sol_et_culture_historique = __regie_sol_et_culture_mapping(
+            zone_de_gestion["regies_sol_et_culture_historique"], municipalite)
 
         try:
             assert serie_de_sol in series_de_sol_supportees
@@ -137,11 +139,12 @@ def __zone_de_gestion_mapping(data):
 
         liste_zone_de_gestion.append(
             ZoneDeGestion(taux_matiere_organique, municipalite, serie_de_sol, classe_de_drainage,
-                          masse_volumique_apparente, profondeur, superficie_de_la_zone, regies_sol_et_culture_projection, regies_sol_et_culture_historique))
+                          masse_volumique_apparente, profondeur, superficie_de_la_zone,
+                          regies_sol_et_culture_projection, regies_sol_et_culture_historique))
     return liste_zone_de_gestion
 
 
-def __regie_sol_et_culture_mapping(data):
+def __regie_sol_et_culture_mapping(data, municipalite):
     liste_regies = []
     cultures_fourrageres = get_cultures_fourrageres()
     iterateur_annee = 0
@@ -150,11 +153,14 @@ def __regie_sol_et_culture_mapping(data):
         if data[iterateur_annee]["culture_principale"] in cultures_fourrageres:
             culture_annee_suivante = data[iterateur_annee + 1]["culture_principale"]
             if iterateur_annee == postion_derniere_annee_de_simulation or culture_annee_suivante not in cultures_fourrageres:
-                culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], True)
+                culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], True,
+                                                                  municipalite)
             else:
-                culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], False)
+                culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], False,
+                                                                  municipalite)
         else:
-            culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], False)
+            culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], False,
+                                                              municipalite)
         culture_secondaire = __culture_secondaire_mapping(data[iterateur_annee]["culture_secondaire"])
         amendements = __amendements_mapping(data[iterateur_annee]["amendements"])
         travail_du_sol = __travail_du_sol_mapping(data[iterateur_annee]["travail_du_sol"])
@@ -197,9 +203,24 @@ def __amendements_mapping(data):
     return Amendements(liste_amendement)
 
 
-def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourragere):
+def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourragere, municipalite):
+    zone_patate = ["Pomme de terre"]
+    zone_mais = ["Maïs grain", "Soya"]
+    zone_foin = ["Avoine", "Blé", "Canola", "Maïs fourrager", "Orge", "Pâturage - en production",
+                 "Pâturage - fin de rotation", "Prairie - fin de rotation", "Prairie/Pâturage - entretien",
+                 "Prairie/Pâturage - semis", "Triticale", "Seigle"]
     culture_principale = data["culture_principale"]
-    rendement = data["rendement"]
+    if data["rendement"] is None:
+        rendements = get_rendement_par_municipalite(municipalite)
+        if culture_principale in zone_patate:
+            rendement = rendements.rendement_zone_patate
+        elif culture_principale in zone_mais:
+            rendement = rendements.rendement_zone_mais
+        else:
+            rendement = rendements.rendement_zone_foin
+
+    else:
+        rendement = data["rendement"]
     produit_non_recolte = data["produit_non_recolte"]
     proportion_tige_exporte = data["proportion_tige_exporte"]
     taux_matiere_seche = data["taux_matiere_seche"]

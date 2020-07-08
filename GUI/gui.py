@@ -708,7 +708,7 @@ def run_gui(frame):
                             tab = ttk.Frame(champs_courant_zone_notebook)
                             champs_courant_zone_notebook.add(tab, text="Zone de gestion " + str(
                                 len(champs_courant_zone_notebook.winfo_children())))
-                            set_up_regies_projections(tab, index)
+                            set_up_regies_projections(tab)
 
                             new_zone_tab = ttk.Frame(champs_courant_zone_notebook)
                             champs_courant_zone_notebook.add(new_zone_tab, text="+")
@@ -721,13 +721,13 @@ def run_gui(frame):
             for zone in range(int(nombre_de_zone)):
                 zone_tab = ttk.Frame(zone_notebook)
                 zone_notebook.add(zone_tab, text="Zone de gestion " + str(zone + 1))
-                set_up_regies_projections(zone_tab, simulation_index)
+                set_up_regies_projections(zone_tab)
 
             new_tab = ttk.Frame(zone_notebook)
             zone_notebook.add(new_tab, text="+")
             zone_notebook.pack()
 
-        def set_up_regies_projections(zone_tab, index):
+        def set_up_regies_projections(zone_tab):
             projection_frame = ttk.LabelFrame(zone_tab, text="Régies de la projection")
             canvas_projection = tk.Canvas(projection_frame)
             scrollbar_projection = ttk.Scrollbar(projection_frame, orient="vertical",

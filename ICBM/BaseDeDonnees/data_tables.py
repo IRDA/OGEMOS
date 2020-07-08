@@ -42,7 +42,7 @@ class CoefficientDesResidusDeCulture(Base):
 class CoefficientDesAmendements(Base):
     __tablename__ = 'CoefficientAmendements'
     amendement = Column(String, primary_key=True)
-    matiere_seche = Column(Float) #% sur base humide
+    matiere_seche = Column(Float)  # % sur base humide
     carbon_nitrogen = Column(Float)
     nitrogen_total = Column(Float)
     coefficient_humidification = Column(Float)
@@ -76,3 +76,11 @@ class CoefficientDesCulturesSecondaires(Base):
     taux_matiere_seche = Column(Float)
     indice_de_recolte = Column(Float)
     biomasse_aerienne_sur_racinaire = Column(Float)
+
+
+class TableDesRendements(Base):
+    __tablename__ = 'TableDesRendements'
+    municipalite = Column(String, primary_key=True)
+    rendement_zone_mais = Column(Float)
+    rendement_zone_patate = Column(Float)
+    rendement_zone_foin = Column(Float)
