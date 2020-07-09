@@ -7,3 +7,4 @@ def is_decimal_number(string):
             return True
         else:
             return False
+    return False
