@@ -124,3 +124,12 @@ def get_rendement_par_municipalite(municipalite):
     query_result = session.query(TableDesRendements).filter(TableDesRendements.municipalite == municipalite).one()
     session.close()
     return query_result
+
+
+def get_municipalites_supportees():
+    session = Session()
+    query_result = []
+    for municipalite in session.query(TableDesRendements.municipalite).all():
+        query_result.append(municipalite.municipalite)
+    session.close()
+    return query_result

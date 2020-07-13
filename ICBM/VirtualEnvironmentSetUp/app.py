@@ -11,6 +11,55 @@ def add():
     return jsonify(response)
 
 
+@app.route('/api/get-municipalite', methods=['GET'])
+def get_municipalite():
+    response = get_municipalites_supportees()
+    response = {"municipalites_supportees": response}
+    return jsonify(response)
+
+
+@app.route('/api/get-series_de_sol', methods=['GET'])
+def get_serie_de_sol():
+    response = get_series_de_sol_supportees()
+    response = {"series_de_sol_supportees": response}
+    return jsonify(response)
+
+
+@app.route('/api/get-classe_de_drainage', methods=['GET'])
+def get_classe_de_drainage():
+    response = get_classes_de_drainage_supportees()
+    response = {"classes_de_drainage_supportees": response}
+    return jsonify(response)
+
+
+@app.route('/api/get-culture_principale', methods=['GET'])
+def get_culture_principale():
+    response = get_cultures_principales_supportees()
+    response = {"cultures_principales_supportees": response}
+    return jsonify(response)
+
+
+@app.route('/api/get-travail_du_sol', methods=['GET'])
+def get_travail_du_sol():
+    response = get_types_travail_du_sol_supportes()
+    response = {"types_travail_du_sol_supportes": response}
+    return jsonify(response)
+
+
+@app.route('/api/get-culture_secondaire', methods=['GET'])
+def get_culture_secondaire():
+    response = get_cultures_secondaires_supportees()
+    response = {"cultures_secondaires_supportees": response}
+    return jsonify(response)
+
+
+@app.route('/api/get-amendement', methods=['GET'])
+def get_amendement():
+    response = get_amendements_supportees()
+    response = {"amendements_supportees": response}
+    return jsonify(response)
+
+
 def __launch_icbm_simulation(data):
     gestion_simulation = __simulation_mapping(data["simulations"])
     return gestion_simulation.generer_les_bilans_pour_les_simulations_de_l_entreprise_agricole()

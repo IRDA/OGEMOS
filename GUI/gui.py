@@ -5,11 +5,68 @@ from tkinter import messagebox
 import json
 import copy
 import GUI.fonction_utilitaire as util
+import subprocess
+import psutil
+import requests
+
+
+def kill(proc_pid):
+    process = psutil.Process(proc_pid)
+    for proc in process.children(recursive=True):
+        proc.kill()
+    process.kill()
+
+
+sp = subprocess.Popen(
+    "cd ../ICBM/VirtualEnvironmentSetUp/venv/scripts & activate & cd ../.. & set FLASK_ENV=development & set "
+    "FLASK_APP=app.py & flask run",
+    shell=True)
+
+# TODO: sort the lists by alphabetical order
+global municipalites_supportees
+municipalites_supportees_temporaire = requests.get("http://localhost:5000/api/get-municipalite")
+municipalites_supportees = municipalites_supportees_temporaire.json()
+
+global series_de_sol_supportees
+series_de_sol_supportees_temporaire = requests.get("http://localhost:5000/api/get-series_de_sol")
+series_de_sol_supportees = series_de_sol_supportees_temporaire.json()
+
+global classes_de_drainage_supportees
+classe_de_drainage_supportees_temporaire = requests.get("http://localhost:5000/api/get-classe_de_drainage")
+classes_de_drainage_supportees = classe_de_drainage_supportees_temporaire.json()
+
+global cultures_principales_supportees
+culture_principale_supportees_temporaire = requests.get("http://localhost:5000/api/get-culture_principale")
+cultures_principales_supportees = culture_principale_supportees_temporaire.json()
+
+global types_travail_du_sol_supportes
+travail_du_sol_supportees_temporaire = requests.get("http://localhost:5000/api/get-travail_du_sol")
+types_travail_du_sol_supportes = travail_du_sol_supportees_temporaire.json()
+
+global cultures_secondaires_supportees
+culture_secondaire_supportees_temporaire = requests.get("http://localhost:5000/api/get-culture_secondaire")
+cultures_secondaires_supportees = culture_secondaire_supportees_temporaire.json()
+
+global amendements_supportees
+amendements_supportees_temporaire = requests.get("http://localhost:5000/api/get-amendement")
+amendements_supportees = amendements_supportees_temporaire.json()
+
+
+
+
 
 root = tk.Tk()
 root.title("OGEMOS")
 mainframe = ttk.Frame(root)
 mainframe.grid(row=0, column=0)
+
+
+def closing_root_protocol():
+    kill(sp.pid)
+    root.destroy()
+
+
+root.protocol("WM_DELETE_WINDOW", closing_root_protocol)
 
 
 def run_gui(frame):
@@ -120,21 +177,38 @@ def run_gui(frame):
                                                                   "\"Taux de matière organique\" doit être un réel positif"))
                             grid_slave1_1 = champs_frame_widget.grid_slaves(row=1, column=1)
                             for entry in grid_slave1_1:
-                                # TODO: ajouter la validation après avoir call l'API pour les données
                                 municipalite = entry.get()
+                                global municipalites_supportees
+                                if municipalite not in municipalites_supportees:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone + 1),
+                                         "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = champs_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
-                                # TODO: ajouter la validation après avoir call l'API pour les données
                                 serie_de_sol = entry.get()
+                                global series_de_sol_supportees
+                                if serie_de_sol not in series_de_sol_supportees:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone + 1),
+                                         "\"Série de sol\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = champs_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
-                                # TODO: ajouter la validation après avoir call l'API pour les données
                                 classe_de_drainage = entry.get()
+                                global classes_de_drainage_supportees
+                                if classe_de_drainage not in classes_de_drainage_supportees:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone + 1),
+                                         "\"Classe de drainage\" doit être parmis les choix disponibles"))
                             grid_slave4_1 = champs_frame_widget.grid_slaves(row=4, column=1)
                             for entry in grid_slave4_1:
                                 masse_volumique_apparente = entry.get()
-                                if (not util.is_decimal_number(masse_volumique_apparente) and masse_volumique_apparente != "") or (util.is_decimal_number(masse_volumique_apparente) and float(
-                                        masse_volumique_apparente) < 0):
+                                if (not util.is_decimal_number(
+                                        masse_volumique_apparente) and masse_volumique_apparente != "") or (
+                                        util.is_decimal_number(masse_volumique_apparente) and float(
+                                    masse_volumique_apparente) < 0):
                                     entree_invalide_liste.append(
                                         (information_champs[index]["nom_du_champs"],
                                          "Zone de gestion " + str(
@@ -201,11 +275,14 @@ def run_gui(frame):
                 taux_matiere_organique_label = ttk.Label(zone_de_gestion_frame, text="Taux matière organique (en %): ")
                 taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
                 municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
-                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame)
+                global municipalites_supportees
+                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees["municipalites_supportees"])
                 serie_de_sol_label = ttk.Label(zone_de_gestion_frame, text="Série de sol: ")
-                serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame)
+                global series_de_sol_supportees
+                serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees["series_de_sol_supportees"])
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
-                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame)
+                global classes_de_drainage_supportees
+                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees["classes_de_drainage_supportees"])
                 masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                             text="Masse volumique apparente (g/cm3): ")
                 masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
@@ -455,11 +532,14 @@ def run_gui(frame):
                                                                  text="Taux matière organique (en %): ")
                         taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
                         municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
-                        municipalite_combobox = ttk.Combobox(zone_de_gestion_frame)
+                        global municipalites_supportees
+                        municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees["municipalites_supportees"])
                         serie_de_sol_label = ttk.Label(zone_de_gestion_frame, text="Série de sol: ")
-                        serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame)
+                        global series_de_sol_supportees
+                        serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees["series_de_sol_supportees"])
                         classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
-                        classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame)
+                        global classes_de_drainage_supportees
+                        classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees["classes_de_drainage_supportees"])
                         masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                                     text="Masse volumique apparente (g/cm3): ")
                         masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
@@ -514,21 +594,38 @@ def run_gui(frame):
                                          "\"Taux de matière organique\" doit être un réel positif"))
                             grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
                             for entry in grid_slave1_1:
-                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 municipalite = entry.get()
+                                global municipalites_supportees
+                                if municipalite not in municipalites_supportees:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone + 1),
+                                         "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
-                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 serie_de_sol = entry.get()
+                                global series_de_sol_supportees
+                                if serie_de_sol not in series_de_sol_supportees:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone + 1),
+                                         "\"Série de sol\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
-                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 classe_de_drainage = entry.get()
+                                global classes_de_drainage_supportees
+                                if classe_de_drainage not in classes_de_drainage_supportees:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone + 1),
+                                         "\"Classe de drainage\" doit être parmis les choix disponibles"))
                             grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
                             for entry in grid_slave4_1:
                                 masse_volumique_apparente = entry.get()
-                                if (not util.is_decimal_number(masse_volumique_apparente) and masse_volumique_apparente != "") or (util.is_decimal_number(masse_volumique_apparente) and float(
-                                        masse_volumique_apparente) < 0):
+                                if (not util.is_decimal_number(
+                                        masse_volumique_apparente) and masse_volumique_apparente != "") or (
+                                        util.is_decimal_number(masse_volumique_apparente) and float(
+                                    masse_volumique_apparente) < 0):
                                     entree_invalide_liste.append(
                                         (information_champs[nombre_de_champs - 1]["nom_du_champs"],
                                          "Zone de gestion " + str(
@@ -693,11 +790,14 @@ def run_gui(frame):
                                                          text="Taux matière organique (en %): ")
                 taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
                 municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
-                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame)
+                global municipalites_supportees
+                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees["municipalites_supportees"])
                 serie_de_sol_label = ttk.Label(zone_de_gestion_frame, text="Série de sol: ")
-                serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame)
+                global series_de_sol_supportees
+                serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees["series_de_sol_supportees"])
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
-                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame)
+                global classes_de_drainage_supportees
+                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees["classes_de_drainage_supportees"])
                 masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                             text="Masse volumique apparente (g/cm3): ")
                 masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
@@ -748,21 +848,38 @@ def run_gui(frame):
                                          "\"Taux de matière organique\" doit être un réel positif"))
                             grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
                             for entry in grid_slave1_1:
-                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 municipalite = entry.get()
+                                global municipalites_supportees
+                                if municipalite not in municipalites_supportees:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone + 1),
+                                         "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
-                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 serie_de_sol = entry.get()
+                                global series_de_sol_supportees
+                                if serie_de_sol not in series_de_sol_supportees:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone + 1),
+                                         "\"Série de sol\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
-                                # TODO: Ajouter la validation avec les valeurs de l'API
                                 classe_de_drainage = entry.get()
+                                global classes_de_drainage_supportees
+                                if classe_de_drainage not in classes_de_drainage_supportees:
+                                    entree_invalide_liste.append(
+                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone + 1),
+                                         "\"Classe de drainage\" doit être parmis les choix disponibles"))
                             grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
                             for entry in grid_slave4_1:
                                 masse_volumique_apparente = entry.get()
-                                if (not util.is_decimal_number(masse_volumique_apparente) and masse_volumique_apparente != "") or (util.is_decimal_number(masse_volumique_apparente) and float(
-                                        masse_volumique_apparente) < 0):
+                                if (not util.is_decimal_number(
+                                        masse_volumique_apparente) and masse_volumique_apparente != "") or (
+                                        util.is_decimal_number(masse_volumique_apparente) and float(
+                                    masse_volumique_apparente) < 0):
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
                                          "Zone de gestion " + str(
@@ -978,21 +1095,24 @@ def run_gui(frame):
             while annee_courante <= annee_historique_finale:
                 annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(annee_courante))
                 culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
-                culture_principale_combobox = ttk.Combobox(annee_courante_frame)
+                global cultures_principales_supportees
+                culture_principale_combobox = ttk.Combobox(annee_courante_frame, values=cultures_principales_supportees["cultures_principales_supportees"])
                 rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
                 rendement_entry = ttk.Entry(annee_courante_frame)
                 proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté [0-1]: ")
                 proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
                 production_non_recolte_label = ttk.Label(annee_courante_frame, text="Production non récoltée: ")
-                production_non_recolte_combobox = ttk.Combobox(annee_courante_frame)
+                production_non_recolte_combobox = ttk.Combobox(annee_courante_frame, values=["Oui", "Non"])
                 taux_matiere_seche_label = ttk.Label(annee_courante_frame, text="Taux de matière sèche [0-1]: ")
                 taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
                 travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
-                travail_du_sol_combobox = ttk.Combobox(annee_courante_frame)
+                global types_travail_du_sol_supportes
+                travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes["types_travail_du_sol_supportes"])
                 profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maximale (cm): ")
                 profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
                 culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
-                culture_secondaire_combobox = ttk.Combobox(annee_courante_frame)
+                global cultures_secondaires_supportees
+                culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees["cultures_secondaires_supportees"])
                 rendement_culture_secondaire_label = ttk.Label(annee_courante_frame,
                                                                text="Rendement culture secondaire (t/ha): ")
                 rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
@@ -1025,7 +1145,8 @@ def run_gui(frame):
 
         def ajouter_des_amendements(amendement_frame):
             amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
-            amendement_combobox = ttk.Combobox(amendement_frame)
+            global amendements_supportees
+            amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees["amendements_supportees"])
             apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
             apport_amendement_entry = ttk.Entry(amendement_frame)
             ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
@@ -1044,7 +1165,8 @@ def run_gui(frame):
             amendement_frame.grid_slaves(grid_size[1] - 1, grid_size[0] - 1)[0].destroy()
             amendement_frame.grid_slaves(grid_size[1] - 1, grid_size[0] - 2)[0].destroy()
             amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
-            amendement_combobox = ttk.Combobox(amendement_frame)
+            global amendements_supportees
+            amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees["amendements_supportees"])
             apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
             apport_amendement_entry = ttk.Entry(amendement_frame)
             ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
@@ -1065,22 +1187,24 @@ def run_gui(frame):
         def add_regies_projection(scrollable_frame, index):
             annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(index))
             culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
-            culture_principale_combobox = ttk.Combobox(annee_courante_frame)
+            global cultures_principales_supportees
+            culture_principale_combobox = ttk.Combobox(annee_courante_frame, values=cultures_principales_supportees["cultures_principales_supportees"])
             rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
             rendement_entry = ttk.Entry(annee_courante_frame)
             proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté [0-1]: ")
             proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
             production_non_recolte_label = ttk.Label(annee_courante_frame, text="Production non récoltée: ")
-            # TODO: Regarder pour autofill avec les combobox
             production_non_recolte_combobox = ttk.Combobox(annee_courante_frame, values=["Oui", "Non"])
             taux_matiere_seche_label = ttk.Label(annee_courante_frame, text="Taux de matière sèche [0-1]: ")
             taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
             travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
-            travail_du_sol_combobox = ttk.Combobox(annee_courante_frame)
+            global types_travail_du_sol_supportes
+            travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes["types_travail_du_sol_supportes"])
             profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maxiamle (cm): ")
             profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
             culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
-            culture_secondaire_combobox = ttk.Combobox(annee_courante_frame)
+            global cultures_secondaires_supportees
+            culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees["cultures_secondaires_supportees"])
             rendement_culture_secondaire_label = ttk.Label(annee_courante_frame,
                                                            text="Rendement culture secondaire (t/ha): ")
             rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
@@ -1124,6 +1248,7 @@ def run_gui(frame):
             global nombre_de_champs
             entree_invalide_simulation_liste = []
             regies_rechauffement, entree_invalide_liste = get_regies_rechauffement()
+            entree_invalide_simulation_liste.append(entree_invalide_liste)
             champs_notebook = simulation_frame.winfo_children()[0]
             index_champs = 0
             champs_list = []
@@ -1158,8 +1283,10 @@ def run_gui(frame):
                                                  "masse_volumique_apparente": zone["masse_volumique_apparente"],
                                                  "profondeur": zone["profondeur"],
                                                  "superficie_de_la_zone": zone["superficie_de_la_zone"],
-                                                 "regies_sol_et_culture_projection": champs_list[index_champs][index_zone]["regies_projection"],
-                                                 "regies_sol_et_culture_historique": champs_list[index_champs][index_zone]["regies_rechauffement"]})
+                                                 "regies_sol_et_culture_projection":
+                                                     champs_list[index_champs][index_zone]["regies_projection"],
+                                                 "regies_sol_et_culture_historique":
+                                                     champs_list[index_champs][index_zone]["regies_rechauffement"]})
                         index_zone += 1
                     champs_attributs.append({"nom": champs["nom_du_champs"],
                                              "zones_de_gestion": zones_de_gestion})
@@ -1171,7 +1298,8 @@ def run_gui(frame):
                 global duree_simulation
                 simulation = {
                     "annee_initiale_projection": int(duree_simulation[index_simulation]["annee_projection_initiale"]),
-                    "annee_finale_projection": int(duree_simulation[index_simulation]["annee_projection_initiale"]) + int(
+                    "annee_finale_projection": int(
+                        duree_simulation[index_simulation]["annee_projection_initiale"]) + int(
                         duree_simulation[index_simulation]["duree_projection"]),
                     "entreprise_agricole": entreprise_agricole}
                 return simulation
@@ -1182,8 +1310,9 @@ def run_gui(frame):
                     for entree in sous_liste:
                         entree_invalide_liste.append(entree)
                 for entree_invalide in entree_invalide_liste:
-                    message = message + "Dans la " + entree_invalide[3] + ", le " + entree_invalide[0] + " et la " + entree_invalide[
-                        1] + " l'entrée " + entree_invalide[2] + "\n"
+                    message = message + "Dans la " + entree_invalide[3] + ", le " + entree_invalide[0] + " et la " + \
+                              entree_invalide[
+                                  1] + " l'entrée " + entree_invalide[2] + "\n"
                 messagebox.showwarning("Warning", message)
                 parent_frame_tabs.focus()
 
@@ -1195,27 +1324,35 @@ def run_gui(frame):
             compteur_regie = 0
             for regie in regies_scrollable_frame.winfo_children():
                 if compteur_regie < len(regies_scrollable_frame.winfo_children()) - 1:
-                    # TODO: Faire la validation une fois le call API fait pour avoir les valeurs
                     culture_principale = regie.grid_slaves(row=0, column=1)[0].get()
+                    global culture_principale_supportees
+                    if culture_principale not in culture_principale_supportees:
+                        entree_invalide_liste.append(
+                            (information_champs[champs_index]["nom_du_champs"],
+                             "Zone de gestion " + str(zone_index + 1),
+                             "\"Culture principale\" doit être parmis les choix disponibles",
+                             "Régie projection Simulation " + str(simulation_index + 1)))
                     rendement = regie.grid_slaves(row=1, column=1)[0].get()
                     if not util.is_decimal_number(rendement) and rendement != "":
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone de gestion " + str(zone_index + 1),
                              "\"Rendement\" doit être un réel positif ou la case peut être vide pour aller chercher un rendement par défaut",
-                             "Régie projection Simulation "+str(simulation_index+1)))
+                             "Régie projection Simulation " + str(simulation_index + 1)))
                     if rendement == "":
                         rendement = None
                     if rendement is not None and util.is_decimal_number(rendement):
                         rendement = float(rendement)
                     proportion_tige_exporte = regie.grid_slaves(row=2, column=1)[0].get()
                     if (not util.is_decimal_number(
-                            proportion_tige_exporte) and proportion_tige_exporte != "") or (util.is_decimal_number(proportion_tige_exporte) and (float(proportion_tige_exporte) < 0 or float(proportion_tige_exporte) > 1)):
+                            proportion_tige_exporte) and proportion_tige_exporte != "") or (
+                            util.is_decimal_number(proportion_tige_exporte) and (
+                            float(proportion_tige_exporte) < 0 or float(proportion_tige_exporte) > 1)):
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone de gestion " + str(zone_index + 1),
                              "\"Proportion tige exportée\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
-                             "Régie projection Simulation "+str(simulation_index+1)))
+                             "Régie projection Simulation " + str(simulation_index + 1)))
                     if proportion_tige_exporte == "":
                         proportion_tige_exporte = None
                     if proportion_tige_exporte is not None and util.is_decimal_number(proportion_tige_exporte):
@@ -1229,12 +1366,14 @@ def run_gui(frame):
                              "Régie projection"))
                     taux_matiere_seche = regie.grid_slaves(row=4, column=1)[0].get()
                     if (not util.is_decimal_number(
-                            taux_matiere_seche) and taux_matiere_seche != "") or (util.is_decimal_number(taux_matiere_seche) and (float(taux_matiere_seche) < 0 or float(taux_matiere_seche) > 1)):
+                            taux_matiere_seche) and taux_matiere_seche != "") or (
+                            util.is_decimal_number(taux_matiere_seche) and (
+                            float(taux_matiere_seche) < 0 or float(taux_matiere_seche) > 1)):
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone de gestion " + str(zone_index + 1),
                              "\"Taux matière sèche\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
-                             "Régie projection Simulation "+str(simulation_index+1)))
+                             "Régie projection Simulation " + str(simulation_index + 1)))
                     if taux_matiere_seche == "":
                         taux_matiere_seche = None
                     if taux_matiere_seche is not None and util.is_decimal_number(taux_matiere_seche):
@@ -1244,31 +1383,44 @@ def run_gui(frame):
                                                "proportion_tige_exporte": proportion_tige_exporte,
                                                "produit_non_recolte": production_non_recolte,
                                                "taux_matiere_seche": taux_matiere_seche}
-                    # TODO: Faire la validation une fois le call API fait pour avoir les valeurs
                     travail_du_sol = regie.grid_slaves(row=5, column=1)[0].get()
+                    global types_travail_du_sol_supportes
+                    if travail_du_sol not in types_travail_du_sol_supportes:
+                        entree_invalide_liste.append(
+                            (information_champs[champs_index]["nom_du_champs"],
+                             "Zone de gestion " + str(zone_index + 1),
+                             "\"Travail du sol\" doit être parmis les choix disponibles",
+                             "Régie projection Simulation " + str(simulation_index + 1)))
                     profondeur = regie.grid_slaves(row=6, column=1)[0].get()
                     if (not util.is_decimal_number(
-                            profondeur) and profondeur != "") or (util.is_decimal_number(profondeur) and (float(profondeur) < 0 or float(profondeur) > 1)):
+                            profondeur) and profondeur != "") or (
+                            util.is_decimal_number(profondeur) and (float(profondeur) < 0 or float(profondeur) > 1)):
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone de gestion " + str(zone_index + 1),
                              "\"Profondeur\" doit être un réel positif",
-                             "Régie projection Simulation "+str(simulation_index+1)))
+                             "Régie projection Simulation " + str(simulation_index + 1)))
                     if profondeur == "":
                         profondeur = None
                     if profondeur is not None and util.is_decimal_number(profondeur):
-                        profondeur = float(taux_matiere_seche)
+                        profondeur = float(profondeur)
                     travail_du_sol_dict = {"travail_du_sol": travail_du_sol,
                                            "profondeur_du_travail": profondeur}
-                    # TODO: Faire la validation une fois le call API fait pour avoir les valeurs
                     culture_secondaire = regie.grid_slaves(row=7, column=1)[0].get()
+                    global cultures_secondaires_supportees
+                    if culture_secondaire not in cultures_secondaires_supportees:
+                        entree_invalide_liste.append(
+                            (information_champs[champs_index]["nom_du_champs"],
+                             "Zone de gestion " + str(zone_index + 1),
+                             "\"Culture secondaire\" doit être parmis les choix disponibles",
+                             "Régie projection Simulation " + str(simulation_index + 1)))
                     rendement_culture_secondaire = regie.grid_slaves(row=8, column=1)[0].get()
                     if not util.is_decimal_number(rendement_culture_secondaire):
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone de gestion " + str(zone_index + 1),
                              "\"Rendement culture secondaire\" doit être un réel positif",
-                             "Régie projection Simulation "+str(simulation_index+1)))
+                             "Régie projection Simulation " + str(simulation_index + 1)))
                     else:
                         rendement_culture_secondaire = float(rendement_culture_secondaire)
                     culture_secondaire_dict = {"culture_secondaire": culture_secondaire,
@@ -1280,14 +1432,22 @@ def run_gui(frame):
                     while index_composante_amendement < grid_size[1] - 1:
                         amendement = composante_amendement_liste.grid_slaves([index_composante_amendement], column=1)[
                             0].get()
+                        global amendements_supportees
+                        if amendement not in amendements_supportees:
+                            entree_invalide_liste.append(
+                                (information_champs[champs_index]["nom_du_champs"],
+                                 "Zone de gestion " + str(zone_index + 1),
+                                 "\"Amendement\" " + str(
+                                     index_composante_amendement + 1) + " doit être parmis les choix disponibles",
+                                 " section Données réchauffement"))
                         apport = composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[
-                                0].get()
+                            0].get()
                         if not util.is_decimal_number(apport):
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone de gestion " + str(zone_index + 1),
                                  amendement + "\"Apport\" doit être un réel positif",
-                                 "Régie projection Simulation "+str(simulation_index+1)))
+                                 "Régie projection Simulation " + str(simulation_index + 1)))
                         else:
                             apport = float(apport)
                         amendements.append({"amendement": amendement,
@@ -1313,7 +1473,8 @@ def run_gui(frame):
         def get_regies_rechauffement():
             entree_invalide_liste = []
             regies_rechauffement_simulation = []
-            champs_label_frames = donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0].winfo_children()
+            champs_label_frames = donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[
+                0].winfo_children()
             champs_index = 0
             for champs_label_frame in champs_label_frames:
                 champs_regies_liste = []
@@ -1323,9 +1484,16 @@ def run_gui(frame):
                     regies_de_rechauffement = zone_label_frame.winfo_children()
                     index_regie = 0
                     zone_regies = []
-                    while index_regie < len(regies_de_rechauffement)-1:
+                    while index_regie < len(regies_de_rechauffement) - 1:
                         regie = regies_de_rechauffement[index_regie]
                         culture_principale = regie.grid_slaves(row=0, column=1)[0].get()
+                        global culture_principale_supportees
+                        if culture_principale not in culture_principale_supportees:
+                            entree_invalide_liste.append(
+                                (information_champs[champs_index]["nom_du_champs"],
+                                 "Zone de gestion " + str(zone_index + 1),
+                                 "\"Culture principale\" doit être parmis les choix disponibles",
+                                 " section Données réchauffement"))
                         rendement = regie.grid_slaves(row=1, column=1)[0].get()
                         if not util.is_decimal_number(rendement) and rendement != "":
                             entree_invalide_liste.append(
@@ -1339,7 +1507,9 @@ def run_gui(frame):
                             rendement = float(rendement)
                         proportion_tige_exporte = regie.grid_slaves(row=2, column=1)[0].get()
                         if (not util.is_decimal_number(
-                                proportion_tige_exporte) and proportion_tige_exporte != "") or (util.is_decimal_number(proportion_tige_exporte) and (float(proportion_tige_exporte) < 0 or float(proportion_tige_exporte) > 1)):
+                                proportion_tige_exporte) and proportion_tige_exporte != "") or (
+                                util.is_decimal_number(proportion_tige_exporte) and (
+                                float(proportion_tige_exporte) < 0 or float(proportion_tige_exporte) > 1)):
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone de gestion " + str(zone_index + 1),
@@ -1354,7 +1524,7 @@ def run_gui(frame):
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone de gestion " + str(zone_index + 1),
-                                 "\"Production non récolté\" doit être l'une des options de la combobox",
+                                 "\"Production non récolté\" doit être parmis les choix disponibles",
                                  "sectionDonnées réchauffement"))
                         taux_matiere_seche = regie.grid_slaves(row=4, column=1)[0].get()
                         if (not util.is_decimal_number(
@@ -1375,8 +1545,14 @@ def run_gui(frame):
                                                    "proportion_tige_exporte": proportion_tige_exporte,
                                                    "produit_non_recolte": production_non_recolte,
                                                    "taux_matiere_seche": taux_matiere_seche}
-                        # TODO: Faire la validation une fois le call API fait pour avoir les valeurs
                         travail_du_sol = regie.grid_slaves(row=5, column=1)[0].get()
+                        global types_travail_du_sol_supportes
+                        if travail_du_sol not in types_travail_du_sol_supportes:
+                            entree_invalide_liste.append(
+                                (information_champs[champs_index]["nom_du_champs"],
+                                 "Zone de gestion " + str(zone_index + 1),
+                                 "\"Travail du sol\" doit être parmis les choix disponibles",
+                                 " section Données réchauffement"))
                         profondeur = regie.grid_slaves(row=6, column=1)[0].get()
                         if (not util.is_decimal_number(
                                 profondeur) and profondeur != "") or (util.is_decimal_number(profondeur) and (
@@ -1389,11 +1565,17 @@ def run_gui(frame):
                         if profondeur == "":
                             profondeur = None
                         if profondeur is not None and util.is_decimal_number(profondeur):
-                            profondeur = float(taux_matiere_seche)
+                            profondeur = float(profondeur)
                         travail_du_sol_dict = {"travail_du_sol": travail_du_sol,
                                                "profondeur_du_travail": profondeur}
-                        # TODO: Faire la validation une fois le call API fait pour avoir les valeurs
                         culture_secondaire = regie.grid_slaves(row=7, column=1)[0].get()
+                        global cultures_secondaires_supportees
+                        if culture_secondaire not in cultures_secondaires_supportees:
+                            entree_invalide_liste.append(
+                                (information_champs[champs_index]["nom_du_champs"],
+                                 "Zone de gestion " + str(zone_index + 1),
+                                 "\"Culture secondaire\" doit être parmis les choix disponibles",
+                                 " section Données réchauffement"))
                         rendement_culture_secondaire = regie.grid_slaves(row=8, column=1)[0].get()
                         if not util.is_decimal_number(rendement_culture_secondaire):
                             entree_invalide_liste.append(
@@ -1411,9 +1593,17 @@ def run_gui(frame):
                         amendements = []
                         while index_composante_amendement < grid_size[1] - 1:
                             amendement = \
-                            composante_amendement_liste.grid_slaves([index_composante_amendement], column=1)[
-                                0].get()
-                            apport = composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[
+                                composante_amendement_liste.grid_slaves([index_composante_amendement], column=1)[
+                                    0].get()
+                            global amendements_supportees
+                            if amendement not in amendements_supportees:
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone de gestion " + str(zone_index + 1),
+                                     "\"Amendement\" "+str(index_composante_amendement+1)+" doit être parmis les choix disponibles",
+                                     " section Données réchauffement"))
+                            apport = \
+                                composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[
                                     0].get()
                             if not util.is_decimal_number(apport):
                                 entree_invalide_liste.append(
@@ -1437,7 +1627,6 @@ def run_gui(frame):
                 regies_rechauffement_simulation.append(champs_regies_liste)
                 champs_index += 1
             return regies_rechauffement_simulation, entree_invalide_liste
-
 
         def editer_caracteristique_physique_entreprise():
             root.withdraw()
@@ -1476,19 +1665,23 @@ def run_gui(frame):
                     taux_matiere_organique_entry = ttk.Entry(zone_label_frame)
                     taux_matiere_organique_entry.insert(0, information_zone_de_gestion["taux_matiere_organique"])
                     municipalite_label = ttk.Label(zone_label_frame, text="Municipalité: ")
-                    municipalite_combobox = ttk.Combobox(zone_label_frame)
+                    global municipalites_supportees
+                    municipalite_combobox = ttk.Combobox(zone_label_frame, values=municipalites_supportees["municipalites_supportees"])
                     municipalite_combobox.set(information_zone_de_gestion["municipalite"])
                     serie_de_sol_label = ttk.Label(zone_label_frame, text="Série de sol: ")
-                    serie_de_sol_combobox = ttk.Combobox(zone_label_frame)
+                    global series_de_sol_supportees
+                    serie_de_sol_combobox = ttk.Combobox(zone_label_frame, values=series_de_sol_supportees["series_de_sol_supportees"])
                     serie_de_sol_combobox.set(information_zone_de_gestion["serie_de_sol"])
                     classe_de_drainage_label = ttk.Label(zone_label_frame, text="Classe de drainage: ")
-                    classe_de_drainage_combobox = ttk.Combobox(zone_label_frame)
+                    global classes_de_drainage_supportees
+                    classe_de_drainage_combobox = ttk.Combobox(zone_label_frame, values=classes_de_drainage_supportees["classes_de_drainage_supportees"])
                     classe_de_drainage_combobox.set(information_zone_de_gestion["classe_de_drainage"])
                     masse_volumique_apparente_label = ttk.Label(zone_label_frame,
                                                                 text="Masse volumique apparente (g/cm3): ")
                     masse_volumique_apparente_entry = ttk.Entry(zone_label_frame)
                     if information_zone_de_gestion["masse_volumique_apparente"] is not None:
-                        masse_volumique_apparente_entry.insert(0, information_zone_de_gestion["masse_volumique_apparente"])
+                        masse_volumique_apparente_entry.insert(0,
+                                                               information_zone_de_gestion["masse_volumique_apparente"])
                     profondeur_label = ttk.Label(zone_label_frame, text="Profondeur (cm): ")
                     profondeur_entry = ttk.Entry(zone_label_frame)
                     profondeur_entry.insert(0, information_zone_de_gestion["profondeur"])
