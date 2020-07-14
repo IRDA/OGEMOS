@@ -22,36 +22,42 @@ sp = subprocess.Popen(
     "FLASK_APP=app.py & flask run",
     shell=True)
 
-# TODO: sort the lists by alphabetical order
 global municipalites_supportees
 municipalites_supportees_temporaire = requests.get("http://localhost:5000/api/get-municipalite")
-municipalites_supportees = municipalites_supportees_temporaire.json()
+municipalites_supportees = municipalites_supportees_temporaire.json()["municipalites_supportees"]
+municipalites_supportees.sort()
 
 global series_de_sol_supportees
 series_de_sol_supportees_temporaire = requests.get("http://localhost:5000/api/get-series_de_sol")
-series_de_sol_supportees = series_de_sol_supportees_temporaire.json()
+series_de_sol_supportees = series_de_sol_supportees_temporaire.json()["series_de_sol_supportees"]
+series_de_sol_supportees.sort()
 
 global classes_de_drainage_supportees
 classe_de_drainage_supportees_temporaire = requests.get("http://localhost:5000/api/get-classe_de_drainage")
-classes_de_drainage_supportees = classe_de_drainage_supportees_temporaire.json()
+classes_de_drainage_supportees = classe_de_drainage_supportees_temporaire.json()["classes_de_drainage_supportees"]
+classes_de_drainage_supportees.sort()
 
 global cultures_principales_supportees
 culture_principale_supportees_temporaire = requests.get("http://localhost:5000/api/get-culture_principale")
-cultures_principales_supportees = culture_principale_supportees_temporaire.json()
+cultures_principales_supportees = culture_principale_supportees_temporaire.json()["cultures_principales_supportees"]
+cultures_principales_supportees.sort()
 
 global types_travail_du_sol_supportes
 travail_du_sol_supportees_temporaire = requests.get("http://localhost:5000/api/get-travail_du_sol")
-types_travail_du_sol_supportes = travail_du_sol_supportees_temporaire.json()
+types_travail_du_sol_supportes = travail_du_sol_supportees_temporaire.json()["types_travail_du_sol_supportes"]
+types_travail_du_sol_supportes.sort()
+
 
 global cultures_secondaires_supportees
 culture_secondaire_supportees_temporaire = requests.get("http://localhost:5000/api/get-culture_secondaire")
-cultures_secondaires_supportees = culture_secondaire_supportees_temporaire.json()
+cultures_secondaires_supportees = culture_secondaire_supportees_temporaire.json()["cultures_secondaires_supportees"]
+cultures_secondaires_supportees.sort()
+
 
 global amendements_supportees
 amendements_supportees_temporaire = requests.get("http://localhost:5000/api/get-amendement")
-amendements_supportees = amendements_supportees_temporaire.json()
-
-
+amendements_supportees = amendements_supportees_temporaire.json()["amendements_supportees"]
+amendements_supportees.sort()
 
 
 
@@ -181,8 +187,8 @@ def run_gui(frame):
                                 global municipalites_supportees
                                 if municipalite not in municipalites_supportees:
                                     entree_invalide_liste.append(
-                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
-                                         "Zone de gestion " + str(index_zone + 1),
+                                        (information_champs[index]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone),
                                          "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = champs_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
@@ -190,8 +196,8 @@ def run_gui(frame):
                                 global series_de_sol_supportees
                                 if serie_de_sol not in series_de_sol_supportees:
                                     entree_invalide_liste.append(
-                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
-                                         "Zone de gestion " + str(index_zone + 1),
+                                        (information_champs[index]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone),
                                          "\"Série de sol\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = champs_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
@@ -199,8 +205,8 @@ def run_gui(frame):
                                 global classes_de_drainage_supportees
                                 if classe_de_drainage not in classes_de_drainage_supportees:
                                     entree_invalide_liste.append(
-                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
-                                         "Zone de gestion " + str(index_zone + 1),
+                                        (information_champs[index]["nom_du_champs"],
+                                         "Zone de gestion " + str(index_zone),
                                          "\"Classe de drainage\" doit être parmis les choix disponibles"))
                             grid_slave4_1 = champs_frame_widget.grid_slaves(row=4, column=1)
                             for entry in grid_slave4_1:
@@ -212,7 +218,7 @@ def run_gui(frame):
                                     entree_invalide_liste.append(
                                         (information_champs[index]["nom_du_champs"],
                                          "Zone de gestion " + str(
-                                             information_champs[index]["nombre_de_zone_de_gestion"]),
+                                             index_zone),
                                          "\"Masse volumique apparente\" doit être un réel positif ou laissé vide pour aller chercher la valeur par défaut"))
                                 if masse_volumique_apparente == "":
                                     masse_volumique_apparente = None
@@ -276,13 +282,13 @@ def run_gui(frame):
                 taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
                 municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
                 global municipalites_supportees
-                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees["municipalites_supportees"])
+                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
                 serie_de_sol_label = ttk.Label(zone_de_gestion_frame, text="Série de sol: ")
                 global series_de_sol_supportees
-                serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees["series_de_sol_supportees"])
+                serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees)
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                 global classes_de_drainage_supportees
-                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees["classes_de_drainage_supportees"])
+                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees)
                 masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                             text="Masse volumique apparente (g/cm3): ")
                 masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
@@ -398,7 +404,7 @@ def run_gui(frame):
                     duree_projection_label.grid(row=1, column=0)
                     duree_projection_entry.grid(row=1, column=1)
 
-                    creer_simulation_bouton = ttk.Button(duree_simulation_frame,
+                    creer_simulation_bouton = ttk.Button(duree_simulation_frame, text="Créer",
                                                          command=get_duree_de_la_simulation)
                     creer_simulation_bouton.grid(row=5, column=0, columnspan=2)
                     duree_simulation_frame.pack()
@@ -533,13 +539,13 @@ def run_gui(frame):
                         taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
                         municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
                         global municipalites_supportees
-                        municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees["municipalites_supportees"])
+                        municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
                         serie_de_sol_label = ttk.Label(zone_de_gestion_frame, text="Série de sol: ")
                         global series_de_sol_supportees
-                        serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees["series_de_sol_supportees"])
+                        serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees)
                         classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                         global classes_de_drainage_supportees
-                        classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees["classes_de_drainage_supportees"])
+                        classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees)
                         masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                                     text="Masse volumique apparente (g/cm3): ")
                         masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
@@ -629,7 +635,7 @@ def run_gui(frame):
                                     entree_invalide_liste.append(
                                         (information_champs[nombre_de_champs - 1]["nom_du_champs"],
                                          "Zone de gestion " + str(
-                                             information_champs[nombre_de_champs - 1]["nombre_de_zone_de_gestion"]),
+                                             index_zone + 1),
                                          "\"Masse volumique apparente\" doit être un réel positif ou laissé vide pour aller chercher la valeur par défaut"))
                                 if masse_volumique_apparente == "":
                                     masse_volumique_apparente = None
@@ -791,13 +797,13 @@ def run_gui(frame):
                 taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
                 municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
                 global municipalites_supportees
-                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees["municipalites_supportees"])
+                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
                 serie_de_sol_label = ttk.Label(zone_de_gestion_frame, text="Série de sol: ")
                 global series_de_sol_supportees
-                serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees["series_de_sol_supportees"])
+                serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees)
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                 global classes_de_drainage_supportees
-                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees["classes_de_drainage_supportees"])
+                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees)
                 masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                             text="Masse volumique apparente (g/cm3): ")
                 masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
@@ -852,8 +858,8 @@ def run_gui(frame):
                                 global municipalites_supportees
                                 if municipalite not in municipalites_supportees:
                                     entree_invalide_liste.append(
-                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
-                                         "Zone de gestion " + str(index_zone + 1),
+                                        (information_champs[champs_index]["nom_du_champs"],
+                                         "Zone de gestion " + str(information_champs[champs_index]["nombre_de_zone_de_gestion"]),
                                          "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
@@ -861,8 +867,8 @@ def run_gui(frame):
                                 global series_de_sol_supportees
                                 if serie_de_sol not in series_de_sol_supportees:
                                     entree_invalide_liste.append(
-                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
-                                         "Zone de gestion " + str(index_zone + 1),
+                                        (information_champs[champs_index]["nom_du_champs"],
+                                         "Zone de gestion " + str(information_champs[champs_index]["nombre_de_zone_de_gestion"]),
                                          "\"Série de sol\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
@@ -870,8 +876,8 @@ def run_gui(frame):
                                 global classes_de_drainage_supportees
                                 if classe_de_drainage not in classes_de_drainage_supportees:
                                     entree_invalide_liste.append(
-                                        (information_champs[nombre_de_champs - 1]["nom_du_champs"],
-                                         "Zone de gestion " + str(index_zone + 1),
+                                        (information_champs[champs_index]["nom_du_champs"],
+                                         "Zone de gestion " + str(information_champs[champs_index]["nombre_de_zone_de_gestion"]),
                                          "\"Classe de drainage\" doit être parmis les choix disponibles"))
                             grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
                             for entry in grid_slave4_1:
@@ -1096,7 +1102,7 @@ def run_gui(frame):
                 annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(annee_courante))
                 culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
                 global cultures_principales_supportees
-                culture_principale_combobox = ttk.Combobox(annee_courante_frame, values=cultures_principales_supportees["cultures_principales_supportees"])
+                culture_principale_combobox = ttk.Combobox(annee_courante_frame, values=cultures_principales_supportees)
                 rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
                 rendement_entry = ttk.Entry(annee_courante_frame)
                 proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté [0-1]: ")
@@ -1107,12 +1113,12 @@ def run_gui(frame):
                 taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
                 travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
                 global types_travail_du_sol_supportes
-                travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes["types_travail_du_sol_supportes"])
+                travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes)
                 profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maximale (cm): ")
                 profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
                 culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
                 global cultures_secondaires_supportees
-                culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees["cultures_secondaires_supportees"])
+                culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees)
                 rendement_culture_secondaire_label = ttk.Label(annee_courante_frame,
                                                                text="Rendement culture secondaire (t/ha): ")
                 rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
@@ -1146,7 +1152,7 @@ def run_gui(frame):
         def ajouter_des_amendements(amendement_frame):
             amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
             global amendements_supportees
-            amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees["amendements_supportees"])
+            amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
             apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
             apport_amendement_entry = ttk.Entry(amendement_frame)
             ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
@@ -1166,7 +1172,7 @@ def run_gui(frame):
             amendement_frame.grid_slaves(grid_size[1] - 1, grid_size[0] - 2)[0].destroy()
             amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
             global amendements_supportees
-            amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees["amendements_supportees"])
+            amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
             apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
             apport_amendement_entry = ttk.Entry(amendement_frame)
             ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
@@ -1188,7 +1194,7 @@ def run_gui(frame):
             annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(index))
             culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
             global cultures_principales_supportees
-            culture_principale_combobox = ttk.Combobox(annee_courante_frame, values=cultures_principales_supportees["cultures_principales_supportees"])
+            culture_principale_combobox = ttk.Combobox(annee_courante_frame, values=cultures_principales_supportees)
             rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
             rendement_entry = ttk.Entry(annee_courante_frame)
             proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté [0-1]: ")
@@ -1199,12 +1205,12 @@ def run_gui(frame):
             taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
             travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
             global types_travail_du_sol_supportes
-            travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes["types_travail_du_sol_supportes"])
+            travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes)
             profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maxiamle (cm): ")
             profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
             culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
             global cultures_secondaires_supportees
-            culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees["cultures_secondaires_supportees"])
+            culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees)
             rendement_culture_secondaire_label = ttk.Label(annee_courante_frame,
                                                            text="Rendement culture secondaire (t/ha): ")
             rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
@@ -1325,8 +1331,8 @@ def run_gui(frame):
             for regie in regies_scrollable_frame.winfo_children():
                 if compteur_regie < len(regies_scrollable_frame.winfo_children()) - 1:
                     culture_principale = regie.grid_slaves(row=0, column=1)[0].get()
-                    global culture_principale_supportees
-                    if culture_principale not in culture_principale_supportees:
+                    global cultures_principales_supportees
+                    if culture_principale not in cultures_principales_supportees:
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone de gestion " + str(zone_index + 1),
@@ -1487,8 +1493,8 @@ def run_gui(frame):
                     while index_regie < len(regies_de_rechauffement) - 1:
                         regie = regies_de_rechauffement[index_regie]
                         culture_principale = regie.grid_slaves(row=0, column=1)[0].get()
-                        global culture_principale_supportees
-                        if culture_principale not in culture_principale_supportees:
+                        global cultures_principales_supportees
+                        if culture_principale not in cultures_principales_supportees:
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone de gestion " + str(zone_index + 1),
@@ -1666,15 +1672,15 @@ def run_gui(frame):
                     taux_matiere_organique_entry.insert(0, information_zone_de_gestion["taux_matiere_organique"])
                     municipalite_label = ttk.Label(zone_label_frame, text="Municipalité: ")
                     global municipalites_supportees
-                    municipalite_combobox = ttk.Combobox(zone_label_frame, values=municipalites_supportees["municipalites_supportees"])
+                    municipalite_combobox = ttk.Combobox(zone_label_frame, values=municipalites_supportees)
                     municipalite_combobox.set(information_zone_de_gestion["municipalite"])
                     serie_de_sol_label = ttk.Label(zone_label_frame, text="Série de sol: ")
                     global series_de_sol_supportees
-                    serie_de_sol_combobox = ttk.Combobox(zone_label_frame, values=series_de_sol_supportees["series_de_sol_supportees"])
+                    serie_de_sol_combobox = ttk.Combobox(zone_label_frame, values=series_de_sol_supportees)
                     serie_de_sol_combobox.set(information_zone_de_gestion["serie_de_sol"])
                     classe_de_drainage_label = ttk.Label(zone_label_frame, text="Classe de drainage: ")
                     global classes_de_drainage_supportees
-                    classe_de_drainage_combobox = ttk.Combobox(zone_label_frame, values=classes_de_drainage_supportees["classes_de_drainage_supportees"])
+                    classe_de_drainage_combobox = ttk.Combobox(zone_label_frame, values=classes_de_drainage_supportees)
                     classe_de_drainage_combobox.set(information_zone_de_gestion["classe_de_drainage"])
                     masse_volumique_apparente_label = ttk.Label(zone_label_frame,
                                                                 text="Masse volumique apparente (g/cm3): ")
