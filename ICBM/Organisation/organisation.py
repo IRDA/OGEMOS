@@ -231,7 +231,7 @@ class ZoneDeGestion:
 
     def __obtenir_region_climatique_a_partir_de_municipalite(self):
         # TODO: enelver la dummy version et faire la vrai fonction
-        if self.__municipalite == 'Victoriaville':
+        #if self.__municipalite == 'Victoriaville':
             return 'Centre-du-Québec'
 
     def get_taille_de_la_zone(self):

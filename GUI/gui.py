@@ -47,19 +47,15 @@ travail_du_sol_supportees_temporaire = requests.get("http://localhost:5000/api/g
 types_travail_du_sol_supportes = travail_du_sol_supportees_temporaire.json()["types_travail_du_sol_supportes"]
 types_travail_du_sol_supportes.sort()
 
-
 global cultures_secondaires_supportees
 culture_secondaire_supportees_temporaire = requests.get("http://localhost:5000/api/get-culture_secondaire")
 cultures_secondaires_supportees = culture_secondaire_supportees_temporaire.json()["cultures_secondaires_supportees"]
 cultures_secondaires_supportees.sort()
 
-
 global amendements_supportees
 amendements_supportees_temporaire = requests.get("http://localhost:5000/api/get-amendement")
 amendements_supportees = amendements_supportees_temporaire.json()["amendements_supportees"]
 amendements_supportees.sort()
-
-
 
 root = tk.Tk()
 root.title("OGEMOS")
@@ -181,6 +177,8 @@ def run_gui(frame):
                                     entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
                                                                   "Zone de gestion " + str(index_zone),
                                                                   "\"Taux de matière organique\" doit être un réel positif"))
+                                else:
+                                    taux_matiere_organique = float(taux_matiere_organique)
                             grid_slave1_1 = champs_frame_widget.grid_slaves(row=1, column=1)
                             for entry in grid_slave1_1:
                                 municipalite = entry.get()
@@ -220,8 +218,11 @@ def run_gui(frame):
                                          "Zone de gestion " + str(
                                              index_zone),
                                          "\"Masse volumique apparente\" doit être un réel positif ou laissé vide pour aller chercher la valeur par défaut"))
-                                if masse_volumique_apparente == "":
-                                    masse_volumique_apparente = None
+                                else:
+                                    if masse_volumique_apparente == "":
+                                        masse_volumique_apparente = None
+                                    else:
+                                        masse_volumique_apparente = float(masse_volumique_apparente)
                             grid_slave5_1 = champs_frame_widget.grid_slaves(row=5, column=1)
                             for entry in grid_slave5_1:
                                 profondeur = entry.get()
@@ -230,6 +231,8 @@ def run_gui(frame):
                                     entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
                                                                   "Zone de gestion " + str(index_zone),
                                                                   "\"Profondeur\" doit être un réel positif"))
+                                else:
+                                    profondeur = float(profondeur)
                             grid_slave6_1 = champs_frame_widget.grid_slaves(row=6, column=1)
                             for entry in grid_slave6_1:
                                 superficie_de_la_zone = entry.get()
@@ -238,6 +241,8 @@ def run_gui(frame):
                                     entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
                                                                   "Zone de gestion " + str(index_zone),
                                                                   "\"Superficie de la zone\" doit être un réel positif"))
+                                else:
+                                    superficie_de_la_zone = float(superficie_de_la_zone)
                             information_champs[index]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
@@ -545,7 +550,8 @@ def run_gui(frame):
                         serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees)
                         classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                         global classes_de_drainage_supportees
-                        classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees)
+                        classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame,
+                                                                   values=classes_de_drainage_supportees)
                         masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                                     text="Masse volumique apparente (g/cm3): ")
                         masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
@@ -598,6 +604,8 @@ def run_gui(frame):
                                         (information_champs[nombre_de_champs - 1]["nom_du_champs"],
                                          "Zone de gestion " + str(index_zone + 1),
                                          "\"Taux de matière organique\" doit être un réel positif"))
+                                else:
+                                    taux_matiere_organique = float(taux_matiere_organique)
                             grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
                             for entry in grid_slave1_1:
                                 municipalite = entry.get()
@@ -637,8 +645,11 @@ def run_gui(frame):
                                          "Zone de gestion " + str(
                                              index_zone + 1),
                                          "\"Masse volumique apparente\" doit être un réel positif ou laissé vide pour aller chercher la valeur par défaut"))
-                                if masse_volumique_apparente == "":
-                                    masse_volumique_apparente = None
+                                else:
+                                    if masse_volumique_apparente == "":
+                                        masse_volumique_apparente = None
+                                    else:
+                                        masse_volumique_apparente = float(masse_volumique_apparente)
                             grid_slave5_1 = scrollable_frame_widget.grid_slaves(row=5, column=1)
                             for entry in grid_slave5_1:
                                 profondeur = entry.get()
@@ -648,6 +659,8 @@ def run_gui(frame):
                                         (information_champs[nombre_de_champs - 1]["nom_du_champs"],
                                          "Zone de gestion " + str(index_zone + 1),
                                          "\"Profondeur\" doit être un réel positif"))
+                                else:
+                                    profondeur = float(profondeur)
                             grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
                             for entry in grid_slave6_1:
                                 superficie_de_la_zone = entry.get()
@@ -657,6 +670,8 @@ def run_gui(frame):
                                         (information_champs[nombre_de_champs - 1]["nom_du_champs"],
                                          "Zone de gestion " + str(index_zone + 1),
                                          "\"Superficie de la zone\" doit être un réel positif"))
+                                else:
+                                    superficie_de_la_zone = float(superficie_de_la_zone)
                             information_champs[len(information_champs) - 1]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
@@ -852,6 +867,8 @@ def run_gui(frame):
                                          "Zone de gestion " + str(
                                              information_champs[champs_index]["nombre_de_zone_de_gestion"]),
                                          "\"Taux de matière organique\" doit être un réel positif"))
+                                else:
+                                    taux_matiere_organique = float(taux_matiere_organique)
                             grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
                             for entry in grid_slave1_1:
                                 municipalite = entry.get()
@@ -859,7 +876,8 @@ def run_gui(frame):
                                 if municipalite not in municipalites_supportees:
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
-                                         "Zone de gestion " + str(information_champs[champs_index]["nombre_de_zone_de_gestion"]),
+                                         "Zone de gestion " + str(
+                                             information_champs[champs_index]["nombre_de_zone_de_gestion"]),
                                          "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
@@ -868,7 +886,8 @@ def run_gui(frame):
                                 if serie_de_sol not in series_de_sol_supportees:
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
-                                         "Zone de gestion " + str(information_champs[champs_index]["nombre_de_zone_de_gestion"]),
+                                         "Zone de gestion " + str(
+                                             information_champs[champs_index]["nombre_de_zone_de_gestion"]),
                                          "\"Série de sol\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
@@ -877,7 +896,8 @@ def run_gui(frame):
                                 if classe_de_drainage not in classes_de_drainage_supportees:
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
-                                         "Zone de gestion " + str(information_champs[champs_index]["nombre_de_zone_de_gestion"]),
+                                         "Zone de gestion " + str(
+                                             information_champs[champs_index]["nombre_de_zone_de_gestion"]),
                                          "\"Classe de drainage\" doit être parmis les choix disponibles"))
                             grid_slave4_1 = scrollable_frame_widget.grid_slaves(row=4, column=1)
                             for entry in grid_slave4_1:
@@ -891,8 +911,11 @@ def run_gui(frame):
                                          "Zone de gestion " + str(
                                              information_champs[champs_index]["nombre_de_zone_de_gestion"]),
                                          "\"Masse volumique apparente\" doit être un réel positif ou laissé vide pour aller chercher la valeur par défaut"))
-                                if masse_volumique_apparente == "":
-                                    masse_volumique_apparente = None
+                                else:
+                                    if masse_volumique_apparente == "":
+                                        masse_volumique_apparente = None
+                                    else:
+                                        masse_volumique_apparente = float(masse_volumique_apparente)
                             grid_slave5_1 = scrollable_frame_widget.grid_slaves(row=5, column=1)
                             for entry in grid_slave5_1:
                                 profondeur = entry.get()
@@ -903,6 +926,8 @@ def run_gui(frame):
                                          "Zone de gestion " + str(
                                              information_champs[champs_index]["nombre_de_zone_de_gestion"]),
                                          "\"Profondeur\" doit être un réel positif"))
+                                else:
+                                    profondeur = float(profondeur)
                             grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
                             for entry in grid_slave6_1:
                                 superficie_de_la_zone = entry.get()
@@ -913,6 +938,8 @@ def run_gui(frame):
                                          "Zone de gestion " + str(
                                              information_champs[champs_index]["nombre_de_zone_de_gestion"]),
                                          "\"Superficie de la zone\" doit être un réel positif"))
+                                else:
+                                    superficie_de_la_zone = float(superficie_de_la_zone)
                             information_champs[champs_index]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
@@ -1241,13 +1268,30 @@ def run_gui(frame):
 
         def get_information_toutes_les_simulations():
             simulations = []
+            entree_invalide_liste = []
             index_simualtion = 0
             for simulation in simulation_notebook.winfo_children():
                 global nombre_simulations
                 if index_simualtion < nombre_simulations:
-                    simulation = get_information_simulation(simulation, index_simualtion)
+                    simulation, entree_invalide_liste_simulation = get_information_simulation(simulation,
+                                                                                              index_simualtion)
+                    for entree in entree_invalide_liste_simulation:
+                        entree_invalide_liste.append(entree)
                     simulations.append(simulation)
                 index_simualtion += 1
+
+            if len(entree_invalide_liste) == 0:
+                simulation_dict = json.dumps({"simulations": simulations})
+                response = requests.post('http://localhost:5000/api/icbm-bilan', json=simulation_dict)
+                # TODO: Ajouter la suite avec la generation du rapport
+            else:
+                message = ""
+                for entree_invalide in entree_invalide_liste:
+                    message = message + "Dans la " + entree_invalide[3] + ", le " + entree_invalide[0] + " et la " + \
+                              entree_invalide[
+                                  1] + " l'entrée " + entree_invalide[2] + "\n"
+                messagebox.showwarning("Warning", message)
+                parent_frame_tabs.focus()
 
         def get_information_simulation(simulation_frame, index_simulation):
             global information_champs
@@ -1308,19 +1352,13 @@ def run_gui(frame):
                         duree_simulation[index_simulation]["annee_projection_initiale"]) + int(
                         duree_simulation[index_simulation]["duree_projection"]),
                     "entreprise_agricole": entreprise_agricole}
-                return simulation
+                return simulation, []
             else:
-                message = ""
                 entree_invalide_liste = []
                 for sous_liste in entree_invalide_simulation_liste:
                     for entree in sous_liste:
                         entree_invalide_liste.append(entree)
-                for entree_invalide in entree_invalide_liste:
-                    message = message + "Dans la " + entree_invalide[3] + ", le " + entree_invalide[0] + " et la " + \
-                              entree_invalide[
-                                  1] + " l'entrée " + entree_invalide[2] + "\n"
-                messagebox.showwarning("Warning", message)
-                parent_frame_tabs.focus()
+                return None, entree_invalide_liste
 
         def get_regies(regies_frame, champs_index, zone_index, simulation_index):
             entree_invalide_liste = []
@@ -1370,6 +1408,11 @@ def run_gui(frame):
                              "Zone de gestion " + str(zone_index + 1),
                              "\"Production non récolté\" doit être l'une des options de la combobox",
                              "Régie projection"))
+                    else:
+                        if production_non_recolte == "Oui":
+                            production_non_recolte = True
+                        else:
+                            production_non_recolte = False
                     taux_matiere_seche = regie.grid_slaves(row=4, column=1)[0].get()
                     if (not util.is_decimal_number(
                             taux_matiere_seche) and taux_matiere_seche != "") or (
@@ -1398,9 +1441,8 @@ def run_gui(frame):
                              "\"Travail du sol\" doit être parmis les choix disponibles",
                              "Régie projection Simulation " + str(simulation_index + 1)))
                     profondeur = regie.grid_slaves(row=6, column=1)[0].get()
-                    if (not util.is_decimal_number(
-                            profondeur) and profondeur != "") or (
-                            util.is_decimal_number(profondeur) and (float(profondeur) < 0 or float(profondeur) > 1)):
+                    if not util.is_decimal_number(profondeur) or float(
+                            profondeur) < 0:
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone de gestion " + str(zone_index + 1),
@@ -1452,7 +1494,7 @@ def run_gui(frame):
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone de gestion " + str(zone_index + 1),
-                                 amendement + "\"Apport\" doit être un réel positif",
+                                 amendement + " \"Apport\" doit être un réel positif",
                                  "Régie projection Simulation " + str(simulation_index + 1)))
                         else:
                             apport = float(apport)
@@ -1532,6 +1574,11 @@ def run_gui(frame):
                                  "Zone de gestion " + str(zone_index + 1),
                                  "\"Production non récolté\" doit être parmis les choix disponibles",
                                  "sectionDonnées réchauffement"))
+                        else:
+                            if production_non_recolte == "Oui":
+                                production_non_recolte = True
+                            else:
+                                production_non_recolte = False
                         taux_matiere_seche = regie.grid_slaves(row=4, column=1)[0].get()
                         if (not util.is_decimal_number(
                                 taux_matiere_seche) and taux_matiere_seche != "") or (
@@ -1560,9 +1607,8 @@ def run_gui(frame):
                                  "\"Travail du sol\" doit être parmis les choix disponibles",
                                  " section Données réchauffement"))
                         profondeur = regie.grid_slaves(row=6, column=1)[0].get()
-                        if (not util.is_decimal_number(
-                                profondeur) and profondeur != "") or (util.is_decimal_number(profondeur) and (
-                                float(profondeur) < 0 or float(profondeur) > 1)):
+                        if not util.is_decimal_number(profondeur) or float(
+                                profondeur) < 0:
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone de gestion " + str(zone_index + 1),
@@ -1606,7 +1652,8 @@ def run_gui(frame):
                                 entree_invalide_liste.append(
                                     (information_champs[champs_index]["nom_du_champs"],
                                      "Zone de gestion " + str(zone_index + 1),
-                                     "\"Amendement\" "+str(index_composante_amendement+1)+" doit être parmis les choix disponibles",
+                                     "\"Amendement\" " + str(
+                                         index_composante_amendement + 1) + " doit être parmis les choix disponibles",
                                      " section Données réchauffement"))
                             apport = \
                                 composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[
@@ -1635,8 +1682,13 @@ def run_gui(frame):
             return regies_rechauffement_simulation, entree_invalide_liste
 
         def editer_caracteristique_physique_entreprise():
+            def fenetre_edition_ferme():
+                root.deiconify()
+                edition_window.destroy()
+
             root.withdraw()
             edition_window = tk.Toplevel()
+            edition_window.protocol("WM_DELETE_WINDOW", fenetre_edition_ferme)
             edition_frame = ttk.Frame(edition_window)
             canvas = tk.Canvas(edition_frame)
             scrollbar = ttk.Scrollbar(edition_frame, orient="vertical", command=canvas.yview)
@@ -1718,7 +1770,7 @@ def run_gui(frame):
             scrollbar.pack(side="right", fill="y")
 
             def effectuer_la_sauvegarde():
-                root.deiconify()
+                entree_invalide_liste = []
                 global nom_entreprise
                 nom_entreprise = nom_entreprise_entry.get()
                 global information_champs
@@ -1733,23 +1785,94 @@ def run_gui(frame):
                     info_zones_de_gestion = []
                     while zone_label_frame_index < len(champs_widgets):
                         zone_frame = champs_widgets[zone_label_frame_index]
+                        taux_matiere_organique = zone_frame.grid_slaves(row=0, column=1)[0].get()
+                        if not util.is_decimal_number(taux_matiere_organique) or float(
+                                taux_matiere_organique) < 0:
+                            entree_invalide_liste.append(
+                                ("Champs " + str(champs_label_frame_index - 1),
+                                 "Zone de gestion " + str(zone_label_frame_index - 1),
+                                 "\"Taux de matière organique\" doit être un réel positif"))
+                        else:
+                            taux_matiere_organique = float(taux_matiere_organique)
+                        municipalite = zone_frame.grid_slaves(row=1, column=1)[0].get()
+                        global municipalites_supportees
+                        if municipalite not in municipalites_supportees:
+                            entree_invalide_liste.append(
+                                ("Champs " + str(champs_label_frame_index - 1),
+                                 "Zone de gestion " + str(zone_label_frame_index - 1),
+                                 "\"Municipalité\" doit être parmis les choix disponibles"))
+                        serie_de_sol = zone_frame.grid_slaves(row=2, column=1)[0].get()
+                        global series_de_sol_supportees
+                        if serie_de_sol not in series_de_sol_supportees:
+                            entree_invalide_liste.append(
+                                ("Champs " + str(champs_label_frame_index - 1),
+                                 "Zone de gestion " + str(zone_label_frame_index - 1),
+                                 "\"Série de sol\" doit être parmis les choix disponibles"))
+                        classe_de_drainage = zone_frame.grid_slaves(row=3, column=1)[0].get()
+                        global classes_de_drainage_supportees
+                        if classe_de_drainage not in classes_de_drainage_supportees:
+                            entree_invalide_liste.append(
+                                ("Champs " + str(champs_label_frame_index - 1),
+                                 "Zone de gestion " + str(zone_label_frame_index - 1),
+                                 "\"Classe de drainage\" doit être parmis les choix disponibles"))
+                        masse_volumique_apparente = zone_frame.grid_slaves(row=4, column=1)[0].get()
+                        if (not util.is_decimal_number(
+                                masse_volumique_apparente) and masse_volumique_apparente != "") or (
+                                util.is_decimal_number(masse_volumique_apparente) and float(
+                            masse_volumique_apparente) < 0):
+                            entree_invalide_liste.append(
+                                ("Champs " + str(champs_label_frame_index - 1),
+                                 "Zone de gestion " + str(zone_label_frame_index - 1),
+                                 "\"Masse volumique apparente\" doit être un réel positif ou laissé vide pour aller chercher la valeur par défaut"))
+                        else:
+                            if masse_volumique_apparente == "":
+                                masse_volumique_apparente = None
+                            else:
+                                masse_volumique_apparente = float(masse_volumique_apparente)
+                        profondeur = zone_frame.grid_slaves(row=5, column=1)[0].get()
+                        if not util.is_decimal_number(profondeur) or float(
+                                profondeur) < 0:
+                            entree_invalide_liste.append(
+                                ("Champs " + str(champs_label_frame_index - 1),
+                                 "Zone de gestion " + str(zone_label_frame_index - 1),
+                                 "\"Profondeur\" doit être un réel positif"))
+                        else:
+                            profondeur = float(profondeur)
+                        superficie_de_la_zone = zone_frame.grid_slaves(row=6, column=1)[0].get()
+                        if not util.is_decimal_number(superficie_de_la_zone) or float(
+                                superficie_de_la_zone) < 0:
+                            entree_invalide_liste.append(
+                                ("Champs " + str(champs_label_frame_index - 1),
+                                 "Zone de gestion " + str(zone_label_frame_index - 1),
+                                 "\"Superficie de la zone\" doit être un réel positif"))
+                        else:
+                            superficie_de_la_zone = float(superficie_de_la_zone)
                         info_zones_de_gestion.append(
-                            {"taux_matiere_organique": zone_frame.grid_slaves(row=0, column=1)[0].get(),
-                             "municipalite": zone_frame.grid_slaves(row=1, column=1)[0].get(),
-                             "serie_de_sol": zone_frame.grid_slaves(row=2, column=1)[0].get(),
-                             "classe_de_drainage": zone_frame.grid_slaves(row=3, column=1)[0].get(),
-                             "masse_volumique_apparente": zone_frame.grid_slaves(row=4, column=1)[0].get(),
-                             "profondeur": zone_frame.grid_slaves(row=5, column=1)[0].get(),
-                             "superficie_de_la_zone": zone_frame.grid_slaves(row=6, column=1)[0].get()})
+                            {"taux_matiere_organique": taux_matiere_organique,
+                             "municipalite": municipalite,
+                             "serie_de_sol": serie_de_sol,
+                             "classe_de_drainage": classe_de_drainage,
+                             "masse_volumique_apparente": masse_volumique_apparente,
+                             "profondeur": profondeur,
+                             "superficie_de_la_zone": superficie_de_la_zone})
                         zone_label_frame_index += 1
                     information_champs.append({"nom_du_champs": nom_du_champs,
                                                "nombre_de_zone_de_gestion": str(len(champs_widgets) - 2),
                                                "information_zone_de_gestion": info_zones_de_gestion})
                     champs_label_frame_index += 1
 
-                effectuer_les_modifications_a_la_fenetre_principale()
-                sauvegarder_attributs_entreprise_apres_modification()
-                edition_window.destroy()
+                if len(entree_invalide_liste) == 0:
+                    root.deiconify()
+                    effectuer_les_modifications_a_la_fenetre_principale()
+                    sauvegarder_attributs_entreprise_apres_modification()
+                    edition_window.destroy()
+                else:
+                    message = ""
+                    for entree_invalide in entree_invalide_liste:
+                        message = message + "Dans le " + entree_invalide[0] + " et la " + entree_invalide[
+                            1] + " l'entrée " + entree_invalide[2] + "\n"
+                    messagebox.showwarning("Warning", message)
+                    edition_window.focus()
 
             def effectuer_les_modifications_a_la_fenetre_principale():
                 index_simulation_frame = 0

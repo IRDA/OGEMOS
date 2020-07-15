@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, abort
+import json
 from ICBM.Simulations.gestion_de_simulation import *
 
 app = Flask(__name__)
@@ -6,8 +7,9 @@ app = Flask(__name__)
 
 @app.route('/api/icbm-bilan', methods=['POST'])
 def add():
-    data = request.get_json()
-    response = __launch_icbm_simulation(data)
+    data_request = request.get_json()
+    data_to_dict = json.loads(data_request)
+    response = __launch_icbm_simulation(data_to_dict)
     return jsonify(response)
 
 
