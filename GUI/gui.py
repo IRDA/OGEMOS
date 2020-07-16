@@ -362,21 +362,47 @@ def run_gui(frame):
                         root.deiconify()
                         annee_projection_initiale = annee_projection_initiale_entry.get()
                         duree_projection = duree_projection_entry.get()
+                        numero_simulation_copie = numero_simulation_copie_entry.get()
+                        if numero_simulation_copie == "":
+                            numero_simulation_copie = None
                         global annees_historiques
+                        global nombre_simulations
                         annee_projection_initiale_valide = True
                         try:
                             if int(annees_historiques["annee_historique_finale"]) + 1 != int(annee_projection_initiale):
                                 annee_projection_initiale_valide = False
                         except NameError:
                             pass
-                        if annee_projection_initiale.isdigit() and duree_projection.isdigit() and int(
-                                duree_projection) > 0 and annee_projection_initiale_valide:
+                        if annee_projection_initiale.isdigit() and duree_projection.isdigit() \
+                                and int(duree_projection) > 0 \
+                                and annee_projection_initiale_valide and \
+                                (numero_simulation_copie is None or (numero_simulation_copie.isdigit() and
+                                                                     (nombre_simulations > int(
+                                                                         numero_simulation_copie) > 0))):
                             global duree_simulation
                             duree_simulation.append({"annee_projection_initiale": annee_projection_initiale,
                                                      "duree_projection": duree_projection})
-
-                            duree_simulation_window.destroy()
-                            set_up_simulation(simulation_notebook)
+                            if numero_simulation_copie is not None:
+                                simulation = simulation_notebook.winfo_children()[int(numero_simulation_copie) - 1]
+                                simulation_copie = get_information_simulation(simulation,
+                                                                              int(numero_simulation_copie) - 1, simulation_unique=True)
+                                if simulation_copie[0] is not None:
+                                    simulation_copie = simulation_copie[0]
+                                    duree_simulation_window.destroy()
+                                    set_up_simulation(simulation_notebook, simulation_copie)
+                                else:
+                                    message = ""
+                                    for entree_invalide in simulation_copie[1]:
+                                        message = message + "Dans la " + entree_invalide[3] + ", le " + entree_invalide[
+                                            0] + " et la " + \
+                                                  entree_invalide[
+                                                      1] + " l'entrée " + entree_invalide[2] + "\n"
+                                    messagebox.showwarning("Warning", message)
+                                    readd_simulation()
+                            else:
+                                simulation_copie = None
+                                duree_simulation_window.destroy()
+                                set_up_simulation(simulation_notebook, simulation_copie)
                         else:
                             entree_invalide_liste = []
                             message = ""
@@ -386,14 +412,19 @@ def run_gui(frame):
                             if not duree_projection.isdigit() or int(duree_projection) <= 0:
                                 entree_invalide_liste.append(
                                     "L'entrée \"Durée de la projection\" est invalide. Elle doit être un nombre naturel plus grand que 0.")
+                            if (numero_simulation_copie is not None and not numero_simulation_copie.isdigit()) or int(
+                                    numero_simulation_copie) >= nombre_simulations or int(numero_simulation_copie) < 1:
+                                entree_invalide_liste.append(
+                                    "L'entrée \"Numéro de la simulation à copier\" est invalide. Elle doit être un nombre naturel plus grand que 0 et parmis les numéros de simulations existantes.")
+
                             for entree_invalide in entree_invalide_liste:
                                 message = message + entree_invalide
                             messagebox.showwarning("Warning", message)
-                            show_creation_des_regies(parent_frame_tabs, show_regie_historique)
-                            duree_simulation_window.destroy()
+                            readd_simulation()
 
                     root.withdraw()
                     duree_simulation_window = tk.Toplevel()
+                    duree_simulation_window.focus()
                     duree_simulation_window.protocol("WM_DELETE_WINDOW", readd_simulation)
                     duree_simulation_frame = ttk.Frame(duree_simulation_window)
                     annee_projection_initiale_label = ttk.Label(duree_simulation_frame,
@@ -404,10 +435,20 @@ def run_gui(frame):
                     duree_projection_entry = ttk.Entry(duree_simulation_frame)
                     duree_projection_entry.insert(0, "30")
 
+                    numero_simulation_copie_label = ttk.Label(duree_simulation_frame,
+                                                              text="Numéro de la simulation à copier: ")
+                    numero_simulation_copie_entry = ttk.Entry(duree_simulation_frame)
+
+                    global nombre_simulations
+                    if nombre_simulations < 2:
+                        numero_simulation_copie_entry.configure(state="disabled")
+
                     annee_projection_initiale_label.grid(row=0, column=0)
                     annee_projection_initiale_entry.grid(row=0, column=1)
                     duree_projection_label.grid(row=1, column=0)
                     duree_projection_entry.grid(row=1, column=1)
+                    numero_simulation_copie_label.grid(row=2, column=0)
+                    numero_simulation_copie_entry.grid(row=2, column=1)
 
                     creer_simulation_bouton = ttk.Button(duree_simulation_frame, text="Créer",
                                                          command=get_duree_de_la_simulation)
@@ -432,7 +473,7 @@ def run_gui(frame):
                         simulation_notebook.tab(current_index, text="+")
                     current_index += 1
 
-        def set_up_simulation(simulation_notebook):
+        def set_up_simulation(simulation_notebook, simulation_copie):
             tab = ttk.Frame(simulation_notebook)
             global nombre_simulations
             simulation_notebook.add(tab, text="Simulation " + str(nombre_simulations))
@@ -478,12 +519,15 @@ def run_gui(frame):
             champs_notebook.bind("<Button-3>", delete_champs_tab)
 
             global information_champs
+            index_champs = 0
             for champs in information_champs:
                 tab = ttk.Frame(champs_notebook)
                 champs_notebook.add(tab, text=champs["nom_du_champs"])
                 zone_de_gestion_notebook = ttk.Notebook(tab)
                 global duree_simulation
-                set_up_champs(zone_de_gestion_notebook, int(champs["nombre_de_zone_de_gestion"]), champs_notebook)
+                set_up_champs(zone_de_gestion_notebook, int(champs["nombre_de_zone_de_gestion"]), champs_notebook,
+                              simulation_copie, index_champs)
+                index_champs += 1
 
             tab = ttk.Frame(champs_notebook)
             champs_notebook.add(tab, text="+")
@@ -739,7 +783,7 @@ def run_gui(frame):
             creer_nouveau_champs_bouton.grid(row=3, column=0, columnspan=2)
             nouveau_champs_frame.pack()
 
-        def set_up_champs(zone_notebook, nombre_de_zone, champs_notebook):
+        def set_up_champs(zone_notebook, nombre_de_zone, champs_notebook, simulation_copie, index_champs=None):
 
             def add_new_zone_de_gestion_tab(event):
                 clicked_tab = zone_notebook.tk.call(zone_notebook._w, "identify", "tab", event.x, event.y)
@@ -996,17 +1040,26 @@ def run_gui(frame):
             zone_notebook.bind("<Button-1>", add_new_zone_de_gestion_tab)
             zone_notebook.bind("<Button-3>", delete_zone_de_gestion_tab)
 
+            if simulation_copie is not None and index_champs is not None:
+                champs = simulation_copie["entreprise_agricole"]["champs"][index_champs]
+            else:
+                champs = None
+
             global duree_simulation
             for zone in range(int(nombre_de_zone)):
                 zone_tab = ttk.Frame(zone_notebook)
                 zone_notebook.add(zone_tab, text="Zone de gestion " + str(zone + 1))
-                set_up_regies_projections(zone_tab)
+                set_up_regies_projections(zone_tab, champs, zone)
 
             new_tab = ttk.Frame(zone_notebook)
             zone_notebook.add(new_tab, text="+")
             zone_notebook.pack()
 
-        def set_up_regies_projections(zone_tab):
+        def set_up_regies_projections(zone_tab, champs, zone_index):
+            if champs is not None:
+                zone = champs["zones_de_gestion"][zone_index]
+            else:
+                zone = None
             projection_frame = ttk.LabelFrame(zone_tab, text="Régies de la projection")
             canvas_projection = tk.Canvas(projection_frame)
             scrollbar_projection = ttk.Scrollbar(projection_frame, orient="vertical",
@@ -1018,7 +1071,7 @@ def run_gui(frame):
             canvas_projection.configure(yscrollcommand=scrollbar_projection.set)
             canvas_projection.pack(side="left", fill="both", expand=True)
             scrollbar_projection.pack(side="right", fill="y")
-            ajouter_une_annee_a_la_rotation(scrollable_frame_projection)
+            ajouter_une_annee_a_la_rotation(scrollable_frame_projection, zone)
             projection_frame.grid(row=1, column=0, columnspan=2)
             get_information_simulation_button = ttk.Button(zone_tab, text="Créer rapport",
                                                            command=get_information_toutes_les_simulations)
@@ -1027,12 +1080,17 @@ def run_gui(frame):
                                                               command=editer_caracteristique_physique_entreprise)
             editer_information_entreprise_button.grid(row=2, column=1)
 
-        def ajouter_une_annee_a_la_rotation(scrollable_frame_projection):
+        def ajouter_une_annee_a_la_rotation(scrollable_frame_projection, zone=None):
             if len(scrollable_frame_projection.winfo_children()) == 0:
-                index = len(scrollable_frame_projection.winfo_children()) + 1
-                add_regies_projection(scrollable_frame_projection, index)
-                button_frame = ttk.Frame(scrollable_frame_projection)
+                if zone is not None:
+                    for regie in zone["regies_sol_et_culture_projection"]:
+                        index = len(scrollable_frame_projection.winfo_children()) + 1
+                        add_regies_projection(scrollable_frame_projection, index, regie)
+                else:
+                    index = len(scrollable_frame_projection.winfo_children()) + 1
+                    add_regies_projection(scrollable_frame_projection, index)
 
+                button_frame = ttk.Frame(scrollable_frame_projection)
                 ajouter_une_annee_a_la_rotation_button = ttk.Button(button_frame, text="Ajouter une année de rotation",
                                                                     command=lambda: ajouter_une_annee_a_la_rotation(
                                                                         scrollable_frame_projection))
@@ -1176,22 +1234,41 @@ def run_gui(frame):
                 annee_courante += 1
                 annee_courante_frame.pack()
 
-        def ajouter_des_amendements(amendement_frame):
-            amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
+        def ajouter_des_amendements(amendement_frame, amendements=None):
             global amendements_supportees
-            amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
-            apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
-            apport_amendement_entry = ttk.Entry(amendement_frame)
+            if amendements is not None:
+                index = 0
+                for amendement in amendements:
+                    amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
+                    amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
+                    amendement_combobox.set(amendement["amendement"])
+                    apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
+                    apport_amendement_entry = ttk.Entry(amendement_frame)
+                    apport_amendement_entry.insert(0, str(amendement["apport"]))
+                    amendement_label.grid(row=index, column=0)
+                    amendement_combobox.grid(row=index, column=1)
+                    apport_amendement_label.grid(row=index+1, column=0)
+                    apport_amendement_entry.grid(row=index+1, column=1)
+                    index += 2
+            else:
+                index = 0
+                amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
+                amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
+                apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
+                apport_amendement_entry = ttk.Entry(amendement_frame)
+                amendement_label.grid(row=0, column=0)
+                amendement_combobox.grid(row=0, column=1)
+                apport_amendement_label.grid(row=1, column=0)
+                apport_amendement_entry.grid(row=1, column=1)
+                index += 2
+
             ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
                                                  command=lambda: ajouter_amendement_regie(amendement_frame))
             ajout_a_la_liste_amendement = ttk.Button(amendement_frame, text="Ajouter un nouvel amendement",
                                                      command=ajouter_nouvel_amendement)
-            amendement_label.grid(row=0, column=0)
-            amendement_combobox.grid(row=0, column=1)
-            apport_amendement_label.grid(row=1, column=0)
-            apport_amendement_entry.grid(row=1, column=1)
-            ajout_a_la_regie_button.grid(row=2, column=0)
-            ajout_a_la_liste_amendement.grid(row=2, column=1)
+
+            ajout_a_la_regie_button.grid(row=index, column=0)
+            ajout_a_la_liste_amendement.grid(row=index, column=1)
 
         def ajouter_amendement_regie(amendement_frame):
             grid_size = amendement_frame.grid_size()
@@ -1217,7 +1294,7 @@ def run_gui(frame):
             # TODO: Faire le UI et les calls nécessaire pour ajouter un amendement à la BD
             pass
 
-        def add_regies_projection(scrollable_frame, index):
+        def add_regies_projection(scrollable_frame, index, regie=None):
             annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(index))
             culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
             global cultures_principales_supportees
@@ -1242,8 +1319,25 @@ def run_gui(frame):
                                                            text="Rendement culture secondaire (t/ha): ")
             rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
 
+            if regie is not None:
+                culture_principale_combobox.set(regie["culture_principale"]["culture_principale"])
+                rendement_entry.insert(0, str(regie["culture_principale"]["rendement"]))
+                proportion_tige_exporte_entry.insert(0, str(regie["culture_principale"]["proportion_tige_exporte"]))
+                if regie["culture_principale"]["produit_non_recolte"]:
+                    production_non_recolte_combobox.set("Oui")
+                else:
+                    production_non_recolte_combobox.set("Non")
+                taux_matiere_seche_entry.insert(0, str(regie["culture_principale"]["taux_matiere_seche"]))
+                travail_du_sol_combobox.set(regie["travail_du_sol"]["travail_du_sol"])
+                profondeur_maximale_entry.insert(0, str(regie["travail_du_sol"]["profondeur_du_travail"]))
+                culture_secondaire_combobox.set(regie["culture_secondaire"]["culture_secondaire"])
+                rendement_culture_secondaire_entry.insert(0, str(regie["culture_secondaire"]["rendement"]))
+
             amendement_frame = ttk.LabelFrame(annee_courante_frame, text="Liste des amendements")
-            ajouter_des_amendements(amendement_frame)
+            if regie is not None:
+                ajouter_des_amendements(amendement_frame, regie["amendements"])
+            else:
+                ajouter_des_amendements(amendement_frame)
 
             culture_principale_label.grid(row=0, column=0)
             culture_principale_combobox.grid(row=0, column=1)
@@ -1274,7 +1368,7 @@ def run_gui(frame):
                 global nombre_simulations
                 if index_simualtion < nombre_simulations:
                     simulation, entree_invalide_liste_simulation = get_information_simulation(simulation,
-                                                                                              index_simualtion)
+                                                                                              index_simualtion, simulation_unique=False)
                     for entree in entree_invalide_liste_simulation:
                         entree_invalide_liste.append(entree)
                     simulations.append(simulation)
@@ -1293,11 +1387,14 @@ def run_gui(frame):
                 messagebox.showwarning("Warning", message)
                 parent_frame_tabs.focus()
 
-        def get_information_simulation(simulation_frame, index_simulation):
+        def get_information_simulation(simulation_frame, index_simulation, simulation_unique):
             global information_champs
             global nombre_de_champs
             entree_invalide_simulation_liste = []
-            regies_rechauffement, entree_invalide_liste = get_regies_rechauffement()
+            if simulation_unique:
+                regies_rechauffement, entree_invalide_liste = None, []
+            else:
+                regies_rechauffement, entree_invalide_liste = get_regies_rechauffement()
             entree_invalide_simulation_liste.append(entree_invalide_liste)
             champs_notebook = simulation_frame.winfo_children()[0]
             index_champs = 0
@@ -1309,12 +1406,15 @@ def run_gui(frame):
                     zone_notebook = champs_frame.winfo_children()[0]
                     for zone_frames in zone_notebook.winfo_children():
                         if index_zone < int(information_champs[index_champs]["nombre_de_zone_de_gestion"]):
-                            # TODO: Modifier cette section pour qu'elle prenne en considération la nouvelle façon de gérer les régies historiques
                             regies_projection_frame = zone_frames.winfo_children()[0]
                             regies_projection, entree_invalide_liste = get_regies(regies_projection_frame, index_champs,
                                                                                   index_zone, index_simulation)
+                            if regies_rechauffement is not None:
+                                regie_rechauffement = regies_rechauffement[index_champs][index_zone]
+                            else:
+                                regie_rechauffement = None
                             zone_list.append({"regies_projection": regies_projection,
-                                              "regies_rechauffement": regies_rechauffement[index_champs][index_zone]})
+                                              "regies_rechauffement": regie_rechauffement})
                             entree_invalide_simulation_liste.append(entree_invalide_liste)
                         index_zone += 1
                     champs_list.append(zone_list)
