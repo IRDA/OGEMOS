@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, abort
 import json
 from ICBM.Simulations.gestion_de_simulation import *
+from waitress import serve
 
 app = Flask(__name__)
 
@@ -8,8 +9,7 @@ app = Flask(__name__)
 @app.route('/api/icbm-bilan', methods=['POST'])
 def add():
     data_request = request.get_json()
-    data_to_dict = json.loads(data_request)
-    response = __launch_icbm_simulation(data_to_dict)
+    response = __launch_icbm_simulation(data_request)
     return jsonify(response)
 
 
@@ -337,3 +337,7 @@ def __culture_secondaire_mapping(data):
         abort(400, message_erreur)
 
     return CultureSecondaire(culture_secondaire, rendement)
+
+
+if __name__ == '__main__':
+    serve(app, host="127.0.0.1", port=5000)

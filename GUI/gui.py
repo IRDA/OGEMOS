@@ -18,8 +18,7 @@ def kill(proc_pid):
 
 
 sp = subprocess.Popen(
-    "cd ../ICBM/VirtualEnvironmentSetUp/venv/scripts & activate & cd ../.. & set FLASK_ENV=development & set "
-    "FLASK_APP=app.py & flask run",
+    "cd ../ICBM/VirtualEnvironmentSetUp & py \"app.py\"",
     shell=True)
 
 global municipalites_supportees
@@ -1375,8 +1374,8 @@ def run_gui(frame):
                 index_simualtion += 1
 
             if len(entree_invalide_liste) == 0:
-                simulation_dict = json.dumps({"simulations": simulations})
-                response = requests.post('http://localhost:5000/api/icbm-bilan', json=simulation_dict)
+                response = requests.post('http://localhost:5000/api/icbm-bilan', json={"simulations": simulations})
+                print(response.text)
                 # TODO: Ajouter la suite avec la generation du rapport
             else:
                 message = ""
