@@ -424,7 +424,7 @@ def run_gui(frame):
                                     "L'entrée \"Durée de la projection\" est invalide. Elle doit être un nombre naturel plus grand que 0.")
                             if (numero_simulation_copie is not None and not numero_simulation_copie.isdigit()) or (
                                     numero_simulation_copie is not None and (int(
-                                    numero_simulation_copie) >= nombre_simulations or int(
+                                numero_simulation_copie) >= nombre_simulations or int(
                                 numero_simulation_copie) < 1)):
                                 entree_invalide_liste.append(
                                     "L'entrée \"Numéro de la simulation à copier\" est invalide. Elle doit être un nombre naturel plus grand que 0 et parmis les numéros de simulations existantes.")
@@ -603,7 +603,8 @@ def run_gui(frame):
                         municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
                         classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
                         global classes_texturales_supportees
-                        classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_texturales_supportees)
+                        classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame,
+                                                                 values=classes_texturales_supportees)
                         classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                         global classes_de_drainage_supportees
                         classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame,
@@ -1107,8 +1108,15 @@ def run_gui(frame):
                                                                     command=lambda: ajouter_une_annee_a_la_rotation(
                                                                         scrollable_frame_projection))
                 ajouter_une_annee_a_la_rotation_button.grid(row=0, column=0)
-                enlever_une_annee_a_la_rotation_button = ttk.Button(button_frame, text="Enlever une année de rotation",
-                                                                    state="disabled")
+                if zone is not None and len(zone) > 1:
+                    enlever_une_annee_a_la_rotation_button = ttk.Button(button_frame,
+                                                                        text="Enlever une année de rotation",
+                                                                        command=lambda: enlever_une_annee_a_la_rotation(
+                                                                        scrollable_frame_projection))
+                else:
+                    enlever_une_annee_a_la_rotation_button = ttk.Button(button_frame,
+                                                                        text="Enlever une année de rotation",
+                                                                        state="disabled")
                 enlever_une_annee_a_la_rotation_button.grid(row=0, column=1)
                 button_frame.pack()
             else:
