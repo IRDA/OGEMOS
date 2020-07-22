@@ -10,6 +10,11 @@ import psutil
 import requests
 
 
+# TODO: ajouter la possibilité de ne pas avoir de culture secondaire ou amendement
+# TODO: ajouter la sauvegarde des simulations (en json)
+# TODO: regarder la possibilité de donner un nom à la simulation
+# TODO: regarder pour un  bug sur le bouton enlever regie
+
 def kill(proc_pid):
     process = psutil.Process(proc_pid)
     for proc in process.children(recursive=True):
@@ -26,10 +31,10 @@ municipalites_supportees_temporaire = requests.get("http://localhost:5000/api/ge
 municipalites_supportees = municipalites_supportees_temporaire.json()["municipalites_supportees"]
 municipalites_supportees.sort()
 
-global series_de_sol_supportees
-series_de_sol_supportees_temporaire = requests.get("http://localhost:5000/api/get-series_de_sol")
-series_de_sol_supportees = series_de_sol_supportees_temporaire.json()["series_de_sol_supportees"]
-series_de_sol_supportees.sort()
+global classes_texturales_supportees
+classes_texturales_supportees_temporaire = requests.get("http://localhost:5000/api/get-classe_texturale")
+classes_texturales_supportees = classes_texturales_supportees_temporaire.json()["classes_texturales_supportees"]
+classes_texturales_supportees.sort()
 
 global classes_de_drainage_supportees
 classe_de_drainage_supportees_temporaire = requests.get("http://localhost:5000/api/get-classe_de_drainage")
@@ -59,7 +64,7 @@ amendements_supportees.sort()
 root = tk.Tk()
 root.title("OGEMOS")
 mainframe = ttk.Frame(root)
-mainframe.grid(row=0, column=0)
+mainframe.grid(row=0, column=0, ipadx=5, ipady=5)
 
 
 def closing_root_protocol():
@@ -92,10 +97,15 @@ def run_gui(frame):
         nombre_de_champs_entry = ttk.Entry(frame_entreprise)
         nombre_de_champs_entry.insert(0, "1")
 
-        nom_entreprise_label.grid(row=0, column=0)
-        nom_entreprise_entry.grid(row=0, column=1)
-        nombre_de_champs_label.grid(row=1, column=0)
-        nombre_de_champs_entry.grid(row=1, column=1)
+        nom_entreprise_label.grid(row=0, column=0, sticky="E")
+        nom_entreprise_entry.grid(row=0, column=1, sticky="W")
+        nombre_de_champs_label.grid(row=1, column=0, sticky="E")
+        nombre_de_champs_entry.grid(row=1, column=1, sticky="W")
+        frame_entreprise.grid_columnconfigure(0, pad=10)
+        frame_entreprise.grid_columnconfigure(1, pad=10)
+        frame_entreprise.grid_rowconfigure(0, minsize=30)
+        frame_entreprise.grid_rowconfigure(1, minsize=30)
+        frame_entreprise.grid_rowconfigure(2, minsize=30)
 
         creer_bouton = ttk.Button(frame_entreprise, text="Créer", command=get_information_entreprise)
         creer_bouton.grid(columnspan=2, row=2, column=0)
@@ -143,14 +153,14 @@ def run_gui(frame):
             nombre_de_zone_de_gestion_label = ttk.Label(champs_frame, text="Nombre de zone de gestion: ")
             nombre_de_zone_de_gestion_entry = ttk.Entry(champs_frame)
             nombre_de_zone_de_gestion_entry.insert(0, "1")
-            nom_du_champs_label.grid(row=0, column=0)
-            nom_du_champs_entry.grid(row=0, column=1)
-            nombre_de_zone_de_gestion_label.grid(row=1, column=0)
-            nombre_de_zone_de_gestion_entry.grid(row=1, column=1)
+            nom_du_champs_label.grid(row=0, column=0, pady=3)
+            nom_du_champs_entry.grid(row=0, column=1, pady=3)
+            nombre_de_zone_de_gestion_label.grid(row=1, column=0, pady=3)
+            nombre_de_zone_de_gestion_entry.grid(row=1, column=1, pady=3)
 
-            champs_frame.pack(fill="both")
+            champs_frame.pack(fill="both", padx=55, pady=5)
 
-        canvas.pack(side="left", fill="x", expand=True)
+        canvas.pack(side="left", ipadx=10)
         scrollbar.pack(side="right", fill="y")
 
         creation_champs_bouton = ttk.Button(scrollable_frame, text="Créer",
@@ -189,13 +199,13 @@ def run_gui(frame):
                                          "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = champs_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
-                                serie_de_sol = entry.get()
-                                global series_de_sol_supportees
-                                if serie_de_sol not in series_de_sol_supportees:
+                                classe_texturale = entry.get()
+                                global classes_texturales_supportees
+                                if classe_texturale not in classes_texturales_supportees:
                                     entree_invalide_liste.append(
                                         (information_champs[index]["nom_du_champs"],
                                          "Zone de gestion " + str(index_zone),
-                                         "\"Série de sol\" doit être parmis les choix disponibles"))
+                                         "\"Classe texturale\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = champs_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
                                 classe_de_drainage = entry.get()
@@ -245,7 +255,7 @@ def run_gui(frame):
                             information_champs[index]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
-                                 "serie_de_sol": serie_de_sol,
+                                 "classe_texturale": classe_texturale,
                                  "classe_de_drainage": classe_de_drainage,
                                  "masse_volumique_apparente": masse_volumique_apparente,
                                  "profondeur": profondeur,
@@ -287,9 +297,9 @@ def run_gui(frame):
                 municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
                 global municipalites_supportees
                 municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
-                serie_de_sol_label = ttk.Label(zone_de_gestion_frame, text="Série de sol: ")
-                global series_de_sol_supportees
-                serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees)
+                classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
+                global classes_texturales_supportees
+                classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_texturales_supportees)
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                 global classes_de_drainage_supportees
                 classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees)
@@ -300,26 +310,26 @@ def run_gui(frame):
                 profondeur_entry = ttk.Entry(zone_de_gestion_frame)
                 superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame, text="Superficie de la zone (ha): ")
                 superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
-                taux_matiere_organique_label.grid(row=0, column=0)
-                taux_matiere_organique_entry.grid(row=0, column=1)
-                municipalite_label.grid(row=1, column=0)
-                municipalite_combobox.grid(row=1, column=1)
-                serie_de_sol_label.grid(row=2, column=0)
-                serie_de_sol_combobox.grid(row=2, column=1)
-                classe_de_drainage_label.grid(row=3, column=0)
-                classe_de_drainage_combobox.grid(row=3, column=1)
-                masse_volumique_apparente_label.grid(row=4, column=0)
-                masse_volumique_apparente_entry.grid(row=4, column=1)
-                profondeur_label.grid(row=5, column=0)
-                profondeur_entry.grid(row=5, column=1)
-                superficie_de_la_zone_label.grid(row=6, column=0)
-                superficie_de_la_zone_entry.grid(row=6, column=1)
+                taux_matiere_organique_label.grid(row=0, column=0, pady=3)
+                taux_matiere_organique_entry.grid(row=0, column=1, pady=3)
+                municipalite_label.grid(row=1, column=0, pady=3)
+                municipalite_combobox.grid(row=1, column=1, pady=3)
+                classe_texturale_label.grid(row=2, column=0, pady=3)
+                classe_texturale_combobox.grid(row=2, column=1, pady=3)
+                classe_de_drainage_label.grid(row=3, column=0, pady=3)
+                classe_de_drainage_combobox.grid(row=3, column=1, pady=3)
+                masse_volumique_apparente_label.grid(row=4, column=0, pady=3)
+                masse_volumique_apparente_entry.grid(row=4, column=1, pady=3)
+                profondeur_label.grid(row=5, column=0, pady=3)
+                profondeur_entry.grid(row=5, column=1, pady=3)
+                superficie_de_la_zone_label.grid(row=6, column=0, pady=3)
+                superficie_de_la_zone_entry.grid(row=6, column=1, pady=3)
 
                 zone_de_gestion_frame.pack()
 
-            champs_frame.pack(fill="both")
+            champs_frame.pack(fill="both", padx=10, pady=5, ipadx=10, ipady=5)
 
-        canvas.pack(side="left", fill="x", expand=True)
+        canvas.pack(side="left", ipadx=10)
         scrollbar.pack(side="right", fill="y")
 
         creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame, text="Créer",
@@ -384,7 +394,8 @@ def run_gui(frame):
                             if numero_simulation_copie is not None:
                                 simulation = simulation_notebook.winfo_children()[int(numero_simulation_copie) - 1]
                                 simulation_copie = get_information_simulation(simulation,
-                                                                              int(numero_simulation_copie) - 1, simulation_unique=True)
+                                                                              int(numero_simulation_copie) - 1,
+                                                                              simulation_unique=True)
                                 if simulation_copie[0] is not None:
                                     simulation_copie = simulation_copie[0]
                                     duree_simulation_window.destroy()
@@ -411,8 +422,10 @@ def run_gui(frame):
                             if not duree_projection.isdigit() or int(duree_projection) <= 0:
                                 entree_invalide_liste.append(
                                     "L'entrée \"Durée de la projection\" est invalide. Elle doit être un nombre naturel plus grand que 0.")
-                            if (numero_simulation_copie is not None and not numero_simulation_copie.isdigit()) or int(
-                                    numero_simulation_copie) >= nombre_simulations or int(numero_simulation_copie) < 1:
+                            if (numero_simulation_copie is not None and not numero_simulation_copie.isdigit()) or (
+                                    numero_simulation_copie is not None and (int(
+                                    numero_simulation_copie) >= nombre_simulations or int(
+                                numero_simulation_copie) < 1)):
                                 entree_invalide_liste.append(
                                     "L'entrée \"Numéro de la simulation à copier\" est invalide. Elle doit être un nombre naturel plus grand que 0 et parmis les numéros de simulations existantes.")
 
@@ -442,16 +455,16 @@ def run_gui(frame):
                     if nombre_simulations < 2:
                         numero_simulation_copie_entry.configure(state="disabled")
 
-                    annee_projection_initiale_label.grid(row=0, column=0)
-                    annee_projection_initiale_entry.grid(row=0, column=1)
-                    duree_projection_label.grid(row=1, column=0)
-                    duree_projection_entry.grid(row=1, column=1)
-                    numero_simulation_copie_label.grid(row=2, column=0)
-                    numero_simulation_copie_entry.grid(row=2, column=1)
+                    annee_projection_initiale_label.grid(row=0, column=0, pady=3, padx=5)
+                    annee_projection_initiale_entry.grid(row=0, column=1, pady=3, padx=5)
+                    duree_projection_label.grid(row=1, column=0, pady=3, padx=5)
+                    duree_projection_entry.grid(row=1, column=1, pady=3, padx=5)
+                    numero_simulation_copie_label.grid(row=2, column=0, pady=3, padx=5)
+                    numero_simulation_copie_entry.grid(row=2, column=1, pady=3, padx=5)
 
                     creer_simulation_bouton = ttk.Button(duree_simulation_frame, text="Créer",
                                                          command=get_duree_de_la_simulation)
-                    creer_simulation_bouton.grid(row=5, column=0, columnspan=2)
+                    creer_simulation_bouton.grid(row=5, column=0, columnspan=2, pady=3)
                     duree_simulation_frame.pack()
 
                 duree_de_la_simulation()
@@ -588,9 +601,9 @@ def run_gui(frame):
                         municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
                         global municipalites_supportees
                         municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
-                        serie_de_sol_label = ttk.Label(zone_de_gestion_frame, text="Série de sol: ")
-                        global series_de_sol_supportees
-                        serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees)
+                        classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
+                        global classes_texturales_supportees
+                        classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_texturales_supportees)
                         classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                         global classes_de_drainage_supportees
                         classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame,
@@ -607,8 +620,8 @@ def run_gui(frame):
                         taux_matiere_organique_entry.grid(row=0, column=1)
                         municipalite_label.grid(row=1, column=0)
                         municipalite_combobox.grid(row=1, column=1)
-                        serie_de_sol_label.grid(row=2, column=0)
-                        serie_de_sol_combobox.grid(row=2, column=1)
+                        classe_texturale_label.grid(row=2, column=0)
+                        classe_texturale_combobox.grid(row=2, column=1)
                         classe_de_drainage_label.grid(row=3, column=0)
                         classe_de_drainage_combobox.grid(row=3, column=1)
                         masse_volumique_apparente_label.grid(row=4, column=0)
@@ -660,13 +673,13 @@ def run_gui(frame):
                                          "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
-                                serie_de_sol = entry.get()
-                                global series_de_sol_supportees
-                                if serie_de_sol not in series_de_sol_supportees:
+                                classe_texturale = entry.get()
+                                global classes_texturales_supportees
+                                if classe_texturale not in classes_texturales_supportees:
                                     entree_invalide_liste.append(
                                         (information_champs[nombre_de_champs - 1]["nom_du_champs"],
                                          "Zone de gestion " + str(index_zone + 1),
-                                         "\"Série de sol\" doit être parmis les choix disponibles"))
+                                         "\"Classe texturale\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
                                 classe_de_drainage = entry.get()
@@ -718,7 +731,7 @@ def run_gui(frame):
                             information_champs[len(information_champs) - 1]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
-                                 "serie_de_sol": serie_de_sol,
+                                 "classe_texturale": classe_texturale,
                                  "classe_de_drainage": classe_de_drainage,
                                  "masse_volumique_apparente": masse_volumique_apparente,
                                  "profondeur": profondeur,
@@ -856,9 +869,9 @@ def run_gui(frame):
                 municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
                 global municipalites_supportees
                 municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
-                serie_de_sol_label = ttk.Label(zone_de_gestion_frame, text="Série de sol: ")
-                global series_de_sol_supportees
-                serie_de_sol_combobox = ttk.Combobox(zone_de_gestion_frame, values=series_de_sol_supportees)
+                classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
+                global classes_texturales_supportees
+                classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_texturales_supportees)
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                 global classes_de_drainage_supportees
                 classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees)
@@ -874,8 +887,8 @@ def run_gui(frame):
                 taux_matiere_organique_entry.grid(row=0, column=1)
                 municipalite_label.grid(row=1, column=0)
                 municipalite_combobox.grid(row=1, column=1)
-                serie_de_sol_label.grid(row=2, column=0)
-                serie_de_sol_combobox.grid(row=2, column=1)
+                classe_texturale_label.grid(row=2, column=0)
+                classe_texturale_combobox.grid(row=2, column=1)
                 classe_de_drainage_label.grid(row=3, column=0)
                 classe_de_drainage_combobox.grid(row=3, column=1)
                 masse_volumique_apparente_label.grid(row=4, column=0)
@@ -924,14 +937,14 @@ def run_gui(frame):
                                          "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
-                                serie_de_sol = entry.get()
-                                global series_de_sol_supportees
-                                if serie_de_sol not in series_de_sol_supportees:
+                                classe_texturale = entry.get()
+                                global classes_texturales_supportees
+                                if classe_texturale not in classes_texturales_supportees:
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
                                          "Zone de gestion " + str(
                                              information_champs[champs_index]["nombre_de_zone_de_gestion"]),
-                                         "\"Série de sol\" doit être parmis les choix disponibles"))
+                                         "\"Classe texturale\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
                                 classe_de_drainage = entry.get()
@@ -986,7 +999,7 @@ def run_gui(frame):
                             information_champs[champs_index]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
-                                 "serie_de_sol": serie_de_sol,
+                                 "classe_texturale": classe_texturale,
                                  "classe_de_drainage": classe_de_drainage,
                                  "masse_volumique_apparente": masse_volumique_apparente,
                                  "profondeur": profondeur,
@@ -1241,19 +1254,19 @@ def run_gui(frame):
                     amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
                     amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
                     amendement_combobox.set(amendement["amendement"])
-                    apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
+                    apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t/ha):")
                     apport_amendement_entry = ttk.Entry(amendement_frame)
                     apport_amendement_entry.insert(0, str(amendement["apport"]))
                     amendement_label.grid(row=index, column=0)
                     amendement_combobox.grid(row=index, column=1)
-                    apport_amendement_label.grid(row=index+1, column=0)
-                    apport_amendement_entry.grid(row=index+1, column=1)
+                    apport_amendement_label.grid(row=index + 1, column=0)
+                    apport_amendement_entry.grid(row=index + 1, column=1)
                     index += 2
             else:
                 index = 0
                 amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
                 amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
-                apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
+                apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t/ha):")
                 apport_amendement_entry = ttk.Entry(amendement_frame)
                 amendement_label.grid(row=0, column=0)
                 amendement_combobox.grid(row=0, column=1)
@@ -1367,7 +1380,8 @@ def run_gui(frame):
                 global nombre_simulations
                 if index_simualtion < nombre_simulations:
                     simulation, entree_invalide_liste_simulation = get_information_simulation(simulation,
-                                                                                              index_simualtion, simulation_unique=False)
+                                                                                              index_simualtion,
+                                                                                              simulation_unique=False)
                     for entree in entree_invalide_liste_simulation:
                         entree_invalide_liste.append(entree)
                     simulations.append(simulation)
@@ -1427,7 +1441,7 @@ def run_gui(frame):
                     for zone in champs["information_zone_de_gestion"]:
                         zones_de_gestion.append({"taux_matiere_organique": zone["taux_matiere_organique"],
                                                  "municipalite": zone["municipalite"],
-                                                 "serie_de_sol": zone["serie_de_sol"],
+                                                 "classe_texturale": zone["classe_texturale"],
                                                  "classe_de_drainage": zone["classe_de_drainage"],
                                                  "masse_volumique_apparente": zone["masse_volumique_apparente"],
                                                  "profondeur": zone["profondeur"],
@@ -1613,7 +1627,7 @@ def run_gui(frame):
 
         simulation_notebook.add(tab1, text="+")
 
-        simulation_notebook.grid(row=0, column=0)
+        simulation_notebook.grid(row=0, column=0, sticky="nw")
         set_up_regies_rechauffement(donnees_de_rechauffement_label_frame, show_regie_historique)
         donnees_de_rechauffement_label_frame.grid(row=0, column=1)
 
@@ -1825,10 +1839,10 @@ def run_gui(frame):
                     global municipalites_supportees
                     municipalite_combobox = ttk.Combobox(zone_label_frame, values=municipalites_supportees)
                     municipalite_combobox.set(information_zone_de_gestion["municipalite"])
-                    serie_de_sol_label = ttk.Label(zone_label_frame, text="Série de sol: ")
-                    global series_de_sol_supportees
-                    serie_de_sol_combobox = ttk.Combobox(zone_label_frame, values=series_de_sol_supportees)
-                    serie_de_sol_combobox.set(information_zone_de_gestion["serie_de_sol"])
+                    classe_texturale_label = ttk.Label(zone_label_frame, text="Classe texturale: ")
+                    global classes_texturales_supportees
+                    classe_texturale_combobox = ttk.Combobox(zone_label_frame, values=classes_texturales_supportees)
+                    classe_texturale_combobox.set(information_zone_de_gestion["classe_texturale"])
                     classe_de_drainage_label = ttk.Label(zone_label_frame, text="Classe de drainage: ")
                     global classes_de_drainage_supportees
                     classe_de_drainage_combobox = ttk.Combobox(zone_label_frame, values=classes_de_drainage_supportees)
@@ -1850,8 +1864,8 @@ def run_gui(frame):
                     taux_matiere_organique_entry.grid(row=0, column=1)
                     municipalite_label.grid(row=1, column=0)
                     municipalite_combobox.grid(row=1, column=1)
-                    serie_de_sol_label.grid(row=2, column=0)
-                    serie_de_sol_combobox.grid(row=2, column=1)
+                    classe_texturale_label.grid(row=2, column=0)
+                    classe_texturale_combobox.grid(row=2, column=1)
                     classe_de_drainage_label.grid(row=3, column=0)
                     classe_de_drainage_combobox.grid(row=3, column=1)
                     masse_volumique_apparente_label.grid(row=4, column=0)
@@ -1864,8 +1878,8 @@ def run_gui(frame):
                     zone_row_index += 1
                 champs_label_frame.grid(row=champs_row_index, column=0, columnspan=2)
                 champs_row_index += 1
-            entreprise_label_frame.pack()
-            canvas.pack(side="left", fill="x", expand=True)
+            entreprise_label_frame.pack(ipadx=5, ipady=5, padx=101)
+            canvas.pack(side="left", ipadx=5)
             scrollbar.pack(side="right", fill="y")
 
             def effectuer_la_sauvegarde():
@@ -1900,13 +1914,13 @@ def run_gui(frame):
                                 ("Champs " + str(champs_label_frame_index - 1),
                                  "Zone de gestion " + str(zone_label_frame_index - 1),
                                  "\"Municipalité\" doit être parmis les choix disponibles"))
-                        serie_de_sol = zone_frame.grid_slaves(row=2, column=1)[0].get()
-                        global series_de_sol_supportees
-                        if serie_de_sol not in series_de_sol_supportees:
+                        classe_texturale = zone_frame.grid_slaves(row=2, column=1)[0].get()
+                        global classes_texturales_supportees
+                        if classe_texturale not in classes_texturales_supportees:
                             entree_invalide_liste.append(
                                 ("Champs " + str(champs_label_frame_index - 1),
                                  "Zone de gestion " + str(zone_label_frame_index - 1),
-                                 "\"Série de sol\" doit être parmis les choix disponibles"))
+                                 "\"Classe texturale\" doit être parmis les choix disponibles"))
                         classe_de_drainage = zone_frame.grid_slaves(row=3, column=1)[0].get()
                         global classes_de_drainage_supportees
                         if classe_de_drainage not in classes_de_drainage_supportees:
@@ -1949,7 +1963,7 @@ def run_gui(frame):
                         info_zones_de_gestion.append(
                             {"taux_matiere_organique": taux_matiere_organique,
                              "municipalite": municipalite,
-                             "serie_de_sol": serie_de_sol,
+                             "classe_texturale": classe_texturale,
                              "classe_de_drainage": classe_de_drainage,
                              "masse_volumique_apparente": masse_volumique_apparente,
                              "profondeur": profondeur,
@@ -2008,9 +2022,9 @@ def run_gui(frame):
         non_button = ttk.Button(question_frame, text="Non",
                                 command=lambda: show_creation_des_regies(question_mainframe,
                                                                          show_regie_historique=False))
-        question_label.grid(row=0, column=0, columnspan=2)
-        oui_button.grid(row=1, column=0)
-        non_button.grid(row=1, column=1)
+        question_label.grid(row=0, column=0, columnspan=2, padx=5, pady=3)
+        oui_button.grid(row=1, column=0, padx=5, pady=3)
+        non_button.grid(row=1, column=1, padx=5, pady=3)
         question_frame.pack()
 
     def set_up_annees_historiques(annee_historique_mainframe):
@@ -2031,10 +2045,10 @@ def run_gui(frame):
         annee_historique_finale_label = ttk.Label(annee_historique_frame, text="Année historique finale: ")
         annee_historique_finale_entry = ttk.Entry(annee_historique_frame)
 
-        annee_historique_initiale_label.grid(row=0, column=0)
-        annee_historique_initiale_entry.grid(row=0, column=1)
-        annee_historique_finale_label.grid(row=1, column=0)
-        annee_historique_finale_entry.grid(row=1, column=1)
+        annee_historique_initiale_label.grid(row=0, column=0, pady=3)
+        annee_historique_initiale_entry.grid(row=0, column=1, pady=3)
+        annee_historique_finale_label.grid(row=1, column=0, pady=3)
+        annee_historique_finale_entry.grid(row=1, column=1, pady=3)
 
         get_annees_historiques_button = ttk.Button(annee_historique_frame, text="Confirmer",
                                                    command=get_annees_historiques)
@@ -2077,9 +2091,9 @@ def run_gui(frame):
                                                 command=creation_nouvelle_entreprise)
         charger_entreprise_button = ttk.Button(menu_frame, text="Charger une entreprise", command=charger_entreprise)
 
-        bienvenue_label.pack()
-        nouvelle_entreprise_button.pack()
-        charger_entreprise_button.pack()
+        bienvenue_label.pack(pady=5, padx=10)
+        nouvelle_entreprise_button.pack(pady=5, padx=10)
+        charger_entreprise_button.pack(pady=5, padx=10)
 
     def sauvergarder_attributs_entreprise_apres_creation():
         root.withdraw()

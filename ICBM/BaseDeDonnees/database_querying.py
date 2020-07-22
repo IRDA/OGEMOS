@@ -9,18 +9,18 @@ def get_facteur_climatique(region):
     return query_result
 
 
-def get_facteur_series_de_sol(series_de_sol):
+def get_facteur_classe_texturale(classe_texturale):
     session = Session()
-    query_result = session.query(FacteurSerieDeSol).filter(FacteurSerieDeSol.serie_de_sol == series_de_sol).one()
+    query_result = session.query(FacteurClasseTexturale).filter(FacteurClasseTexturale.classe_texturale == classe_texturale).one()
     session.close()
     return query_result
 
 
-def get_series_de_sol_supportees():
+def get_classes_texturales_supportees():
     session = Session()
     query_result = []
-    for serie_de_sol in session.query(FacteurSerieDeSol.serie_de_sol).all():
-        query_result.append(serie_de_sol.serie_de_sol)
+    for classe_texturale in session.query(FacteurClasseTexturale.classe_texturale).all():
+        query_result.append(classe_texturale.classe_texturale)
     session.close()
     return query_result
 

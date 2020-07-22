@@ -18,8 +18,8 @@ class RegieDesSolsEtCultures:
     def set_annee_de_culture(self, annee_de_culture):
         self.__annee_de_culture = annee_de_culture
 
-    def calculer_coefficient_humidification_residus_culture(self):
-        return self.__culture_principale.get_coefficient_calcul().coefficient_humidification_residus_culture
+    def calculer_coefficient_humification_residus_culture(self):
+        return self.__culture_principale.get_coefficient_calcul().coefficient_humification_residus_culture
 
     def generer_bilan_regie(self):
 
@@ -145,12 +145,3 @@ class TravailDuSol:
     def calculer_apport_en_carbone_travail_du_sol(self):
         return get_facteur_travail_du_sol(self.__type_de_travail_du_sol).facteur_travail_du_sol
 
-
-if __name__ == '__main__':
-    cp = CulturePrincipale('Maïs grain', 15.0, 0.75, True, True, 3)
-    cs = CultureSecondaire(0, 0)
-    am = Amendement('Lisier porcs', 0)
-    ams = Amendements([am])
-    ts = TravailDuSol(0, 0)
-    data = RegieDesSolsEtCultures(cp, cs, ams, ts)
-    print(data.generer_bilan_regie()["culture_principale"])

@@ -20,10 +20,10 @@ def get_municipalite():
     return jsonify(response)
 
 
-@app.route('/api/get-series_de_sol', methods=['GET'])
-def get_serie_de_sol():
-    response = get_series_de_sol_supportees()
-    response = {"series_de_sol_supportees": response}
+@app.route('/api/get-classe_texturale', methods=['GET'])
+def get_classe_texturale():
+    response = get_classes_texturales_supportees()
+    response = {"classes_texturales_supportees": response}
     return jsonify(response)
 
 
@@ -122,12 +122,12 @@ def __champs_mapping(data):
 
 def __zone_de_gestion_mapping(data):
     liste_zone_de_gestion = []
-    series_de_sol_supportees = get_series_de_sol_supportees()
+    classes_texturales_supportees = get_classes_texturales_supportees()
     classe_de_drainage_supportees = get_classes_de_drainage_supportees()
     for zone_de_gestion in data:
         taux_matiere_organique = zone_de_gestion["taux_matiere_organique"]
         municipalite = zone_de_gestion["municipalite"]
-        serie_de_sol = zone_de_gestion["serie_de_sol"]
+        classe_texturale = zone_de_gestion["classe_texturale"]
         superficie_de_la_zone = zone_de_gestion["superficie_de_la_zone"]
         classe_de_drainage = zone_de_gestion["classe_de_drainage"]
         masse_volumique_apparente = zone_de_gestion["masse_volumique_apparente"]
@@ -138,9 +138,9 @@ def __zone_de_gestion_mapping(data):
             zone_de_gestion["regies_sol_et_culture_historique"], municipalite)
 
         try:
-            assert serie_de_sol in series_de_sol_supportees
+            assert classe_texturale in classes_texturales_supportees
         except AssertionError:
-            message_erreur = str(serie_de_sol) + " n'est pas une série de sol supportée."
+            message_erreur = str(classe_texturale) + " n'est pas une classe texturale supportée."
             abort(400, message_erreur)
 
         try:
@@ -189,7 +189,7 @@ def __zone_de_gestion_mapping(data):
             abort(400, message_erreur)
 
         liste_zone_de_gestion.append(
-            ZoneDeGestion(taux_matiere_organique, municipalite, serie_de_sol, classe_de_drainage,
+            ZoneDeGestion(taux_matiere_organique, municipalite, classe_texturale, classe_de_drainage,
                           masse_volumique_apparente, profondeur, superficie_de_la_zone,
                           regies_sol_et_culture_projection, regies_sol_et_culture_historique))
     return liste_zone_de_gestion

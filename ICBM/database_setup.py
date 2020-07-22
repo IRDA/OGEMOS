@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
 
+# TODO: vérifier si le cacul du path risque de planter
 
 path = os.path.abspath(__file__)
 while path != 'C:\\Users\\Samuel\\PycharmProjects\\OGEMOS\\ICBM':

@@ -26,17 +26,3 @@ class Simulation:
 
     def generer_le_bilan_pour_la_simulation(self):
         return self.__entreprise_agricole.generer_le_bilan_entreprise()
-
-
-if __name__ == '__main__':
-    cp = CulturePrincipale('Maïs grain', 5.0, 5, True)
-    cs = CultureSecondaire(0, 0)
-    am = Amendement(0)
-    ams = Amendements([am])
-    ts = TravailDuSol(0, 0)
-    data = RegieDesSolsEtCultures(cp, cs, ams, ts)
-    zg = ZoneDeGestion(3, 'Victoriaville', 'Limon', 'Ok', None, None, [data])
-    chmp = Champs("Joe's Field", [zg])
-    ea = EntrepriseAgricole("Joe's Farm", [chmp])
-    sim = Simulation(2015, 2020, ea)
-    #2print(sim.calculer_carbone_organique_du_sol_pour_entreprise_agricole_la_duree_de_la_simulation())

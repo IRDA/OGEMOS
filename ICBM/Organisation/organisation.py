@@ -90,13 +90,13 @@ class ZoneDeGestion:
     :param masse_volumique_apparente: masse volumique apparente  1.318 par défaut(g/cm3)
     :param profondeur: profondeur donnée pour le calcul de la masse de carbone organique du sol (cm)
     :param municipalite: municipalite dans laquelle se trouve la zone de gestion
-    :param serie_de_sol: série de sol de la zone de gestion
+    :param classe_texturale: classe texturale de la zone de gestion
     :param classe_de_drainage: classe de drainage de la zone de gestion
     :param regies_sol_et_culture_projection: Régies des sols constitué des cultures, amendement, etc, pour les quelques années
     qui correspondent à une rotation
     """
 
-    def __init__(self, taux_matiere_organique, municipalite, serie_de_sol, classe_de_drainage,
+    def __init__(self, taux_matiere_organique, municipalite, classe_texturale, classe_de_drainage,
                  masse_volumique_apparente, profondeur, taille_de_la_zone, regies_sol_et_culture_projection,
                  regies_sol_et_culture_historique):
         self.FACTEUR_CONVERSION_MATIERE_ORGANIQUE_CARBONE_ORGANIQUE_SOL = 1.724
@@ -110,7 +110,7 @@ class ZoneDeGestion:
             self.__profondeur = profondeur
         self.__taux_matiere_organique = taux_matiere_organique
         self.__municipalite = municipalite
-        self.__serie_de_sol = serie_de_sol
+        self.__classe_texturale = classe_texturale
         self.__classe_de_drainage = classe_de_drainage
         self.__coefficient_mineralisation_pool_jeune = self.__caculer_coefficient_mineralisation_pool_jeune()
         self.__coefficient_mineralisation_pool_vieux = self.__calculer_coefficient_mineralisation_pool_vieux()
@@ -170,7 +170,7 @@ class ZoneDeGestion:
                 carbone_organique_du_sol = regie_annee_de_simulation.calculer_apport_annuel_en_carbone_de_la_regie() / (
                         self.__facteur_climatique * (
                         (1 / self.__coefficient_mineralisation_pool_jeune) + (
-                        regie_annee_de_simulation.calculer_coefficient_humidification_residus_culture() / self.__coefficient_mineralisation_pool_vieux)))
+                        regie_annee_de_simulation.calculer_coefficient_humification_residus_culture() / self.__coefficient_mineralisation_pool_vieux)))
                 carbone_organique_du_sol_pour_la_duree_de_la_simulation.append(carbone_organique_du_sol)
                 return carbone_organique_du_sol_pour_la_duree_de_la_simulation
 
@@ -186,10 +186,10 @@ class ZoneDeGestion:
         return self.__carbone_organique_initial_du_sol - pool_carbone_jeune_initial
 
     def __caculer_coefficient_mineralisation_pool_jeune(self):
-        return get_facteur_series_de_sol(self.__serie_de_sol).coefficient_mineralisation_pool_jeune
+        return get_facteur_classe_texturale(self.__classe_texturale).coefficient_mineralisation_pool_jeune
 
     def __calculer_coefficient_mineralisation_pool_vieux(self):
-        return get_facteur_series_de_sol(self.__serie_de_sol).coefficient_mineralisation_pool_vieux
+        return get_facteur_classe_texturale(self.__classe_texturale).coefficient_mineralisation_pool_vieux
 
     def __calculer_facteur_climatique(self):
         facteur_climatique = get_facteur_climatique(self.__obtenir_region_climatique_a_partir_de_municipalite())
@@ -256,7 +256,7 @@ class ZoneDeGestion:
                 "difference_entre_la_teneur_finale_et_la_zone": difference_entre_teneur_initiale_et_finale,
                 "moyenne_de_chaque_annee_de_rotation": moyenne_de_chaque_annee_de_rotation,
                 "taille_de_la_zone": self.__taille_de_la_zone_de_gestion,
-                "taux_de_matiere_organique_initial": self.__taux_matiere_organique, "serie_de_sol": self.__serie_de_sol,
+                "taux_de_matiere_organique_initial": self.__taux_matiere_organique, "classe_texturale": self.__classe_texturale,
                 "classe_de_drainage": self.__classe_de_drainage,
                 "bilan_des_regies_projections": bilan_des_regies_projections,
                 "bilan_des_regies_historiques": bilan_des_regies_historiques}
