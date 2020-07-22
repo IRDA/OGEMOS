@@ -10,10 +10,8 @@ import psutil
 import requests
 
 
-# TODO: ajouter la possibilité de ne pas avoir de culture secondaire ou amendement
 # TODO: ajouter la sauvegarde des simulations (en json)
 # TODO: regarder la possibilité de donner un nom à la simulation
-
 
 def kill(proc_pid):
     process = psutil.Process(proc_pid)
@@ -796,7 +794,7 @@ def run_gui(frame):
             creer_nouveau_champs_bouton.grid(row=3, column=0, columnspan=2)
             nouveau_champs_frame.pack()
 
-        def set_up_champs(zone_notebook, nombre_de_zone, champs_notebook, simulation_copie, index_champs=None):
+        def set_up_champs(zone_notebook, nombre_de_zone, champs_notebook, simulation_copie=None, index_champs=None):
 
             def add_new_zone_de_gestion_tab(event):
                 clicked_tab = zone_notebook.tk.call(zone_notebook._w, "identify", "tab", event.x, event.y)
@@ -1068,7 +1066,7 @@ def run_gui(frame):
             zone_notebook.add(new_tab, text="+")
             zone_notebook.pack()
 
-        def set_up_regies_projections(zone_tab, champs, zone_index):
+        def set_up_regies_projections(zone_tab, champs=None, zone_index=None):
             if champs is not None:
                 zone = champs["zones_de_gestion"][zone_index]
             else:
@@ -1112,7 +1110,7 @@ def run_gui(frame):
                     enlever_une_annee_a_la_rotation_button = ttk.Button(button_frame,
                                                                         text="Enlever une année de rotation",
                                                                         command=lambda: enlever_une_annee_a_la_rotation(
-                                                                        scrollable_frame_projection))
+                                                                            scrollable_frame_projection))
                 else:
                     enlever_une_annee_a_la_rotation_button = ttk.Button(button_frame,
                                                                         text="Enlever une année de rotation",
@@ -1261,10 +1259,12 @@ def run_gui(frame):
                 for amendement in amendements:
                     amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
                     amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
-                    amendement_combobox.set(amendement["amendement"])
+                    if amendement["amendement"] is not None:
+                        amendement_combobox.set(amendement["amendement"])
                     apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t/ha):")
                     apport_amendement_entry = ttk.Entry(amendement_frame)
-                    apport_amendement_entry.insert(0, str(amendement["apport"]))
+                    if amendement["apport"] is not None:
+                        apport_amendement_entry.insert(0, str(amendement["apport"]))
                     amendement_label.grid(row=index, column=0)
                     amendement_combobox.grid(row=index, column=1)
                     apport_amendement_label.grid(row=index + 1, column=0)
@@ -1350,8 +1350,10 @@ def run_gui(frame):
                 taux_matiere_seche_entry.insert(0, str(regie["culture_principale"]["taux_matiere_seche"]))
                 travail_du_sol_combobox.set(regie["travail_du_sol"]["travail_du_sol"])
                 profondeur_maximale_entry.insert(0, str(regie["travail_du_sol"]["profondeur_du_travail"]))
-                culture_secondaire_combobox.set(regie["culture_secondaire"]["culture_secondaire"])
-                rendement_culture_secondaire_entry.insert(0, str(regie["culture_secondaire"]["rendement"]))
+                if regie["culture_secondaire"]["culture_secondaire"] is not None:
+                    culture_secondaire_combobox.set(regie["culture_secondaire"]["culture_secondaire"])
+                if regie["culture_secondaire"]["rendement"]:
+                    rendement_culture_secondaire_entry.insert(0, str(regie["culture_secondaire"]["rendement"]))
 
             amendement_frame = ttk.LabelFrame(annee_courante_frame, text="Liste des amendements")
             if regie is not None:
@@ -1577,21 +1579,34 @@ def run_gui(frame):
                                            "profondeur_du_travail": profondeur}
                     culture_secondaire = regie.grid_slaves(row=7, column=1)[0].get()
                     global cultures_secondaires_supportees
-                    if culture_secondaire not in cultures_secondaires_supportees:
+                    if culture_secondaire == "":
+                        culture_secondaire = None
+                    if culture_secondaire is not None and culture_secondaire not in cultures_secondaires_supportees:
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone de gestion " + str(zone_index + 1),
-                             "\"Culture secondaire\" doit être parmis les choix disponibles",
+                             "\"Culture secondaire\" doit être parmis les choix disponibles ou laissé vide s'il n'y a pas de culture secondaire",
                              "Régie projection Simulation " + str(simulation_index + 1)))
                     rendement_culture_secondaire = regie.grid_slaves(row=8, column=1)[0].get()
-                    if not util.is_decimal_number(rendement_culture_secondaire):
+                    if rendement_culture_secondaire == "":
+                        rendement_culture_secondaire = None
+                    if rendement_culture_secondaire is not None and not util.is_decimal_number(
+                            rendement_culture_secondaire):
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone de gestion " + str(zone_index + 1),
-                             "\"Rendement culture secondaire\" doit être un réel positif",
+                             "\"Rendement culture secondaire\" doit être un réel positif ou laissé vide s'il n'y a pas de culture secondaire",
+                             "Régie projection Simulation " + str(simulation_index + 1)))
+                    elif (culture_secondaire is None and rendement_culture_secondaire is not None) or (
+                            culture_secondaire is not None and rendement_culture_secondaire is None):
+                        entree_invalide_liste.append(
+                            (information_champs[champs_index]["nom_du_champs"],
+                             "Zone de gestion " + str(zone_index + 1),
+                             "\"Rendement culture secondaire\" et \"Culture secondaire\" doivent être tout deux laissé vide s'il n'y a pas de culture secondaire",
                              "Régie projection Simulation " + str(simulation_index + 1)))
                     else:
-                        rendement_culture_secondaire = float(rendement_culture_secondaire)
+                        if rendement_culture_secondaire is not None:
+                            rendement_culture_secondaire = float(rendement_culture_secondaire)
                     culture_secondaire_dict = {"culture_secondaire": culture_secondaire,
                                                "rendement": rendement_culture_secondaire}
                     index_composante_amendement = 0
@@ -1602,23 +1617,38 @@ def run_gui(frame):
                         amendement = composante_amendement_liste.grid_slaves([index_composante_amendement], column=1)[
                             0].get()
                         global amendements_supportees
-                        if amendement not in amendements_supportees:
+                        if amendement == "":
+                            amendement = None
+                        if amendement is not None and amendement not in amendements_supportees:
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone de gestion " + str(zone_index + 1),
                                  "\"Amendement\" " + str(
                                      index_composante_amendement + 1) + " doit être parmis les choix disponibles",
-                                 " section Données réchauffement"))
+                                 "Régie projection Simulation " + str(simulation_index + 1)))
                         apport = composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[
                             0].get()
-                        if not util.is_decimal_number(apport):
+                        if apport == "":
+                            apport = None
+                        if apport is not None and not util.is_decimal_number(apport):
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone de gestion " + str(zone_index + 1),
-                                 amendement + " \"Apport\" doit être un réel positif",
+                                 "\"Apport\" "+str(index_composante_amendement+1)+
+                                 " est invalide, il doit être un réel positif ou laissé vide s'il n'y a pas d'amendements",
+                                 "Régie projection Simulation " + str(simulation_index + 1)))
+                        elif (amendement is None and apport is not None) or (amendement is not None and apport is None):
+                            entree_invalide_liste.append(
+                                (information_champs[champs_index]["nom_du_champs"],
+                                 "Zone de gestion " + str(zone_index + 1),
+                                 "\"Apport\" " + str(
+                                     index_composante_amendement + 1) + " et \"Amendement\" " + str(
+                                     index_composante_amendement + 1) +
+                                 " doivent être tout deux laissé vide s'il n'y a pas d'amendements",
                                  "Régie projection Simulation " + str(simulation_index + 1)))
                         else:
-                            apport = float(apport)
+                            if apport is not None:
+                                apport = float(apport)
                         amendements.append({"amendement": amendement,
                                             "apport": apport})
                         index_composante_amendement += 2
@@ -1743,21 +1773,34 @@ def run_gui(frame):
                                                "profondeur_du_travail": profondeur}
                         culture_secondaire = regie.grid_slaves(row=7, column=1)[0].get()
                         global cultures_secondaires_supportees
-                        if culture_secondaire not in cultures_secondaires_supportees:
+                        if culture_secondaire == "":
+                            culture_secondaire = None
+                        if culture_secondaire is not None and culture_secondaire not in cultures_secondaires_supportees:
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone de gestion " + str(zone_index + 1),
-                                 "\"Culture secondaire\" doit être parmis les choix disponibles",
+                                 "\"Culture secondaire\" doit être parmis les choix disponibles ou laissé vide s'il n'y a pas de culture secondaire",
                                  " section Données réchauffement"))
                         rendement_culture_secondaire = regie.grid_slaves(row=8, column=1)[0].get()
-                        if not util.is_decimal_number(rendement_culture_secondaire):
+                        if rendement_culture_secondaire == "":
+                            rendement_culture_secondaire = None
+                        if rendement_culture_secondaire is not None and not util.is_decimal_number(
+                                rendement_culture_secondaire):
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone de gestion " + str(zone_index + 1),
-                                 "\"Rendement culture secondaire\" doit être un réel positif",
+                                 "\"Rendement culture secondaire\" doit être un réel positif ou laissé vide s'il n'y a pas de culture secondaire",
+                                 "section Données réchauffement"))
+                        elif (culture_secondaire is None and rendement_culture_secondaire is not None) or (
+                                culture_secondaire is not None and rendement_culture_secondaire is None):
+                            entree_invalide_liste.append(
+                                (information_champs[champs_index]["nom_du_champs"],
+                                 "Zone de gestion " + str(zone_index + 1),
+                                 "\"Rendement culture secondaire\" et \"Culture secondaire\" doivent être tout deux laissé vide s'il n'y a pas de culture secondaire",
                                  "section Données réchauffement"))
                         else:
-                            rendement_culture_secondaire = float(rendement_culture_secondaire)
+                            if rendement_culture_secondaire is not None:
+                                rendement_culture_secondaire = float(rendement_culture_secondaire)
                         culture_secondaire_dict = {"culture_secondaire": culture_secondaire,
                                                    "rendement": rendement_culture_secondaire}
                         index_composante_amendement = 0
@@ -1769,24 +1812,40 @@ def run_gui(frame):
                                 composante_amendement_liste.grid_slaves([index_composante_amendement], column=1)[
                                     0].get()
                             global amendements_supportees
-                            if amendement not in amendements_supportees:
+                            if amendement == "":
+                                amendement = None
+                            if amendement is not None and amendement not in amendements_supportees:
                                 entree_invalide_liste.append(
                                     (information_champs[champs_index]["nom_du_champs"],
                                      "Zone de gestion " + str(zone_index + 1),
                                      "\"Amendement\" " + str(
                                          index_composante_amendement + 1) + " doit être parmis les choix disponibles",
-                                     " section Données réchauffement"))
+                                     "section Données réchauffement"))
                             apport = \
-                                composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[
-                                    0].get()
-                            if not util.is_decimal_number(apport):
+                            composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[
+                                0].get()
+                            if apport == "":
+                                apport = None
+                            if apport is not None and not util.is_decimal_number(apport):
                                 entree_invalide_liste.append(
                                     (information_champs[champs_index]["nom_du_champs"],
                                      "Zone de gestion " + str(zone_index + 1),
-                                     amendement + "\"Apport\" doit être un réel positif",
+                                     "\"Apport\" " + str(index_composante_amendement + 1) +
+                                     " est invalide, il doit être un réel positif ou laissé vide s'il n'y a pas d'amendements",
+                                     "section Données réchauffement"))
+                            elif (amendement is None and apport is not None) or (
+                                    amendement is not None and apport is None):
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone de gestion " + str(zone_index + 1),
+                                     "\"Apport\" " + str(
+                                         index_composante_amendement + 1) + " et \"Amendement\" " + str(
+                                         index_composante_amendement + 1) +
+                                     " doivent être tout deux laissé vide s'il n'y a pas d'amendements",
                                      "section Données réchauffement"))
                             else:
-                                apport = float(apport)
+                                if apport is not None:
+                                    apport = float(apport)
                             amendements.append({"amendement": amendement,
                                                 "apport": apport})
                             index_composante_amendement += 2

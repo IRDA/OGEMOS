@@ -34,7 +34,7 @@ class CulturePrincipale:
     """
 
     def __init__(self, type_de_culture_principale, rendement, proportion_tige_exporte, produit_non_recolte,
-                 est_derniere_annee_rotation_plante_fourragere, taux_matiere_seche):
+                 est_derniere_annee_rotation_plante_fourragere, taux_matiere_seche=None):
         self.__coefficient_des_residus_de_culture = get_coefficients_des_residus_de_culture(type_de_culture_principale)
         self.__type_de_culture_principale = type_de_culture_principale
         self.__rendement = rendement
@@ -89,6 +89,8 @@ class CultureSecondaire:
         self.__rendement = rendement
 
     def calculer_apport_en_carbone_culture_secondaire(self):
+        if self.__type_de_culture_secondaire is None:
+            return 0
         conversion_de_ton_ha_a_kg_m2 = 1000 / 10000
         coefficient_de_calcul = get_coefficients_culture_secondaire(self.__type_de_culture_secondaire)
         proportion_tige_laissee_au_champs = (1 - coefficient_de_calcul.proportion_des_tiges_exportees)
@@ -129,6 +131,8 @@ class Amendement:
         self.__apport = apport
 
     def calculer_apport_en_carbone(self):
+        if self.__type_amendement is None:
+            return 0
         coefficient_de_calcul = get_coefficient_des_amendements(self.__type_amendement)
         quantite_carbone_amendement = self.__apport * coefficient_de_calcul.nitrogen_total * coefficient_de_calcul.carbon_nitrogen
         return quantite_carbone_amendement

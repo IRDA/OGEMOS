@@ -237,20 +237,22 @@ def __travail_du_sol_mapping(data):
 def __amendements_mapping(data):
     liste_amendement = []
     for amendement in data:
+        if amendement["amendement"] is None and amendement["apport"] is None:
+            liste_amendement.append(Amendement(amendement["amendement"], amendement["apport"]))
+        else:
+            try:
+                assert isinstance(amendement["apport"], (float, int))
+            except AssertionError:
+                message_erreur = str(amendement["apport"]) + " n'est pas un apport valide. Voir documentation API."
+                abort(400, message_erreur)
 
-        try:
-            assert isinstance(amendement["apport"], (float, int))
-        except AssertionError:
-            message_erreur = str(amendement["apport"]) + " n'est pas un apport valide. Voir documentation API."
-            abort(400, message_erreur)
+            try:
+                assert amendement["amendement"] in get_amendements_supportees()
+            except AssertionError:
+                message_erreur = str(amendement["amendement"]) + " n'est pas un amendement supporté."
+                abort(400, message_erreur)
 
-        try:
-            assert amendement["amendement"] in get_amendements_supportees()
-        except AssertionError:
-            message_erreur = str(amendement["amendement"]) + " n'est pas un amendement supporté."
-            abort(400, message_erreur)
-
-        liste_amendement.append(Amendement(amendement["amendement"], amendement["apport"]))
+            liste_amendement.append(Amendement(amendement["amendement"], amendement["apport"]))
     return Amendements(liste_amendement)
 
 
@@ -322,6 +324,9 @@ def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourr
 def __culture_secondaire_mapping(data):
     culture_secondaire = data["culture_secondaire"]
     rendement = data["rendement"]
+
+    if culture_secondaire is None and rendement is None:
+        return CultureSecondaire(culture_secondaire, rendement)
 
     try:
         assert culture_secondaire in get_cultures_secondaires_supportees()
