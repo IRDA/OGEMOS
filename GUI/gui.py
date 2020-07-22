@@ -13,7 +13,7 @@ import requests
 # TODO: ajouter la possibilité de ne pas avoir de culture secondaire ou amendement
 # TODO: ajouter la sauvegarde des simulations (en json)
 # TODO: regarder la possibilité de donner un nom à la simulation
-# TODO: regarder pour un  bug sur le bouton enlever regie
+
 
 def kill(proc_pid):
     process = psutil.Process(proc_pid)
