@@ -9,9 +9,29 @@ import subprocess
 import psutil
 import requests
 
-
 # TODO: ajouter la sauvegarde des simulations (en json)
 # TODO: regarder la possibilité de donner un nom à la simulation
+
+global furthest_left_tab_index_simulation
+furthest_left_tab_index_simulation = 0
+global furthest_right_tab_index_simulation
+furthest_right_tab_index_simulation = 0
+
+global min_index_simulation
+min_index_simulation = 0
+global max_index_simulation
+max_index_simulation = 0
+
+global furthest_left_tab_index_champs
+furthest_left_tab_index_champs = 0
+global furthest_right_tab_index_champs
+furthest_right_tab_index_champs = 0
+
+global min_index_champs
+min_index_champs = 0
+global max_index_champs
+max_index_champs = 0
+
 
 def kill(proc_pid):
     process = psutil.Process(proc_pid)
@@ -122,15 +142,24 @@ def run_gui(frame):
                     for entry in grid_slave1_1:
                         nombre_de_zone_de_gestion = entry.get()
                     if nombre_de_zone_de_gestion.isdigit() and int(nombre_de_zone_de_gestion) > 0:
-                        information_champs.append({"nom_du_champs": nom_du_champs,
-                                                   "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion,
-                                                   "information_zone_de_gestion": []})
+                        if len(nom_du_champs) < 13:
+                            information_champs.append({"nom_du_champs": nom_du_champs,
+                                                       "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion,
+                                                       "information_zone_de_gestion": []})
+                        else:
+                            champs_valides = False
+                            information_champs = []
+                            messagebox.showwarning("Warning",
+                                                   "Le nom du chmaps devrait être composé de 12 caractères ou moins.")
+                            break
+
                     else:
                         champs_valides = False
                         information_champs = []
                         messagebox.showwarning("Warning",
                                                "Une entrée \"Nombre de zone de gestion\" est invalide.Veuillez entrer un nombre naturel plus grand que 0.")
                         break
+
             if champs_valides:
                 for widget in frame_champs_list.winfo_children():
                     widget.destroy()
@@ -338,8 +367,15 @@ def run_gui(frame):
         for widget in parent_frame_tabs.winfo_children():
             widget.destroy()
 
-        donnees_de_rechauffement_label_frame = ttk.LabelFrame(parent_frame_tabs, text="Données de réchauffement")
-        simulation_notebook = ttk.Notebook(parent_frame_tabs)
+        rechauffement_frame = ttk.Frame(parent_frame_tabs)
+        projection_frame = ttk.Frame(parent_frame_tabs, width=575, height=385)
+
+        rechauffement_frame.grid(row=0, column=1)
+        projection_frame.grid(row=0, column=0)
+        projection_frame.grid_propagate(False)
+
+        donnees_de_rechauffement_label_frame = ttk.LabelFrame(rechauffement_frame, text="Données de réchauffement")
+        simulation_notebook = ttk.Notebook(projection_frame)
         global nombre_simulations
         nombre_simulations = 0
 
@@ -367,6 +403,7 @@ def run_gui(frame):
 
                     def get_duree_de_la_simulation():
                         root.deiconify()
+                        nom_simulation = nom_simulation_entry.get()
                         annee_projection_initiale = annee_projection_initiale_entry.get()
                         duree_projection = duree_projection_entry.get()
                         numero_simulation_copie = numero_simulation_copie_entry.get()
@@ -385,10 +422,12 @@ def run_gui(frame):
                                 and annee_projection_initiale_valide and \
                                 (numero_simulation_copie is None or (numero_simulation_copie.isdigit() and
                                                                      (nombre_simulations > int(
-                                                                         numero_simulation_copie) > 0))):
+                                                                         numero_simulation_copie) > 0))) and \
+                                len(nom_simulation) < 13:
                             global duree_simulation
                             duree_simulation.append({"annee_projection_initiale": annee_projection_initiale,
-                                                     "duree_projection": duree_projection})
+                                                     "duree_projection": duree_projection,
+                                                     "nom_simulation": nom_simulation})
                             if numero_simulation_copie is not None:
                                 simulation = simulation_notebook.winfo_children()[int(numero_simulation_copie) - 1]
                                 simulation_copie = get_information_simulation(simulation,
@@ -426,6 +465,9 @@ def run_gui(frame):
                                 numero_simulation_copie) < 1)):
                                 entree_invalide_liste.append(
                                     "L'entrée \"Numéro de la simulation à copier\" est invalide. Elle doit être un nombre naturel plus grand que 0 et parmis les numéros de simulations existantes.")
+                            if len(nom_simulation) > 12:
+                                entree_invalide_liste.append(
+                                    "Le nom de la simulation doit être composé de 12 caractères ou moins.")
 
                             for entree_invalide in entree_invalide_liste:
                                 message = message + entree_invalide
@@ -437,6 +479,8 @@ def run_gui(frame):
                     duree_simulation_window.focus()
                     duree_simulation_window.protocol("WM_DELETE_WINDOW", readd_simulation)
                     duree_simulation_frame = ttk.Frame(duree_simulation_window)
+                    nom_simulation_label = ttk.Label(duree_simulation_frame, text="Nom simulation: ")
+                    nom_simulation_entry = ttk.Entry(duree_simulation_frame)
                     annee_projection_initiale_label = ttk.Label(duree_simulation_frame,
                                                                 text="Année de projection initiale: ")
                     annee_projection_initiale_entry = ttk.Entry(duree_simulation_frame)
@@ -453,12 +497,14 @@ def run_gui(frame):
                     if nombre_simulations < 2:
                         numero_simulation_copie_entry.configure(state="disabled")
 
-                    annee_projection_initiale_label.grid(row=0, column=0, pady=3, padx=5)
-                    annee_projection_initiale_entry.grid(row=0, column=1, pady=3, padx=5)
-                    duree_projection_label.grid(row=1, column=0, pady=3, padx=5)
-                    duree_projection_entry.grid(row=1, column=1, pady=3, padx=5)
-                    numero_simulation_copie_label.grid(row=2, column=0, pady=3, padx=5)
-                    numero_simulation_copie_entry.grid(row=2, column=1, pady=3, padx=5)
+                    nom_simulation_label.grid(row=0, column=0, pady=3, padx=5)
+                    nom_simulation_entry.grid(row=0, column=1, pady=3, padx=5)
+                    annee_projection_initiale_label.grid(row=1, column=0, pady=3, padx=5)
+                    annee_projection_initiale_entry.grid(row=1, column=1, pady=3, padx=5)
+                    duree_projection_label.grid(row=2, column=0, pady=3, padx=5)
+                    duree_projection_entry.grid(row=2, column=1, pady=3, padx=5)
+                    numero_simulation_copie_label.grid(row=3, column=0, pady=3, padx=5)
+                    numero_simulation_copie_entry.grid(row=3, column=1, pady=3, padx=5)
 
                     creer_simulation_bouton = ttk.Button(duree_simulation_frame, text="Créer",
                                                          command=get_duree_de_la_simulation)
@@ -472,21 +518,53 @@ def run_gui(frame):
             index_clicked_tab = simulation_notebook.index(clicked_tab)
             if index_clicked_tab != simulation_notebook.index("end") - 1:
                 simulation_notebook.winfo_children()[index_clicked_tab].destroy()
+                global max_index_simulation
+                global furthest_left_tab_index_simulation
+                global furthest_right_tab_index_simulation
+                if furthest_left_tab_index_simulation == min_index_simulation and len(
+                        simulation_notebook.winfo_children()) > 5:
+                    simulation_notebook.tab(furthest_right_tab_index_simulation, state="normal")
+                elif furthest_left_tab_index_simulation == min_index_simulation and len(
+                        simulation_notebook.winfo_children()) == 5:
+                    for tab_index in range(len(simulation_notebook.winfo_children())):
+                        simulation_notebook.tab(tab_index, state="normal")
+                    scroll_right_button_simulation.configure(state="disabled")
+                elif furthest_left_tab_index_simulation == min_index_simulation and len(
+                        simulation_notebook.winfo_children()) <= 4:
+                    furthest_right_tab_index_simulation -= 1
+                elif furthest_right_tab_index_simulation == max_index_simulation and len(
+                        simulation_notebook.winfo_children()) > 5:
+                    furthest_left_tab_index_simulation -= 1
+                    furthest_right_tab_index_simulation -= 1
+                    simulation_notebook.tab(furthest_left_tab_index_simulation, state="normal")
+                else:
+                    simulation_notebook.tab(furthest_right_tab_index_simulation, state="normal")
                 global nombre_simulations
                 nombre_simulations -= 1
-                current_index = index_clicked_tab
                 global duree_simulation
                 duree_simulation.pop(index_clicked_tab)
-                while current_index < simulation_notebook.index("end"):
-                    simulation_notebook.tab(current_index, text="Simulation " + str(current_index + 1))
-                    if current_index == simulation_notebook.index("end") - 1:
-                        simulation_notebook.tab(current_index, text="+")
-                    current_index += 1
+                max_index_simulation -= 1
 
         def set_up_simulation(simulation_notebook, simulation_copie):
-            tab = ttk.Frame(simulation_notebook)
             global nombre_simulations
-            simulation_notebook.add(tab, text="Simulation " + str(nombre_simulations))
+            global furthest_left_tab_index_simulation
+            global furthest_right_tab_index_simulation
+            global max_index_simulation
+            global duree_simulation
+            global information_champs
+            global max_index_champs
+            global furthest_right_tab_index_champs
+            global nombre_de_champs
+            global furthest_left_tab_index_champs
+            global min_index_champs
+            if nombre_simulations > 4:
+                simulation_notebook.tab(furthest_left_tab_index_simulation, state="hidden")
+                scroll_left_button_simulation.configure(state="normal")
+                furthest_left_tab_index_simulation += 1
+            furthest_right_tab_index_simulation += 1
+            max_index_simulation += 1
+            tab = ttk.Frame(simulation_notebook)
+            simulation_notebook.add(tab, text=duree_simulation[nombre_simulations - 1]["nom_simulation"])
             new_tab = ttk.Frame(simulation_notebook)
             simulation_notebook.add(new_tab, text="+")
             champs_notebook = ttk.Notebook(tab)
@@ -520,29 +598,71 @@ def run_gui(frame):
                         else:
                             notebook = simulation_frame.winfo_children()[0]
                             notebook.winfo_children()[index_clicked_tab].destroy()
-                            current_index = index_clicked_tab
-                            while current_index < len(information_champs):
-                                notebook.tab(current_index, text=information_champs[current_index]["nom_du_champs"])
-                                current_index += 1
+                            global  furthest_left_tab_index_champs
+                            global furthest_right_tab_index_champs
+                            if furthest_left_tab_index_champs == min_index_champs and len(
+                                    notebook.winfo_children()) > 5:
+                                notebook.tab(furthest_right_tab_index_champs, state="normal")
+                            elif furthest_left_tab_index_champs == min_index_champs and len(
+                                    notebook.winfo_children()) == 5:
+                                for tab_index in range(len(notebook.winfo_children())):
+                                    notebook.tab(tab_index, state="normal")
+                            elif furthest_left_tab_index_champs == min_index_champs and len(
+                                    notebook.winfo_children()) <= 4:
+                                pass
+                            elif furthest_right_tab_index_champs == max_index_champs and len(
+                                    notebook.winfo_children()) > 5:
+                                notebook.tab(furthest_left_tab_index_champs, state="normal")
+                            else:
+                                notebook.tab(furthest_right_tab_index_champs, state="normal")
+
+                    notebook = simulation_notebook.winfo_children()[0].winfo_children()[0].winfo_children()
+                    if furthest_left_tab_index_champs == min_index_champs and len(
+                            notebook.winfo_children()) > 5:
+                        pass
+                    elif furthest_left_tab_index_champs == min_index_champs and len(
+                            notebook.winfo_children()) == 5:
+                        scroll_right_button_champs.configure(state="disabled")
+                    elif furthest_left_tab_index_champs == min_index_champs and len(
+                            notebook.winfo_children()) <= 4:
+                        furthest_right_tab_index_champs -= 1
+                    elif furthest_right_tab_index_champs == max_index_champs and len(
+                            notebook.winfo_children()) > 5:
+                        furthest_left_tab_index_champs -= 1
+                        furthest_right_tab_index_champs -= 1
+                    else:
+                        pass
 
             champs_notebook.bind("<Button-1>", add_new_champs_tab)
             champs_notebook.bind("<Button-3>", delete_champs_tab)
 
-            global information_champs
+
             index_champs = 0
             for champs in information_champs:
                 tab = ttk.Frame(champs_notebook)
+                if nombre_simulations == 1:
+                    max_index_champs += 1
+                    furthest_right_tab_index_champs += 1
+                    if index_champs > 3:
+                        champs_notebook.tab(furthest_left_tab_index_champs, state="hidden")
+                        furthest_left_tab_index_champs += 1
                 champs_notebook.add(tab, text=champs["nom_du_champs"])
+                if nombre_simulations > 1 and (
+                        index_champs < furthest_left_tab_index_champs or index_champs > furthest_right_tab_index_champs):
+                    champs_notebook.tab(index_champs, state="hidden")
                 zone_de_gestion_notebook = ttk.Notebook(tab)
-                global duree_simulation
                 set_up_champs(zone_de_gestion_notebook, int(champs["nombre_de_zone_de_gestion"]), champs_notebook,
                               simulation_copie, index_champs)
                 index_champs += 1
 
+            global nombre_de_champs
+            if nombre_de_champs > 4:
+                scroll_left_button_champs.configure(state="normal")
+
             tab = ttk.Frame(champs_notebook)
             champs_notebook.add(tab, text="+")
 
-            champs_notebook.pack()
+            champs_notebook.pack(anchor="nw")
 
         def set_up_new_champs():
             new_champs_window = tk.Toplevel()
@@ -568,76 +688,82 @@ def run_gui(frame):
                 nom_du_champs = nom_du_champs_entry.get()
                 nombre_de_zone_de_gestion = nombre_de_zone_de_gestion_entry.get()
                 if nombre_de_zone_de_gestion.isdigit() and int(nombre_de_zone_de_gestion) > 0:
-                    global information_champs
-                    information_champs.append({"nom_du_champs": nom_du_champs,
-                                               "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion,
-                                               "information_zone_de_gestion": []})
-                    global nombre_de_champs
-                    nombre_de_champs += 1
-                    global nombre_de_champs_modifie
-                    nombre_de_champs_modifie = True
-                    global information_champs_modifie
-                    information_champs_modifie = True
+                    if len(nom_du_champs) < 13:
+                        global information_champs
+                        information_champs.append({"nom_du_champs": nom_du_champs,
+                                                   "nombre_de_zone_de_gestion": nombre_de_zone_de_gestion,
+                                                   "information_zone_de_gestion": []})
+                        global nombre_de_champs
+                        nombre_de_champs += 1
+                        global nombre_de_champs_modifie
+                        nombre_de_champs_modifie = True
+                        global information_champs_modifie
+                        information_champs_modifie = True
 
-                    for widget in new_champs_window.winfo_children():
-                        widget.destroy()
-                    creation_zone_frame = ttk.Frame(new_champs_window)
-                    canvas = tk.Canvas(creation_zone_frame)
-                    scrollbar = ttk.Scrollbar(creation_zone_frame, orient="vertical", command=canvas.yview)
-                    scrollable_frame = ttk.Frame(canvas)
-                    scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
-                    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-                    canvas.configure(yscrollcommand=scrollbar.set)
-                    for index_zone_de_gestion_nouveau_champs in range(
-                            int(nombre_de_zone_de_gestion)):
-                        zone_de_gestion_frame = ttk.LabelFrame(scrollable_frame,
-                                                               text="Zone de gestion " + str(
-                                                                   index_zone_de_gestion_nouveau_champs + 1))
-                        taux_matiere_organique_label = ttk.Label(zone_de_gestion_frame,
-                                                                 text="Taux matière organique (en %): ")
-                        taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
-                        municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
-                        global municipalites_supportees
-                        municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
-                        classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
-                        global classes_texturales_supportees
-                        classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame,
-                                                                 values=classes_texturales_supportees)
-                        classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
-                        global classes_de_drainage_supportees
-                        classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame,
-                                                                   values=classes_de_drainage_supportees)
-                        masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
-                                                                    text="Masse volumique apparente (g/cm3): ")
-                        masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
-                        profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur (cm): ")
-                        profondeur_entry = ttk.Entry(zone_de_gestion_frame)
-                        superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
-                                                                text="Superficie de la zone (ha): ")
-                        superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
-                        taux_matiere_organique_label.grid(row=0, column=0)
-                        taux_matiere_organique_entry.grid(row=0, column=1)
-                        municipalite_label.grid(row=1, column=0)
-                        municipalite_combobox.grid(row=1, column=1)
-                        classe_texturale_label.grid(row=2, column=0)
-                        classe_texturale_combobox.grid(row=2, column=1)
-                        classe_de_drainage_label.grid(row=3, column=0)
-                        classe_de_drainage_combobox.grid(row=3, column=1)
-                        masse_volumique_apparente_label.grid(row=4, column=0)
-                        masse_volumique_apparente_entry.grid(row=4, column=1)
-                        profondeur_label.grid(row=5, column=0)
-                        profondeur_entry.grid(row=5, column=1)
-                        superficie_de_la_zone_label.grid(row=6, column=0)
-                        superficie_de_la_zone_entry.grid(row=6, column=1)
+                        for widget in new_champs_window.winfo_children():
+                            widget.destroy()
+                        creation_zone_frame = ttk.Frame(new_champs_window)
+                        canvas = tk.Canvas(creation_zone_frame)
+                        scrollbar = ttk.Scrollbar(creation_zone_frame, orient="vertical", command=canvas.yview)
+                        scrollable_frame = ttk.Frame(canvas)
+                        scrollable_frame.bind("<Configure>",
+                                              lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+                        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+                        canvas.configure(yscrollcommand=scrollbar.set)
+                        for index_zone_de_gestion_nouveau_champs in range(
+                                int(nombre_de_zone_de_gestion)):
+                            zone_de_gestion_frame = ttk.LabelFrame(scrollable_frame,
+                                                                   text="Zone de gestion " + str(
+                                                                       index_zone_de_gestion_nouveau_champs + 1))
+                            taux_matiere_organique_label = ttk.Label(zone_de_gestion_frame,
+                                                                     text="Taux matière organique (en %): ")
+                            taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
+                            municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
+                            global municipalites_supportees
+                            municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
+                            classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
+                            global classes_texturales_supportees
+                            classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame,
+                                                                     values=classes_texturales_supportees)
+                            classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
+                            global classes_de_drainage_supportees
+                            classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame,
+                                                                       values=classes_de_drainage_supportees)
+                            masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
+                                                                        text="Masse volumique apparente (g/cm3): ")
+                            masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
+                            profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur (cm): ")
+                            profondeur_entry = ttk.Entry(zone_de_gestion_frame)
+                            superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
+                                                                    text="Superficie de la zone (ha): ")
+                            superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
+                            taux_matiere_organique_label.grid(row=0, column=0)
+                            taux_matiere_organique_entry.grid(row=0, column=1)
+                            municipalite_label.grid(row=1, column=0)
+                            municipalite_combobox.grid(row=1, column=1)
+                            classe_texturale_label.grid(row=2, column=0)
+                            classe_texturale_combobox.grid(row=2, column=1)
+                            classe_de_drainage_label.grid(row=3, column=0)
+                            classe_de_drainage_combobox.grid(row=3, column=1)
+                            masse_volumique_apparente_label.grid(row=4, column=0)
+                            masse_volumique_apparente_entry.grid(row=4, column=1)
+                            profondeur_label.grid(row=5, column=0)
+                            profondeur_entry.grid(row=5, column=1)
+                            superficie_de_la_zone_label.grid(row=6, column=0)
+                            superficie_de_la_zone_entry.grid(row=6, column=1)
 
-                        zone_de_gestion_frame.pack()
+                            zone_de_gestion_frame.pack()
 
-                    creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame, text="Créer",
-                                                                 command=lambda: add_new_zone_tab())
-                    creation_zone_de_gestion_bouton.pack()
-                    canvas.pack(side="left", fill="x", expand=True)
-                    scrollbar.pack(side="right", fill="y")
-                    creation_zone_frame.pack()
+                        creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame, text="Créer",
+                                                                     command=lambda: add_new_zone_tab())
+                        creation_zone_de_gestion_bouton.pack()
+                        canvas.pack(side="left", fill="x", expand=True)
+                        scrollbar.pack(side="right", fill="y")
+                        creation_zone_frame.pack(fill=None, expand=False)
+                    else:
+                        messagebox.showwarning("Warning",
+                                               "Le nom du champs devrait être composé de 12 caractères ou moins.")
+                        new_champs_window.focus()
                 else:
                     message = "L'entrée \"Nombre de zone de gestion\" est invalide. Elle doit être un nombre naturel plus grand que 0."
                     messagebox.showwarning("Warning", message)
@@ -739,6 +865,9 @@ def run_gui(frame):
                     if len(entree_invalide_liste) == 0:
                         sauvegarder_attributs_entreprise_apres_modification()
                         new_champs_window.destroy()
+                        global furthest_left_tab_index_champs
+                        global max_index_champs
+                        global furthest_right_tab_index_champs
                         for simulation_frame in simulation_notebook.winfo_children():
                             if len(simulation_frame.winfo_children()) == 0:
                                 pass
@@ -755,6 +884,14 @@ def run_gui(frame):
                                 set_up_champs(zone_notebook, nombre_de_zone_de_gestion, notebook)
                                 new_tab = ttk.Frame(notebook)
                                 notebook.add(new_tab, text="+")
+                                if len(notebook.winfo_children()) > 5:
+                                    notebook.tab(furthest_left_tab_index_champs, state="hidden")
+
+                        max_index_champs += 1
+                        furthest_right_tab_index_champs += 1
+                        if len(simulation_notebook.winfo_children()[0].winfo_children()[0].winfo_children()) > 5:
+                            furthest_left_tab_index_champs += 1
+                            scroll_left_button_champs.configure(state="normal")
                         rechauffement_champs_label_frame = ttk.LabelFrame(
                             donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0],
                             text=nom_du_champs)
@@ -1064,7 +1201,7 @@ def run_gui(frame):
 
             new_tab = ttk.Frame(zone_notebook)
             zone_notebook.add(new_tab, text="+")
-            zone_notebook.pack()
+            zone_notebook.pack(anchor="nw")
 
         def set_up_regies_projections(zone_tab, champs=None, zone_index=None):
             if champs is not None:
@@ -1634,7 +1771,7 @@ def run_gui(frame):
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone de gestion " + str(zone_index + 1),
-                                 "\"Apport\" "+str(index_composante_amendement+1)+
+                                 "\"Apport\" " + str(index_composante_amendement + 1) +
                                  " est invalide, il doit être un réel positif ou laissé vide s'il n'y a pas d'amendements",
                                  "Régie projection Simulation " + str(simulation_index + 1)))
                         elif (amendement is None and apport is not None) or (amendement is not None and apport is None):
@@ -1665,7 +1802,131 @@ def run_gui(frame):
 
         simulation_notebook.add(tab1, text="+")
 
-        simulation_notebook.grid(row=0, column=0, sticky="nw")
+        scroll_right_frame = ttk.Frame(projection_frame)
+        scroll_left_frame = ttk.Frame(projection_frame)
+
+        scroll_right_button_simulation = ttk.Button(scroll_right_frame, text="\u25b6")
+        scroll_left_button_simulation = ttk.Button(scroll_left_frame, text="\u25c0")
+
+        def scroll_right_simulation():
+            global duree_simulation
+            global furthest_left_tab_index_simulation
+            global furthest_right_tab_index_simulation
+            simulation_notebook.tab(furthest_left_tab_index_simulation, state="hidden")
+            furthest_left_tab_index_simulation += 1
+            furthest_right_tab_index_simulation += 1
+            if furthest_right_tab_index_simulation == max_index_simulation:
+                tab_text = "+"
+            else:
+                tab_text = duree_simulation[furthest_right_tab_index_simulation]["nom_simulation"]
+            simulation_notebook.add(simulation_notebook.winfo_children()[furthest_right_tab_index_simulation],
+                                    text=tab_text)
+            if furthest_right_tab_index_simulation == max_index_simulation:
+                scroll_right_button_simulation.configure(state="disabled")
+            else:
+                scroll_right_button_simulation.configure(state="normal")
+            if furthest_left_tab_index_simulation == min_index_simulation:
+                scroll_left_button_simulation.configure(state="disabled")
+            else:
+                scroll_left_button_simulation.configure(state="normal")
+
+        def scroll_left_simulation():
+            global duree_simulation
+            global furthest_left_tab_index_simulation
+            global furthest_right_tab_index_simulation
+            simulation_notebook.tab(furthest_right_tab_index_simulation, state="hidden")
+            furthest_left_tab_index_simulation -= 1
+            furthest_right_tab_index_simulation -= 1
+            simulation_notebook.add(simulation_notebook.winfo_children()[furthest_left_tab_index_simulation],
+                                    text=duree_simulation[furthest_left_tab_index_simulation]["nom_simulation"])
+            if furthest_right_tab_index_simulation == max_index_simulation:
+                scroll_right_button_simulation.configure(state="disabled")
+            else:
+                scroll_right_button_simulation.configure(state="normal")
+            if furthest_left_tab_index_simulation == min_index_simulation:
+                scroll_left_button_simulation.configure(state="disabled")
+            else:
+                scroll_left_button_simulation.configure(state="normal")
+
+        scroll_right_button_simulation.configure(command=scroll_right_simulation, state="disabled")
+        scroll_left_button_simulation.configure(command=scroll_left_simulation, state="disabled")
+
+        scroll_right_button_simulation.grid(row=0, column=0, sticky="n")
+        scroll_left_button_simulation.grid(row=0, column=0, sticky="n")
+
+        scroll_right_button_champs = ttk.Button(scroll_right_frame, text="\u25b6")
+        scroll_left_button_champs = ttk.Button(scroll_left_frame, text="\u25c0")
+
+        def scroll_right_champs():
+            global information_champs
+            global furthest_left_tab_index_champs
+            global furthest_right_tab_index_champs
+            index_champs_frame = 0
+            for simulation_frame in simulation_notebook.winfo_children():
+                if index_champs_frame < len(simulation_notebook.winfo_children())-1:
+                    champs_notebook = simulation_frame.winfo_children()[0]
+                    champs_notebook.tab(furthest_left_tab_index_champs, state="hidden")
+                index_champs_frame += 1
+            furthest_left_tab_index_champs += 1
+            furthest_right_tab_index_champs += 1
+            if furthest_right_tab_index_champs == max_index_champs:
+                tab_text = "+"
+            else:
+                tab_text = information_champs[furthest_right_tab_index_champs]["nom_du_champs"]
+            index_champs_frame = 0
+            for simulation_frame in simulation_notebook.winfo_children():
+                if index_champs_frame < len(simulation_notebook.winfo_children())-1:
+                    champs_notebook = simulation_frame.winfo_children()[0]
+                    champs_notebook.add(champs_notebook.winfo_children()[furthest_right_tab_index_champs],
+                                        text=tab_text)
+                index_champs_frame += 1
+            if furthest_right_tab_index_champs == max_index_champs:
+                scroll_right_button_champs.configure(state="disabled")
+            else:
+                scroll_right_button_champs.configure(state="normal")
+            if furthest_left_tab_index_champs == min_index_champs:
+                scroll_left_button_champs.configure(state="disabled")
+            else:
+                scroll_left_button_champs.configure(state="normal")
+
+        def scroll_left_champs():
+            global information_champs
+            global furthest_left_tab_index_champs
+            global furthest_right_tab_index_champs
+            index_champs_frame = 0
+            for simulation_frame in simulation_notebook.winfo_children():
+                if index_champs_frame < len(simulation_notebook.winfo_children())-1:
+                    champs_notebook = simulation_frame.winfo_children()[0]
+                    champs_notebook.tab(furthest_right_tab_index_champs, state="hidden")
+                index_champs_frame += 1
+            furthest_left_tab_index_champs -= 1
+            furthest_right_tab_index_champs -= 1
+            index_champs_frame = 0
+            for simulation_frame in simulation_notebook.winfo_children():
+                if index_champs_frame < len(simulation_notebook.winfo_children())-1:
+                    champs_notebook = simulation_frame.winfo_children()[0]
+                    champs_notebook.add(champs_notebook.winfo_children()[furthest_left_tab_index_champs],
+                                        text=information_champs[furthest_left_tab_index_champs]["nom_du_champs"])
+                index_champs_frame += 1
+            if furthest_right_tab_index_champs == max_index_champs:
+                scroll_right_button_champs.configure(state="disabled")
+            else:
+                scroll_right_button_champs.configure(state="normal")
+            if furthest_left_tab_index_champs == min_index_champs:
+                scroll_left_button_champs.configure(state="disabled")
+            else:
+                scroll_left_button_champs.configure(state="normal")
+
+        scroll_right_button_champs.configure(command=scroll_right_champs, state="disabled")
+        scroll_left_button_champs.configure(command=scroll_left_champs, state="disabled")
+
+        scroll_right_button_champs.grid(row=1, column=0, sticky="n")
+        scroll_left_button_champs.grid(row=1, column=0, sticky="n")
+
+        scroll_right_frame.grid(row=0, column=2, sticky="n")
+        scroll_left_frame.grid(row=0, column=0, sticky="n")
+
+        simulation_notebook.grid(row=0, column=1, sticky="nw")
         set_up_regies_rechauffement(donnees_de_rechauffement_label_frame, show_regie_historique)
         donnees_de_rechauffement_label_frame.grid(row=0, column=1)
 
@@ -1822,8 +2083,8 @@ def run_gui(frame):
                                          index_composante_amendement + 1) + " doit être parmis les choix disponibles",
                                      "section Données réchauffement"))
                             apport = \
-                            composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[
-                                0].get()
+                                composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[
+                                    0].get()
                             if apport == "":
                                 apport = None
                             if apport is not None and not util.is_decimal_number(apport):
