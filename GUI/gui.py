@@ -529,6 +529,12 @@ def run_gui(frame):
                     for tab_index in range(len(simulation_notebook.winfo_children())):
                         simulation_notebook.tab(tab_index, state="normal")
                     scroll_right_button_simulation.configure(state="disabled")
+                elif furthest_right_tab_index_simulation == max_index_simulation and len(
+                        simulation_notebook.winfo_children()) == 5:
+                    furthest_right_tab_index_simulation -= 1
+                    furthest_left_tab_index_simulation -= 1
+                    simulation_notebook.tab(furthest_left_tab_index_simulation, state="normal")
+                    scroll_left_button_simulation.configure(state="disabled")
                 elif furthest_left_tab_index_simulation == min_index_simulation and len(
                         simulation_notebook.winfo_children()) <= 4:
                     furthest_right_tab_index_simulation -= 1
@@ -539,6 +545,8 @@ def run_gui(frame):
                     simulation_notebook.tab(furthest_left_tab_index_simulation, state="normal")
                 else:
                     simulation_notebook.tab(furthest_right_tab_index_simulation, state="normal")
+                    if max_index_simulation - 1 == furthest_right_tab_index_simulation:
+                        scroll_right_button_simulation.configure(state="disabled")
                 global nombre_simulations
                 nombre_simulations -= 1
                 global duree_simulation
@@ -552,10 +560,8 @@ def run_gui(frame):
             global max_index_simulation
             global duree_simulation
             global information_champs
-            global max_index_champs
-            global furthest_right_tab_index_champs
             global nombre_de_champs
-            global furthest_left_tab_index_champs
+
             global min_index_champs
             if nombre_simulations > 4:
                 simulation_notebook.tab(furthest_left_tab_index_simulation, state="hidden")
@@ -598,8 +604,9 @@ def run_gui(frame):
                         else:
                             notebook = simulation_frame.winfo_children()[0]
                             notebook.winfo_children()[index_clicked_tab].destroy()
-                            global  furthest_left_tab_index_champs
+                            global furthest_left_tab_index_champs
                             global furthest_right_tab_index_champs
+                            global max_index_champs
                             if furthest_left_tab_index_champs == min_index_champs and len(
                                     notebook.winfo_children()) > 5:
                                 notebook.tab(furthest_right_tab_index_champs, state="normal")
@@ -607,6 +614,9 @@ def run_gui(frame):
                                     notebook.winfo_children()) == 5:
                                 for tab_index in range(len(notebook.winfo_children())):
                                     notebook.tab(tab_index, state="normal")
+                            elif furthest_right_tab_index_champs == max_index_champs and len(
+                                    notebook.winfo_children()) == 5:
+                                notebook.tab(furthest_left_tab_index_champs - 1, state="normal")
                             elif furthest_left_tab_index_champs == min_index_champs and len(
                                     notebook.winfo_children()) <= 4:
                                 pass
@@ -616,13 +626,18 @@ def run_gui(frame):
                             else:
                                 notebook.tab(furthest_right_tab_index_champs, state="normal")
 
-                    notebook = simulation_notebook.winfo_children()[0].winfo_children()[0].winfo_children()
+                    notebook = simulation_notebook.winfo_children()[0].winfo_children()[0]
                     if furthest_left_tab_index_champs == min_index_champs and len(
                             notebook.winfo_children()) > 5:
                         pass
                     elif furthest_left_tab_index_champs == min_index_champs and len(
                             notebook.winfo_children()) == 5:
                         scroll_right_button_champs.configure(state="disabled")
+                    elif furthest_right_tab_index_champs == max_index_champs and len(
+                            notebook.winfo_children()) == 5:
+                        furthest_left_tab_index_champs -= 1
+                        furthest_right_tab_index_champs -= 1
+                        scroll_left_button_champs.configure(state="disabled")
                     elif furthest_left_tab_index_champs == min_index_champs and len(
                             notebook.winfo_children()) <= 4:
                         furthest_right_tab_index_champs -= 1
@@ -631,15 +646,20 @@ def run_gui(frame):
                         furthest_left_tab_index_champs -= 1
                         furthest_right_tab_index_champs -= 1
                     else:
-                        pass
+                        if max_index_champs - 1 == furthest_right_tab_index_champs:
+                            scroll_right_button_champs.configure(state="disabled")
+                    max_index_champs -= 1
 
             champs_notebook.bind("<Button-1>", add_new_champs_tab)
             champs_notebook.bind("<Button-3>", delete_champs_tab)
 
-
+            global max_index_champs
+            global furthest_right_tab_index_champs
+            global furthest_left_tab_index_champs
             index_champs = 0
             for champs in information_champs:
                 tab = ttk.Frame(champs_notebook)
+
                 if nombre_simulations == 1:
                     max_index_champs += 1
                     furthest_right_tab_index_champs += 1
@@ -1863,7 +1883,7 @@ def run_gui(frame):
             global furthest_right_tab_index_champs
             index_champs_frame = 0
             for simulation_frame in simulation_notebook.winfo_children():
-                if index_champs_frame < len(simulation_notebook.winfo_children())-1:
+                if index_champs_frame < len(simulation_notebook.winfo_children()) - 1:
                     champs_notebook = simulation_frame.winfo_children()[0]
                     champs_notebook.tab(furthest_left_tab_index_champs, state="hidden")
                 index_champs_frame += 1
@@ -1875,7 +1895,7 @@ def run_gui(frame):
                 tab_text = information_champs[furthest_right_tab_index_champs]["nom_du_champs"]
             index_champs_frame = 0
             for simulation_frame in simulation_notebook.winfo_children():
-                if index_champs_frame < len(simulation_notebook.winfo_children())-1:
+                if index_champs_frame < len(simulation_notebook.winfo_children()) - 1:
                     champs_notebook = simulation_frame.winfo_children()[0]
                     champs_notebook.add(champs_notebook.winfo_children()[furthest_right_tab_index_champs],
                                         text=tab_text)
@@ -1895,7 +1915,7 @@ def run_gui(frame):
             global furthest_right_tab_index_champs
             index_champs_frame = 0
             for simulation_frame in simulation_notebook.winfo_children():
-                if index_champs_frame < len(simulation_notebook.winfo_children())-1:
+                if index_champs_frame < len(simulation_notebook.winfo_children()) - 1:
                     champs_notebook = simulation_frame.winfo_children()[0]
                     champs_notebook.tab(furthest_right_tab_index_champs, state="hidden")
                 index_champs_frame += 1
@@ -1903,7 +1923,7 @@ def run_gui(frame):
             furthest_right_tab_index_champs -= 1
             index_champs_frame = 0
             for simulation_frame in simulation_notebook.winfo_children():
-                if index_champs_frame < len(simulation_notebook.winfo_children())-1:
+                if index_champs_frame < len(simulation_notebook.winfo_children()) - 1:
                     champs_notebook = simulation_frame.winfo_children()[0]
                     champs_notebook.add(champs_notebook.winfo_children()[furthest_left_tab_index_champs],
                                         text=information_champs[furthest_left_tab_index_champs]["nom_du_champs"])
