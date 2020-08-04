@@ -9,8 +9,8 @@ import subprocess
 import psutil
 import requests
 
-# TODO: ajouter la sauvegarde des simulations (en json)
-# TODO: regarder la possibilité de donner un nom à la simulation
+# TODO: assurer que si on ajoute une zone ou un chamos la sauvegarde automatique ne fait rien planter1
+
 
 global furthest_left_tab_index_simulation
 furthest_left_tab_index_simulation = 0
@@ -44,6 +44,18 @@ max_index_zone = 0
 
 global current_champs_tab
 current_champs_tab = None
+
+global nombre_simulations
+nombre_simulations = 0
+
+global duree_simulation
+duree_simulation = []
+
+global annees_historiques
+annees_historiques = None
+
+global simulations_chargees
+simulations_chargees = False
 
 
 def kill(proc_pid):
@@ -376,27 +388,7 @@ def run_gui(frame):
                                                      command=lambda: get_information_zone_de_gestion(scrollable_frame))
         creation_zone_de_gestion_bouton.pack()
 
-    def show_creation_des_regies(parent_frame_tabs, show_regie_historique):
-        for widget in parent_frame_tabs.winfo_children():
-            widget.destroy()
-
-        rechauffement_frame = ttk.Frame(parent_frame_tabs)
-        projection_frame = ttk.Frame(parent_frame_tabs, width=575, height=385)
-
-        rechauffement_frame.grid(row=0, column=1)
-        projection_frame.grid(row=0, column=0)
-        projection_frame.grid_propagate(False)
-
-        donnees_de_rechauffement_label_frame = ttk.LabelFrame(rechauffement_frame, text="Données de réchauffement")
-        simulation_notebook = ttk.Notebook(projection_frame)
-        global nombre_simulations
-        nombre_simulations = 0
-
-        global duree_simulation
-        duree_simulation = []
-
-        tab1 = ttk.Frame(simulation_notebook)
-
+    def show_creation_des_regies(parent_frame_tabs, show_regie_historique, simulations=None):
         def add_new_simulation_tab(event):
             clicked_tab = simulation_notebook.tk.call(simulation_notebook._w, "identify", "tab", event.x, event.y)
             if clicked_tab == simulation_notebook.index("end") - 1:
@@ -425,11 +417,9 @@ def run_gui(frame):
                         global annees_historiques
                         global nombre_simulations
                         annee_projection_initiale_valide = True
-                        try:
+                        if annees_historiques is not None:
                             if int(annees_historiques["annee_historique_finale"]) + 1 != int(annee_projection_initiale):
                                 annee_projection_initiale_valide = False
-                        except NameError:
-                            pass
                         if annee_projection_initiale.isdigit() and duree_projection.isdigit() \
                                 and int(duree_projection) > 0 \
                                 and annee_projection_initiale_valide and \
@@ -574,16 +564,21 @@ def run_gui(frame):
             global duree_simulation
             global information_champs
             global nombre_de_champs
-
+            global simulations_chargees
             global min_index_champs
-            if nombre_simulations > 4:
+            if (4 < nombre_simulations and not simulations_chargees) or (simulations_chargees and len(simulation_notebook.winfo_children()) > 3):
                 simulation_notebook.tab(furthest_left_tab_index_simulation, state="hidden")
                 scroll_left_button_simulation.configure(state="normal")
                 furthest_left_tab_index_simulation += 1
             furthest_right_tab_index_simulation += 1
             max_index_simulation += 1
             tab = ttk.Frame(simulation_notebook)
-            simulation_notebook.add(tab, text=duree_simulation[nombre_simulations - 1]["nom_simulation"])
+
+
+            if simulations_chargees:
+                simulation_notebook.add(tab, text=simulation_copie["nom_simulation"])
+            else:
+                simulation_notebook.add(tab, text=duree_simulation[nombre_simulations - 1]["nom_simulation"])
             new_tab = ttk.Frame(simulation_notebook)
             simulation_notebook.add(new_tab, text="+")
             champs_notebook = ttk.Notebook(tab)
@@ -1309,10 +1304,14 @@ def run_gui(frame):
                                                               command=editer_caracteristique_physique_entreprise)
             editer_information_entreprise_button.grid(row=2, column=1)
 
-        def ajouter_une_annee_a_la_rotation(scrollable_frame_projection, zone=None):
+        def ajouter_une_annee_a_la_rotation(scrollable_frame_projection, zone=None, zone_rechauffement=None):
             if len(scrollable_frame_projection.winfo_children()) == 0:
                 if zone is not None:
                     for regie in zone["regies_sol_et_culture_projection"]:
+                        index = len(scrollable_frame_projection.winfo_children()) + 1
+                        add_regies_projection(scrollable_frame_projection, index, regie)
+                elif zone_rechauffement is not None:
+                    for regie in zone_rechauffement["regies_sol_et_culture_historique"]:
                         index = len(scrollable_frame_projection.winfo_children()) + 1
                         add_regies_projection(scrollable_frame_projection, index, regie)
                 else:
@@ -1361,7 +1360,7 @@ def run_gui(frame):
                     len(scrollable_frame_projection.winfo_children()) - 1].grid_slaves(row=0, column=1)[0].configure(
                     state="disabled")
 
-        def set_up_regies_rechauffement(rechauffement_frame, show_regie_historique):
+        def set_up_regies_rechauffement(rechauffement_frame, show_regie_historique, simulations):
             global information_champs
             if show_regie_historique:
                 canvas_historique = tk.Canvas(rechauffement_frame)
@@ -1370,17 +1369,31 @@ def run_gui(frame):
                 scrollable_frame_historique = ttk.Frame(canvas_historique)
                 scrollable_frame_historique.bind("<Configure>", lambda e: canvas_historique.configure(
                     scrollregion=canvas_historique.bbox("all")))
+                if simulations is not None:
+                    entreprise = simulations[0]["entreprise_agricole"]
+                    champs_liste = entreprise["champs"]
+                index_champs = 0
                 for champs in information_champs:
                     rechauffement_champs_label_frame = ttk.LabelFrame(scrollable_frame_historique,
                                                                       text=champs["nom_du_champs"])
                     rechauffement_champs_label_frame.pack()
+                    if simulations is not None:
+                        champs_courant = champs_liste[index_champs]
+                        zone_liste = champs_courant["zones_de_gestion"]
                     index = 0
                     while index < int(champs["nombre_de_zone_de_gestion"]):
                         rechauffement_zone_label_frame = ttk.LabelFrame(rechauffement_champs_label_frame,
                                                                         text="Zone gestion " + str(index + 1))
+                        if simulations is not None:
+                            regies_historiques = zone_liste[index]["regies_sol_et_culture_historique"]
                         rechauffement_zone_label_frame.pack()
-                        add_regies_historiques(rechauffement_zone_label_frame)
+                        if simulations is not None:
+                            add_regies_historiques(rechauffement_zone_label_frame,
+                                                   regies_historiques=regies_historiques)
+                        else:
+                            add_regies_historiques(rechauffement_zone_label_frame)
                         index += 1
+                    index_champs += 1
 
                 canvas_historique.create_window((0, 0), window=scrollable_frame_historique, anchor="nw")
                 canvas_historique.configure(yscrollcommand=scrollbar_historique.set)
@@ -1401,25 +1414,42 @@ def run_gui(frame):
                 canvas_rechauffement_via_rotation.configure(yscrollcommand=scrollbar_rechauffement_via_rotation.set)
                 canvas_rechauffement_via_rotation.pack(side="left", fill="both", expand=True)
                 scrollbar_rechauffement_via_rotation.pack(side="right", fill="y")
+                if simulations is not None:
+                    entreprise = simulations[0]["entreprise_agricole"]
+                    champs_liste = entreprise["champs"]
+                index_champs = 0
                 for champs in information_champs:
                     rechauffement_champs_label_frame = ttk.LabelFrame(scrollable_frame_rechauffement_via_rotation,
                                                                       text=champs["nom_du_champs"])
                     rechauffement_champs_label_frame.pack()
+                    if simulations is not None:
+                        champs_courant = champs_liste[index_champs]
+                        zone_liste = champs_courant["zones_de_gestion"]
                     index = 0
                     while index < int(champs["nombre_de_zone_de_gestion"]):
                         rechauffement_zone_label_frame = ttk.LabelFrame(rechauffement_champs_label_frame,
                                                                         text="Zone gestion " + str(index + 1))
+                        if simulations is not None:
+                            zone_rechauffement = zone_liste[index]
                         rechauffement_zone_label_frame.pack()
-                        ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame)
+                        if simulations is not None:
+                            ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame,
+                                                            zone_rechauffement=zone_rechauffement)
+                        else:
+                            ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame)
                         index += 1
+                    index_champs += 1
                 rechauffement_frame.grid(row=1, column=0, columnspan=2)
 
-        def add_regies_historiques(scrollable_frame):
+        def add_regies_historiques(scrollable_frame, regies_historiques=None):
             global annees_historiques
             annee_historique_initiale = int(annees_historiques["annee_historique_initiale"])
             annee_historique_finale = int(annees_historiques["annee_historique_finale"])
             annee_courante = annee_historique_initiale
+            index = 0
             while annee_courante <= annee_historique_finale:
+                if regies_historiques is not None:
+                    regie_historique = regies_historiques[index]
                 annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(annee_courante))
                 culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
                 global cultures_principales_supportees
@@ -1443,9 +1473,29 @@ def run_gui(frame):
                 rendement_culture_secondaire_label = ttk.Label(annee_courante_frame,
                                                                text="Rendement culture secondaire (t/ha): ")
                 rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
-
                 amendement_frame = ttk.LabelFrame(annee_courante_frame, text="Liste des amendements")
-                ajouter_des_amendements(amendement_frame)
+                if regies_historiques is not None:
+                    culture_principale_combobox.set(regie_historique["culture_principale"]["culture_principale"])
+                    if regie_historique["culture_principale"]["rendement"] is not None:
+                        rendement_entry.insert(0, regie_historique["culture_principale"]["rendement"])
+                    if regie_historique["culture_principale"]["proportion_tige_exporte"] is not None:
+                        proportion_tige_exporte_entry.insert(0, regie_historique["culture_principale"][
+                            "proportion_tige_exporte"])
+                    if regie_historique["culture_principale"]["produit_non_recolte"]:
+                        production_non_recolte_combobox.set("Oui")
+                    else:
+                        production_non_recolte_combobox.set("Non")
+                    if taux_matiere_seche_entry is not None:
+                        taux_matiere_seche_entry.insert(0, regie_historique["culture_principale"]["taux_matiere_seche"])
+                    travail_du_sol_combobox.set(regie_historique["travail_du_sol"]["travail_du_sol"])
+                    if profondeur_maximale_entry is not None:
+                        profondeur_maximale_entry.insert(0, regie_historique["travail_du_sol"]["profondeur_du_travail"])
+                    culture_secondaire_combobox.set(regie_historique["culture_secondaire"]["culture_secondaire"])
+                    if rendement_culture_secondaire_entry is not None:
+                        rendement_culture_secondaire_entry.insert(0, regie_historique["culture_secondaire"]["rendement"])
+                    ajouter_des_amendements(amendement_frame, regie_historique["amendements"])
+                else:
+                    ajouter_des_amendements(amendement_frame)
 
                 culture_principale_label.grid(row=0, column=0)
                 culture_principale_combobox.grid(row=0, column=1)
@@ -1468,6 +1518,7 @@ def run_gui(frame):
                 amendement_frame.grid(row=9, column=0, columnspan=2)
 
                 annee_courante += 1
+                index += 1
                 annee_courante_frame.pack()
 
         def ajouter_des_amendements(amendement_frame, amendements=None):
@@ -1559,15 +1610,20 @@ def run_gui(frame):
 
             if regie is not None:
                 culture_principale_combobox.set(regie["culture_principale"]["culture_principale"])
-                rendement_entry.insert(0, str(regie["culture_principale"]["rendement"]))
-                proportion_tige_exporte_entry.insert(0, str(regie["culture_principale"]["proportion_tige_exporte"]))
+                if regie["culture_principale"]["rendement"] is not None:
+                    rendement_entry.insert(0, str(regie["culture_principale"]["rendement"]))
+
+                if regie["culture_principale"]["proportion_tige_exporte"] is not None:
+                    proportion_tige_exporte_entry.insert(0, str(regie["culture_principale"]["proportion_tige_exporte"]))
                 if regie["culture_principale"]["produit_non_recolte"]:
                     production_non_recolte_combobox.set("Oui")
                 else:
                     production_non_recolte_combobox.set("Non")
-                taux_matiere_seche_entry.insert(0, str(regie["culture_principale"]["taux_matiere_seche"]))
+                if regie["culture_principale"]["taux_matiere_seche"] is not None:
+                    taux_matiere_seche_entry.insert(0, str(regie["culture_principale"]["taux_matiere_seche"]))
                 travail_du_sol_combobox.set(regie["travail_du_sol"]["travail_du_sol"])
-                profondeur_maximale_entry.insert(0, str(regie["travail_du_sol"]["profondeur_du_travail"]))
+                if regie["travail_du_sol"]["profondeur_du_travail"] is not None:
+                    profondeur_maximale_entry.insert(0, str(regie["travail_du_sol"]["profondeur_du_travail"]))
                 if regie["culture_secondaire"]["culture_secondaire"] is not None:
                     culture_secondaire_combobox.set(regie["culture_secondaire"]["culture_secondaire"])
                 if regie["culture_secondaire"]["rendement"]:
@@ -1627,6 +1683,30 @@ def run_gui(frame):
                                   1] + " l'entrée " + entree_invalide[2] + "\n"
                 messagebox.showwarning("Warning", message)
                 parent_frame_tabs.focus()
+
+        def sauvegarder_toutes_les_simulations():
+            simulations = []
+            entree_invalide_liste = []
+            index_simulation = 0
+            for simulation in simulation_notebook.winfo_children():
+                global duree_simulation
+                global nombre_simulations
+                if index_simulation < nombre_simulations:
+                    simulation, entree_invalide_liste_simulation = get_information_simulation(simulation,
+                                                                                              index_simulation,
+                                                                                              simulation_unique=False)
+                    for entree in entree_invalide_liste_simulation:
+                        entree_invalide_liste.append(entree)
+                    simulations.append(simulation)
+                index_simulation += 1
+
+            if len(entree_invalide_liste) == 0:
+                global annees_historiques
+                return {"simulations": simulations,
+                        "presence_regie_historique": show_regie_historique,
+                        "annees_historiques": annees_historiques}
+            else:
+                return entree_invalide_liste
 
         def get_information_simulation(simulation_frame, index_simulation, simulation_unique):
             global information_champs
@@ -1688,6 +1768,8 @@ def run_gui(frame):
                                        "champs": champs_attributs}
                 global duree_simulation
                 simulation = {
+                    "nom_simulation": duree_simulation[index_simulation]["nom_simulation"],
+                    "duree_projection": duree_simulation[index_simulation]["duree_projection"],
                     "annee_initiale_projection": int(duree_simulation[index_simulation]["annee_projection_initiale"]),
                     "annee_finale_projection": int(
                         duree_simulation[index_simulation]["annee_projection_initiale"]) + int(
@@ -1878,17 +1960,6 @@ def run_gui(frame):
                 compteur_regie += 1
             return regies, entree_invalide_liste
 
-        simulation_notebook.bind("<Button-1>", add_new_simulation_tab)
-        simulation_notebook.bind("<Button-3>", delete_simulation_tab)
-
-        simulation_notebook.add(tab1, text="+")
-
-        scroll_right_frame = ttk.Frame(projection_frame)
-        scroll_left_frame = ttk.Frame(projection_frame)
-
-        scroll_right_button_simulation = ttk.Button(scroll_right_frame, text="\u25b6")
-        scroll_left_button_simulation = ttk.Button(scroll_left_frame, text="\u25c0")
-
         def scroll_right_simulation():
             global duree_simulation
             global furthest_left_tab_index_simulation
@@ -1928,15 +1999,6 @@ def run_gui(frame):
                 scroll_left_button_simulation.configure(state="disabled")
             else:
                 scroll_left_button_simulation.configure(state="normal")
-
-        scroll_right_button_simulation.configure(command=scroll_right_simulation, state="disabled")
-        scroll_left_button_simulation.configure(command=scroll_left_simulation, state="disabled")
-
-        scroll_right_button_simulation.grid(row=0, column=0, sticky="n")
-        scroll_left_button_simulation.grid(row=0, column=0, sticky="n")
-
-        scroll_right_button_champs = ttk.Button(scroll_right_frame, text="\u25b6")
-        scroll_left_button_champs = ttk.Button(scroll_left_frame, text="\u25c0")
 
         def scroll_right_champs():
             global information_champs
@@ -1997,15 +2059,6 @@ def run_gui(frame):
                 scroll_left_button_champs.configure(state="disabled")
             else:
                 scroll_left_button_champs.configure(state="normal")
-
-        scroll_right_button_champs.configure(command=scroll_right_champs, state="disabled")
-        scroll_left_button_champs.configure(command=scroll_left_champs, state="disabled")
-
-        scroll_right_button_champs.grid(row=1, column=0, sticky="n")
-        scroll_left_button_champs.grid(row=1, column=0, sticky="n")
-
-        scroll_right_button_zone = ttk.Button(scroll_right_frame, text="\u25b6")
-        scroll_left_button_zone = ttk.Button(scroll_left_frame, text="\u25c0")
 
         def scroll_right_zone():
             global furthest_left_tab_index_zone
@@ -2082,19 +2135,6 @@ def run_gui(frame):
             if len(current_zone_notebook.winfo_children()) > 0:
                 current_zone_notebook.select(furthest_left_tab_index_zone)
 
-        scroll_right_button_zone.configure(command=scroll_right_zone, state="disabled")
-        scroll_left_button_zone.configure(command=scroll_left_zone, state="disabled")
-
-        scroll_right_button_zone.grid(row=2, column=0, sticky="n")
-        scroll_left_button_zone.grid(row=2, column=0, sticky="n")
-
-        scroll_right_frame.grid(row=0, column=2, sticky="n")
-        scroll_left_frame.grid(row=0, column=0, sticky="n")
-
-        simulation_notebook.grid(row=0, column=1, sticky="nw")
-        set_up_regies_rechauffement(donnees_de_rechauffement_label_frame, show_regie_historique)
-        donnees_de_rechauffement_label_frame.grid(row=0, column=1)
-
         def get_regies_rechauffement():
             entree_invalide_liste = []
             regies_rechauffement_simulation = []
@@ -2109,7 +2149,11 @@ def run_gui(frame):
                     regies_de_rechauffement = zone_label_frame.winfo_children()
                     index_regie = 0
                     zone_regies = []
-                    while index_regie < len(regies_de_rechauffement) - 1:
+                    if show_regie_historique:
+                        number_of_label_frames = len(regies_de_rechauffement)
+                    else:
+                        number_of_label_frames = len(regies_de_rechauffement) - 1
+                    while index_regie < number_of_label_frames:
                         regie = regies_de_rechauffement[index_regie]
                         culture_principale = regie.grid_slaves(row=0, column=1)[0].get()
                         global cultures_principales_supportees
@@ -2316,7 +2360,8 @@ def run_gui(frame):
                 global information_champs
                 nom_champs_label = ttk.Label(champs_label_frame, text="Nom du champs: ")
                 nom_champs_entry = ttk.Entry(champs_label_frame)
-                nom_champs_entry.insert(0, information_champs[champs_index]["nom_du_champs"])
+                if information_champs[champs_index]["nom_du_champs"]:
+                    nom_champs_entry.insert(0, information_champs[champs_index]["nom_du_champs"])
                 nom_champs_label.grid(row=0, column=0)
                 nom_champs_entry.grid(row=0, column=1)
                 zone_row_index = 1
@@ -2327,7 +2372,8 @@ def run_gui(frame):
                     taux_matiere_organique_label = ttk.Label(zone_label_frame,
                                                              text="Taux matière organique (en %): ")
                     taux_matiere_organique_entry = ttk.Entry(zone_label_frame)
-                    taux_matiere_organique_entry.insert(0, information_zone_de_gestion["taux_matiere_organique"])
+                    if information_zone_de_gestion["taux_matiere_organique"] is not None:
+                        taux_matiere_organique_entry.insert(0, information_zone_de_gestion["taux_matiere_organique"])
                     municipalite_label = ttk.Label(zone_label_frame, text="Municipalité: ")
                     global municipalites_supportees
                     municipalite_combobox = ttk.Combobox(zone_label_frame, values=municipalites_supportees)
@@ -2348,11 +2394,13 @@ def run_gui(frame):
                                                                information_zone_de_gestion["masse_volumique_apparente"])
                     profondeur_label = ttk.Label(zone_label_frame, text="Profondeur (cm): ")
                     profondeur_entry = ttk.Entry(zone_label_frame)
-                    profondeur_entry.insert(0, information_zone_de_gestion["profondeur"])
+                    if information_zone_de_gestion["profondeur"] is not None:
+                        profondeur_entry.insert(0, information_zone_de_gestion["profondeur"])
                     superficie_de_la_zone_label = ttk.Label(zone_label_frame,
                                                             text="Superficie de la zone (ha): ")
                     superficie_de_la_zone_entry = ttk.Entry(zone_label_frame)
-                    superficie_de_la_zone_entry.insert(0, information_zone_de_gestion["superficie_de_la_zone"])
+                    if information_zone_de_gestion["superficie_de_la_zone"] is not None:
+                        superficie_de_la_zone_entry.insert(0, information_zone_de_gestion["superficie_de_la_zone"])
                     taux_matiere_organique_label.grid(row=0, column=0)
                     taux_matiere_organique_entry.grid(row=0, column=1)
                     municipalite_label.grid(row=1, column=0)
@@ -2506,28 +2554,114 @@ def run_gui(frame):
 
             edition_frame.pack()
 
-    def question_ajout_regie_historique(question_mainframe):
+        for widget in parent_frame_tabs.winfo_children():
+            widget.destroy()
+
+        rechauffement_frame = ttk.Frame(parent_frame_tabs)
+        projection_frame = ttk.Frame(parent_frame_tabs, width=575, height=385)
+
+        rechauffement_frame.grid(row=0, column=1)
+        projection_frame.grid(row=0, column=0)
+        projection_frame.grid_propagate(False)
+
+        donnees_de_rechauffement_label_frame = ttk.LabelFrame(rechauffement_frame, text="Données de réchauffement")
+        simulation_notebook = ttk.Notebook(projection_frame)
+
+        global nombre_simulations
+        if nombre_simulations != 0:
+            pass
+        else:
+            nombre_simulations = 0
+
+        global duree_simulation
+        if len(duree_simulation) != 0:
+            pass
+        else:
+            duree_simulation = []
+
+        tab1 = ttk.Frame(simulation_notebook)
+
+        simulation_notebook.bind("<Button-1>", add_new_simulation_tab)
+        simulation_notebook.bind("<Button-3>", delete_simulation_tab)
+
+        simulation_notebook.add(tab1, text="+")
+
+        scroll_right_frame = ttk.Frame(projection_frame)
+        scroll_left_frame = ttk.Frame(projection_frame)
+
+        scroll_right_button_simulation = ttk.Button(scroll_right_frame, text="\u25b6")
+        scroll_left_button_simulation = ttk.Button(scroll_left_frame, text="\u25c0")
+
+        scroll_right_button_simulation.configure(command=scroll_right_simulation, state="disabled")
+        scroll_left_button_simulation.configure(command=scroll_left_simulation, state="disabled")
+
+        scroll_right_button_simulation.grid(row=0, column=0, sticky="n")
+        scroll_left_button_simulation.grid(row=0, column=0, sticky="n")
+
+        scroll_right_button_champs = ttk.Button(scroll_right_frame, text="\u25b6")
+        scroll_left_button_champs = ttk.Button(scroll_left_frame, text="\u25c0")
+
+        scroll_right_button_champs.configure(command=scroll_right_champs, state="disabled")
+        scroll_left_button_champs.configure(command=scroll_left_champs, state="disabled")
+
+        scroll_right_button_champs.grid(row=1, column=0, sticky="n")
+        scroll_left_button_champs.grid(row=1, column=0, sticky="n")
+
+        scroll_right_button_zone = ttk.Button(scroll_right_frame, text="\u25b6")
+        scroll_left_button_zone = ttk.Button(scroll_left_frame, text="\u25c0")
+
+        scroll_right_button_zone.configure(command=scroll_right_zone, state="disabled")
+        scroll_left_button_zone.configure(command=scroll_left_zone, state="disabled")
+
+        scroll_right_button_zone.grid(row=2, column=0, sticky="n")
+        scroll_left_button_zone.grid(row=2, column=0, sticky="n")
+
+        scroll_right_frame.grid(row=0, column=2, sticky="n")
+        scroll_left_frame.grid(row=0, column=0, sticky="n")
+
+        simulation_notebook.grid(row=0, column=1, sticky="nw")
+
+        set_up_regies_rechauffement(donnees_de_rechauffement_label_frame, show_regie_historique, simulations)
+        donnees_de_rechauffement_label_frame.grid(row=0, column=0)
+        sauvegarder_plan_de_gestion_button = ttk.Button(rechauffement_frame, text="Sauvegarder le plan de gestion",
+                                                        command=lambda: sauvegarder_plan_de_gestion_de_carbone(
+                                                            sauvegarder_toutes_les_simulations()))
+        sauvegarder_plan_de_gestion_button.grid(row=1, column=0)
+
+        if simulations is not None:
+            simulation_notebook.winfo_children()[simulation_notebook.index("end") - 1].destroy()
+            index_simulation = 0
+            for simulation in simulations:
+                set_up_simulation(simulation_notebook, simulation)
+                if index_simulation != len(simulations) - 1:
+                    simulation_notebook.winfo_children()[simulation_notebook.index("end") - 1].destroy()
+                index_simulation += 1
+            global  simulations_chargees
+            simulations_chargees = False
+
+    def question_ajout_regie_historique(question_mainframe, simulations=None):
         question_frame = ttk.Frame(question_mainframe)
         question_label = ttk.Label(question_frame,
                                    text="Voulez-vous utiliser une régie historique pour réchauffer le modèle?")
         oui_button = ttk.Button(question_frame, text="Oui",
-                                command=lambda: set_up_annees_historiques(question_mainframe))
+                                command=lambda: set_up_annees_historiques(question_mainframe, simulations=simulations))
         non_button = ttk.Button(question_frame, text="Non",
                                 command=lambda: show_creation_des_regies(question_mainframe,
-                                                                         show_regie_historique=False))
+                                                                         show_regie_historique=False,
+                                                                         simulations=simulations))
         question_label.grid(row=0, column=0, columnspan=2, padx=5, pady=3)
         oui_button.grid(row=1, column=0, padx=5, pady=3)
         non_button.grid(row=1, column=1, padx=5, pady=3)
         question_frame.pack()
 
-    def set_up_annees_historiques(annee_historique_mainframe):
+    def set_up_annees_historiques(annee_historique_mainframe, simulations=None):
         def get_annees_historiques():
             global annees_historiques
             annee_historique_initiale = annee_historique_initiale_entry.get()
             annee_historique_finale = annee_historique_finale_entry.get()
             annees_historiques = {"annee_historique_initiale": annee_historique_initiale,
                                   "annee_historique_finale": annee_historique_finale}
-            show_creation_des_regies(annee_historique_mainframe, show_regie_historique=True)
+            show_creation_des_regies(annee_historique_mainframe, show_regie_historique=True, simulations=simulations)
 
         for widget in annee_historique_mainframe.winfo_children():
             widget.destroy()
@@ -2568,25 +2702,95 @@ def run_gui(frame):
                 return
             root.deiconify()
 
-            with open(filename) as file:
-                data = json.load(file)
-            global nom_entreprise
-            global nombre_de_champs
-            global information_champs
-            nom_entreprise = data["nom_entreprise"]
-            nombre_de_champs = data["nombre_de_champs"]
-            information_champs = data["information_champs"]
+            try:
+                with open(filename) as file:
+                    data = json.load(file)
+                global nom_entreprise
+                global nombre_de_champs
+                global information_champs
+                nom_entreprise = data["nom_entreprise"]
+                nombre_de_champs = data["nombre_de_champs"]
+                information_champs = data["information_champs"]
+            except IndexError:
+                messagebox.showwarning("Fichier Invalide", "Le fichier ne correspondant pas au format désiré.")
+                menu_initial_ogemos(menu_frame)
 
             question_ajout_regie_historique(menu_frame)
+
+        def charger_plan_de_gestion_de_carbone():
+            global simulations_chargees
+            simulations_chargees = True
+            for widget in menu_frame.winfo_children():
+                widget.destroy()
+            root.withdraw()
+            global plan_gestion_filename
+            plan_gestion_filename = filedialog.askopenfilename(initialdir="/", title="Select file",
+                                                               filetypes=(
+                                                                   ("json files", "*.json"), ("all files", "*.*")))
+            if plan_gestion_filename == "":
+                menu_initial_ogemos(menu_frame)
+                root.deiconify()
+                return
+            root.deiconify()
+
+            try:
+                with open(plan_gestion_filename) as file:
+                    data = json.load(file)
+                global nom_entreprise
+                global nombre_de_champs
+                global information_champs
+                global duree_simulation
+                global nombre_simulations
+                global annees_historiques
+                annees_historiques = data["annees_historiques"]
+                information_champs = []
+                duree_simulation = []
+                simulations = data["simulations"]
+                nombre_simulations = len(simulations)
+                for simulation in simulations:
+                    duree_simulation.append({"annee_projection_initiale": simulation["annee_initiale_projection"],
+                                             "duree_projection": simulation["duree_projection"],
+                                             "nom_simulation": simulation["nom_simulation"]})
+                if len(simulations) > 0:
+                    entreprise = simulations[0]["entreprise_agricole"]
+                    nom_entreprise = entreprise["nom"]
+                    nombre_de_champs = len(entreprise["champs"])
+                    if nombre_de_champs > 0:
+                        champs_liste = entreprise["champs"]
+                        for champs in champs_liste:
+                            if len(champs["zones_de_gestion"]) > 0:
+                                information_zone_de_gestion = []
+                                zone_de_gestion_liste = champs["zones_de_gestion"]
+                                for zone_de_gestion in zone_de_gestion_liste:
+                                    information_zone_de_gestion.append(
+                                        {"taux_matiere_organique": zone_de_gestion["taux_matiere_organique"],
+                                         "municipalite": zone_de_gestion["municipalite"],
+                                         "classe_texturale": zone_de_gestion["classe_texturale"],
+                                         "classe_de_drainage": zone_de_gestion["classe_de_drainage"],
+                                         "masse_volumique_apparente": zone_de_gestion["masse_volumique_apparente"],
+                                         "profondeur": zone_de_gestion["profondeur"],
+                                         "superficie_de_la_zone": zone_de_gestion["superficie_de_la_zone"]})
+                                information_champs.append({"nom_du_champs": champs["nom"],
+                                                           "nombre_de_zone_de_gestion": len(champs["zones_de_gestion"]),
+                                                           "information_zone_de_gestion": information_zone_de_gestion})
+            except IndexError:
+                messagebox.showwarning("Fichier Invalide", "Le fichier ne correspondant pas au format désiré.")
+                menu_initial_ogemos(menu_frame)
+
+            show_creation_des_regies(menu_frame, show_regie_historique=data["presence_regie_historique"],
+                                     simulations=simulations)
 
         bienvenue_label = ttk.Label(menu_frame, text="Bienvenue dans OGEMOS!")
         nouvelle_entreprise_button = ttk.Button(menu_frame, text="Créer une nouvelle entreprise",
                                                 command=creation_nouvelle_entreprise)
         charger_entreprise_button = ttk.Button(menu_frame, text="Charger une entreprise", command=charger_entreprise)
+        charger_plan_de_gestion_de_carbone_button = ttk.Button(menu_frame, text="Charger un plan de gestion de carbone",
+                                                               command=charger_plan_de_gestion_de_carbone)
 
         bienvenue_label.pack(pady=5, padx=10)
         nouvelle_entreprise_button.pack(pady=5, padx=10)
         charger_entreprise_button.pack(pady=5, padx=10)
+        charger_plan_de_gestion_de_carbone_button.pack(pady=5, padx=10)
 
     def sauvergarder_attributs_entreprise_apres_creation():
         root.withdraw()
@@ -2620,6 +2824,33 @@ def run_gui(frame):
         global filename
         with open(filename, 'w') as json_file:
             json.dump(save_dict, json_file)
+
+    def sauvegarder_plan_de_gestion_de_carbone(simulations):
+        if isinstance(simulations, list):
+            entree_invalide_liste = simulations
+            message = ""
+            for entree_invalide in entree_invalide_liste:
+                message = message + "Dans la " + entree_invalide[3] + ", le " + entree_invalide[0] + " et la " + \
+                          entree_invalide[
+                              1] + " l'entrée " + entree_invalide[2] + "\n"
+            messagebox.showwarning("Warning", message)
+            root.deiconify()
+            return
+        root.withdraw()
+        global plan_gestion_filename
+        plan_gestion_filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer",
+                                                             filetypes=(("json files", "*.json"), ("all files", "*.*")))
+        if plan_gestion_filename == "":
+            root.deiconify()
+            return False
+        if ".json" not in plan_gestion_filename:
+            plan_gestion_filename = plan_gestion_filename + ".json"
+
+        save_dict = simulations
+
+        with open(plan_gestion_filename, 'w') as json_file:
+            json.dump(save_dict, json_file)
+        root.deiconify()
 
     menu_initial_ogemos(frame)
 
