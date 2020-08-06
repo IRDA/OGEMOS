@@ -2,9 +2,9 @@ from ICBM.BaseDeDonnees.data_tables import *
 from ICBM.database_setup import *
 
 
-def get_facteur_climatique(region):
+def get_facteur_climatique(municipalite):
     session = Session()
-    query_result = session.query(FacteurClimatique).filter(FacteurClimatique.region == region).one()
+    query_result = session.query(TableDesMunicipalites).filter(TableDesMunicipalites.nom_municipalite == municipalite).one().utm
     session.close()
     return query_result
 
@@ -119,9 +119,9 @@ def get_cultures_secondaires_supportees():
     return query_result
 
 
-def get_rendement_par_municipalite(municipalite):
+def get_rendement_et_propriete_municipalite(municipalite):
     session = Session()
-    query_result = session.query(TableDesRendements).filter(TableDesRendements.municipalite == municipalite).one()
+    query_result = session.query(TableDesMunicipalites).filter(TableDesMunicipalites.nom_municipalite == municipalite).one()
     session.close()
     return query_result
 
@@ -129,7 +129,7 @@ def get_rendement_par_municipalite(municipalite):
 def get_municipalites_supportees():
     session = Session()
     query_result = []
-    for municipalite in session.query(TableDesRendements.municipalite).all():
-        query_result.append(municipalite.municipalite)
+    for municipalite in session.query(TableDesMunicipalites.nom_municipalite).all():
+        query_result.append(municipalite.nom_municipalite)
     session.close()
     return query_result

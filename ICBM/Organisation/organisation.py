@@ -1,7 +1,6 @@
 from ICBM.BaseDeDonnees.database_querying import *
 
 
-# TODO: trouver un meilleur nom pour le fichier et le directory
 class EntrepriseAgricole:
     def __init__(self, nom_entreprise_agricole, champs):
         self.__nom_entreprise_agricole = nom_entreprise_agricole
@@ -192,7 +191,7 @@ class ZoneDeGestion:
         return get_facteur_classe_texturale(self.__classe_texturale).coefficient_mineralisation_pool_vieux
 
     def __calculer_facteur_climatique(self):
-        facteur_climatique = get_facteur_climatique(self.__obtenir_region_climatique_a_partir_de_municipalite())
+        facteur_climatique = get_facteur_climatique(self.__municipalite)
         return facteur_climatique.facteur_temperature_sol * facteur_climatique.facteur_humidite_sol
 
     def __calculer_bilan_annuel_moyen(self, carbone_organique_du_sol_pour_la_duree_de_la_simulation):
@@ -228,11 +227,6 @@ class ZoneDeGestion:
             moyenne_de_chaque_annee_de_rotation[index_annee] = moyenne_de_chaque_annee_de_rotation[index_annee]/ nombre_de_repetition_de_annee_de_rotation[index_annee]
 
         return moyenne_de_chaque_annee_de_rotation
-
-    def __obtenir_region_climatique_a_partir_de_municipalite(self):
-        # TODO: enelver la dummy version et faire la vrai fonction
-        #if self.__municipalite == 'Victoriaville':
-            return 'Centre-du-Québec'
 
     def get_taille_de_la_zone(self):
         return self.__taille_de_la_zone_de_gestion

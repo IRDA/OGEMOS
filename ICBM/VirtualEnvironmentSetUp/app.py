@@ -149,12 +149,16 @@ def __zone_de_gestion_mapping(data):
             message_erreur = str(
                 taux_matiere_organique) + " n'est pas un taux de matière organique valide. Voir documentation API."
             abort(400, message_erreur)
-
-        # TODO: Une fois la table des municipalitées faites regarder si la municipalité est supportée
         try:
             assert isinstance(municipalite, str)
         except AssertionError:
             message_erreur = str(municipalite) + " n'est pas une municipalité valide. Voir documentation API."
+            abort(400, message_erreur)
+
+        try:
+            assert municipalite in get_municipalites_supportees()
+        except AssertionError:
+            message_erreur = str(municipalite) + " n'est pas une municipalité supportée."
             abort(400, message_erreur)
 
         try:
@@ -264,7 +268,7 @@ def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourr
                  "Prairie/Pâturage - semis", "Triticale", "Seigle"]
     culture_principale = data["culture_principale"]
     if data["rendement"] is None:
-        rendements = get_rendement_par_municipalite(municipalite)
+        rendements = get_rendement_et_propriete_municipalite(municipalite)
         if culture_principale in zone_patate:
             rendement = rendements.rendement_zone_patate
         elif culture_principale in zone_mais:

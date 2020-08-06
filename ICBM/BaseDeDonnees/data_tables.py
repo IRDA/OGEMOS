@@ -1,13 +1,14 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Float, String, Boolean
+from sqlalchemy import Column, Float, String, Boolean, Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
 
 class FacteurClimatique(Base):
     __tablename__ = 'FacteurClimatique'
-    region = Column(String, primary_key=True)
-    utm = Column(String)
+    utm = Column(Integer, primary_key=True)
     facteur_temperature_sol = Column(Float)
     facteur_humidite_sol = Column(Float)
 
@@ -78,9 +79,19 @@ class CoefficientDesCulturesSecondaires(Base):
     biomasse_aerienne_sur_racinaire = Column(Float)
 
 
-class TableDesRendements(Base):
-    __tablename__ = 'TableDesRendements'
-    municipalite = Column(String, primary_key=True)
-    rendement_zone_mais = Column(Float)
-    rendement_zone_patate = Column(Float)
-    rendement_zone_foin = Column(Float)
+class TableDesMunicipalites(Base):
+    __tablename__ = 'TableDesMunicipalites'
+    code_geographique_municipalite = Column(String)
+    nom_municipalite = Column(String, primary_key=True)
+    rendement_avoine = Column(Float)
+    rendement_ble = Column(Float)
+    rendement_mais_fourrager = Column(Float)
+    rendement_orge = Column(Float)
+    rendement_mais_grain = Column(Float)
+    rendement_soya = Column(Float)
+    rendement_haricot = Column(Float)
+    rendement_pomme_de_terre_de_semence = Column(Float)
+    rendement_pomme_de_terre_de_table = Column(Float)
+    rendement_pomme_de_terre_de_transformation = Column(Float)
+    utm_principal = Column(Integer, ForeignKey('FacteurClimatique.utm'))
+    utm = relationship("FacteurClimatique")
