@@ -57,6 +57,12 @@ annees_historiques = None
 global simulations_chargees
 simulations_chargees = False
 
+global filename
+filename = None
+
+global plan_gestion_filename
+plan_gestion_filename = None
+
 
 def kill(proc_pid):
     process = psutil.Process(proc_pid)
@@ -175,7 +181,7 @@ def run_gui(frame):
                             champs_valides = False
                             information_champs = []
                             messagebox.showwarning("Warning",
-                                                   "Le nom du chmaps devrait être composé de 12 caractères ou moins.")
+                                                   "Le nom du champs devrait être composé de 12 caractères ou moins.")
                             break
 
                     else:
@@ -315,7 +321,7 @@ def run_gui(frame):
                             index_zone += 1
                 index += 1
             if len(entree_invalide_liste) == 0:
-                sauvegarde_reussi = sauvergarder_attributs_entreprise_apres_creation()
+                sauvegarde_reussi = sauvegarder_attributs_entreprise_apres_creation()
                 for widget in zone_de_gestion_mainframe.winfo_children():
                     widget.destroy()
 
@@ -566,14 +572,14 @@ def run_gui(frame):
             global nombre_de_champs
             global simulations_chargees
             global min_index_champs
-            if (4 < nombre_simulations and not simulations_chargees) or (simulations_chargees and len(simulation_notebook.winfo_children()) > 3):
+            if (4 < nombre_simulations and not simulations_chargees) or (
+                    simulations_chargees and len(simulation_notebook.winfo_children()) > 3):
                 simulation_notebook.tab(furthest_left_tab_index_simulation, state="hidden")
                 scroll_left_button_simulation.configure(state="normal")
                 furthest_left_tab_index_simulation += 1
             furthest_right_tab_index_simulation += 1
             max_index_simulation += 1
             tab = ttk.Frame(simulation_notebook)
-
 
             if simulations_chargees:
                 simulation_notebook.add(tab, text=simulation_copie["nom_simulation"])
@@ -1492,7 +1498,8 @@ def run_gui(frame):
                         profondeur_maximale_entry.insert(0, regie_historique["travail_du_sol"]["profondeur_du_travail"])
                     culture_secondaire_combobox.set(regie_historique["culture_secondaire"]["culture_secondaire"])
                     if rendement_culture_secondaire_entry is not None:
-                        rendement_culture_secondaire_entry.insert(0, regie_historique["culture_secondaire"]["rendement"])
+                        rendement_culture_secondaire_entry.insert(0,
+                                                                  regie_historique["culture_secondaire"]["rendement"])
                     ajouter_des_amendements(amendement_frame, regie_historique["amendements"])
                 else:
                     ajouter_des_amendements(amendement_frame)
@@ -2636,7 +2643,7 @@ def run_gui(frame):
                 if index_simulation != len(simulations) - 1:
                     simulation_notebook.winfo_children()[simulation_notebook.index("end") - 1].destroy()
                 index_simulation += 1
-            global  simulations_chargees
+            global simulations_chargees
             simulations_chargees = False
 
     def question_ajout_regie_historique(question_mainframe, simulations=None):
@@ -2702,6 +2709,7 @@ def run_gui(frame):
                 return
             root.deiconify()
 
+            no_error = True
             try:
                 with open(filename) as file:
                     data = json.load(file)
@@ -2711,11 +2719,15 @@ def run_gui(frame):
                 nom_entreprise = data["nom_entreprise"]
                 nombre_de_champs = data["nombre_de_champs"]
                 information_champs = data["information_champs"]
-            except IndexError:
+            except KeyError:
+                root.withdraw()
+                no_error = False
                 messagebox.showwarning("Fichier Invalide", "Le fichier ne correspondant pas au format désiré.")
+                root.deiconify()
                 menu_initial_ogemos(menu_frame)
 
-            question_ajout_regie_historique(menu_frame)
+            if no_error:
+                question_ajout_regie_historique(menu_frame)
 
         def charger_plan_de_gestion_de_carbone():
             global simulations_chargees
@@ -2733,6 +2745,7 @@ def run_gui(frame):
                 return
             root.deiconify()
 
+            no_error = True
             try:
                 with open(plan_gestion_filename) as file:
                     data = json.load(file)
@@ -2773,12 +2786,16 @@ def run_gui(frame):
                                 information_champs.append({"nom_du_champs": champs["nom"],
                                                            "nombre_de_zone_de_gestion": len(champs["zones_de_gestion"]),
                                                            "information_zone_de_gestion": information_zone_de_gestion})
-            except IndexError:
+            except KeyError:
+                root.withdraw()
+                no_error = False
                 messagebox.showwarning("Fichier Invalide", "Le fichier ne correspondant pas au format désiré.")
+                root.deiconify()
                 menu_initial_ogemos(menu_frame)
 
-            show_creation_des_regies(menu_frame, show_regie_historique=data["presence_regie_historique"],
-                                     simulations=simulations)
+            if no_error:
+                show_creation_des_regies(menu_frame, show_regie_historique=data["presence_regie_historique"],
+                                         simulations=simulations)
 
         bienvenue_label = ttk.Label(menu_frame, text="Bienvenue dans OGEMOS!")
         nouvelle_entreprise_button = ttk.Button(menu_frame, text="Créer une nouvelle entreprise",
@@ -2792,7 +2809,7 @@ def run_gui(frame):
         charger_entreprise_button.pack(pady=5, padx=10)
         charger_plan_de_gestion_de_carbone_button.pack(pady=5, padx=10)
 
-    def sauvergarder_attributs_entreprise_apres_creation():
+    def sauvegarder_attributs_entreprise_apres_creation():
         root.withdraw()
         global filename
         filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer",
@@ -2822,8 +2839,16 @@ def run_gui(frame):
                      "nombre_de_champs": nombre_de_champs,
                      "information_champs": information_champs}
         global filename
-        with open(filename, 'w') as json_file:
-            json.dump(save_dict, json_file)
+        if filename is None:
+            response = messagebox.askyesno("Sauvegarde entreprise", "Souhaitez-vous sauvegarder les modifications apportées à l'entreprise?")
+            if response:
+                filename_valide = sauvegarder_attributs_entreprise_apres_creation()
+                if filename_valide:
+                    with open(filename, 'w') as json_file:
+                        json.dump(save_dict, json_file)
+        else:
+            with open(filename, 'w') as json_file:
+                json.dump(save_dict, json_file)
 
     def sauvegarder_plan_de_gestion_de_carbone(simulations):
         if isinstance(simulations, list):
