@@ -10,10 +10,16 @@ class RegieDesSolsEtCultures:
         self.__travail_du_sol = travail_du_sol
 
     def calculer_apport_annuel_en_carbone_de_la_regie(self):
-        return self.__culture_principale.calculer_apport_en_carbone_culture_principale() \
-               + self.__culture_secondaire.calculer_apport_en_carbone_culture_secondaire() \
-               + self.__amendements.calculer_apport_en_carbone_amendements() \
-               + self.__travail_du_sol.calculer_apport_en_carbone_travail_du_sol()
+        apport_culture_principale = self.__culture_principale.calculer_apport_en_carbone_culture_principale()
+        apport_culture_secondaire = self.__culture_secondaire.calculer_apport_en_carbone_culture_secondaire()
+        apport_amendements = self.__amendements.calculer_apport_en_carbone_amendements()
+        return apport_culture_principale \
+               + apport_culture_secondaire \
+               + apport_amendements \
+               + self.__travail_du_sol.calculer_apport_en_carbone_travail_du_sol(), \
+               apport_culture_principale, \
+               apport_culture_secondaire, \
+               apport_amendements
 
     def set_annee_de_culture(self, annee_de_culture):
         self.__annee_de_culture = annee_de_culture
@@ -22,7 +28,6 @@ class RegieDesSolsEtCultures:
         return self.__culture_principale.get_coefficient_calcul().coefficient_humification_residus_culture
 
     def generer_bilan_regie(self):
-
         return {"culture_principale": self.__culture_principale.generer_bilan_culture_principale(),
                 "culture_secondaire": self.__culture_secondaire.generer_bilan_culture_secondaire(),
                 "amendements": self.__amendements.generer_bilan_amendements()}
@@ -148,4 +153,3 @@ class TravailDuSol:
 
     def calculer_apport_en_carbone_travail_du_sol(self):
         return get_facteur_travail_du_sol(self.__type_de_travail_du_sol).facteur_travail_du_sol
-

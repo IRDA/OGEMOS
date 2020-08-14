@@ -93,5 +93,7 @@ class TableDesMunicipalites(Base):
     rendement_pomme_de_terre_de_semence = Column(Float)
     rendement_pomme_de_terre_de_table = Column(Float)
     rendement_pomme_de_terre_de_transformation = Column(Float)
+    rendement_seigle = Column(Float)
+    rendement_triticale = Column(Float)
     utm_principal = Column(Integer, ForeignKey('FacteurClimatique.utm'))
     utm = relationship("FacteurClimatique")

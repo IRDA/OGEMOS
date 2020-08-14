@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
+from openpyxl import Workbook
 import json
 import copy
 import GUI.fonction_utilitaire as util
@@ -9,7 +10,7 @@ import subprocess
 import psutil
 import requests
 
-# TODO: assurer que si on ajoute une zone ou un chamos la sauvegarde automatique ne fait rien planter1
+# TODO: regarder les rendments et comparer avec  les cultures supportees car il risque d'y avoir des incohérence
 
 
 global furthest_left_tab_index_simulation
@@ -157,7 +158,7 @@ def run_gui(frame):
         frame_entreprise.grid_rowconfigure(2, minsize=30)
 
         creer_bouton = ttk.Button(frame_entreprise, text="Créer", command=get_information_entreprise)
-        creer_bouton.grid(columnspan=2, row=2, column=0)
+        creer_bouton.grid(columnspan=2, row=2, column=0, pady=3)
 
     def show_creation_champs(frame_champs_list):
         def get_information_champs(scrollable_frame):
@@ -211,10 +212,10 @@ def run_gui(frame):
             nombre_de_zone_de_gestion_label = ttk.Label(champs_frame, text="Nombre de zone gestion: ")
             nombre_de_zone_de_gestion_entry = ttk.Entry(champs_frame)
             nombre_de_zone_de_gestion_entry.insert(0, "1")
-            nom_du_champs_label.grid(row=0, column=0, pady=3)
-            nom_du_champs_entry.grid(row=0, column=1, pady=3)
-            nombre_de_zone_de_gestion_label.grid(row=1, column=0, pady=3)
-            nombre_de_zone_de_gestion_entry.grid(row=1, column=1, pady=3)
+            nom_du_champs_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
+            nom_du_champs_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
+            nombre_de_zone_de_gestion_label.grid(row=1, column=0, sticky="w", pady=3, padx=5)
+            nombre_de_zone_de_gestion_entry.grid(row=1, column=1, sticky="w", pady=3, padx=5)
 
             champs_frame.pack(fill="both", padx=55, pady=5)
 
@@ -368,20 +369,20 @@ def run_gui(frame):
                 profondeur_entry = ttk.Entry(zone_de_gestion_frame)
                 superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame, text="Superficie de la zone (ha): ")
                 superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
-                taux_matiere_organique_label.grid(row=0, column=0, pady=3)
-                taux_matiere_organique_entry.grid(row=0, column=1, pady=3)
-                municipalite_label.grid(row=1, column=0, pady=3)
-                municipalite_combobox.grid(row=1, column=1, pady=3)
-                classe_texturale_label.grid(row=2, column=0, pady=3)
-                classe_texturale_combobox.grid(row=2, column=1, pady=3)
-                classe_de_drainage_label.grid(row=3, column=0, pady=3)
-                classe_de_drainage_combobox.grid(row=3, column=1, pady=3)
-                masse_volumique_apparente_label.grid(row=4, column=0, pady=3)
-                masse_volumique_apparente_entry.grid(row=4, column=1, pady=3)
-                profondeur_label.grid(row=5, column=0, pady=3)
-                profondeur_entry.grid(row=5, column=1, pady=3)
-                superficie_de_la_zone_label.grid(row=6, column=0, pady=3)
-                superficie_de_la_zone_entry.grid(row=6, column=1, pady=3)
+                taux_matiere_organique_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
+                taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
+                municipalite_label.grid(row=1, column=0, sticky="w", pady=3, padx=5)
+                municipalite_combobox.grid(row=1, column=1, sticky="w", pady=3, padx=5)
+                classe_texturale_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
+                classe_texturale_combobox.grid(row=2, column=1, sticky="w", pady=3, padx=5)
+                classe_de_drainage_label.grid(row=3, column=0, sticky="w", pady=3, padx=5)
+                classe_de_drainage_combobox.grid(row=3, column=1, sticky="w", pady=3, padx=5)
+                masse_volumique_apparente_label.grid(row=4, column=0, sticky="w", pady=3, padx=5)
+                masse_volumique_apparente_entry.grid(row=4, column=1, sticky="w", pady=3, padx=5)
+                profondeur_label.grid(row=5, column=0, sticky="w", pady=3, padx=5)
+                profondeur_entry.grid(row=5, column=1, sticky="w", pady=3, padx=5)
+                superficie_de_la_zone_label.grid(row=6, column=0, sticky="w", pady=3, padx=5)
+                superficie_de_la_zone_entry.grid(row=6, column=1, sticky="w", pady=3, padx=5)
 
                 zone_de_gestion_frame.pack()
 
@@ -506,14 +507,14 @@ def run_gui(frame):
                     if nombre_simulations < 2:
                         numero_simulation_copie_entry.configure(state="disabled")
 
-                    nom_simulation_label.grid(row=0, column=0, pady=3, padx=5)
-                    nom_simulation_entry.grid(row=0, column=1, pady=3, padx=5)
-                    annee_projection_initiale_label.grid(row=1, column=0, pady=3, padx=5)
-                    annee_projection_initiale_entry.grid(row=1, column=1, pady=3, padx=5)
-                    duree_projection_label.grid(row=2, column=0, pady=3, padx=5)
-                    duree_projection_entry.grid(row=2, column=1, pady=3, padx=5)
-                    numero_simulation_copie_label.grid(row=3, column=0, pady=3, padx=5)
-                    numero_simulation_copie_entry.grid(row=3, column=1, pady=3, padx=5)
+                    nom_simulation_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
+                    nom_simulation_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
+                    annee_projection_initiale_label.grid(row=1, column=0, sticky="w", pady=3, padx=5)
+                    annee_projection_initiale_entry.grid(row=1, column=1, sticky="w", pady=3, padx=5)
+                    duree_projection_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
+                    duree_projection_entry.grid(row=2, column=1, sticky="w", pady=3, padx=5)
+                    numero_simulation_copie_label.grid(row=3, column=0, sticky="w", pady=3, padx=5)
+                    numero_simulation_copie_entry.grid(row=3, column=1, sticky="w", pady=3, padx=5)
 
                     creer_simulation_bouton = ttk.Button(duree_simulation_frame, text="Créer",
                                                          command=get_duree_de_la_simulation)
@@ -772,20 +773,20 @@ def run_gui(frame):
                             superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
                                                                     text="Superficie de la zone (ha): ")
                             superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
-                            taux_matiere_organique_label.grid(row=0, column=0)
-                            taux_matiere_organique_entry.grid(row=0, column=1)
-                            municipalite_label.grid(row=1, column=0)
-                            municipalite_combobox.grid(row=1, column=1)
-                            classe_texturale_label.grid(row=2, column=0)
-                            classe_texturale_combobox.grid(row=2, column=1)
-                            classe_de_drainage_label.grid(row=3, column=0)
-                            classe_de_drainage_combobox.grid(row=3, column=1)
-                            masse_volumique_apparente_label.grid(row=4, column=0)
-                            masse_volumique_apparente_entry.grid(row=4, column=1)
-                            profondeur_label.grid(row=5, column=0)
-                            profondeur_entry.grid(row=5, column=1)
-                            superficie_de_la_zone_label.grid(row=6, column=0)
-                            superficie_de_la_zone_entry.grid(row=6, column=1)
+                            taux_matiere_organique_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
+                            taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
+                            municipalite_label.grid(row=1, column=0, sticky="w", pady=3, padx=5)
+                            municipalite_combobox.grid(row=1, column=1, sticky="w", pady=3, padx=5)
+                            classe_texturale_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
+                            classe_texturale_combobox.grid(row=2, column=1, sticky="w", pady=3, padx=5)
+                            classe_de_drainage_label.grid(row=3, column=0, sticky="w", pady=3, padx=5)
+                            classe_de_drainage_combobox.grid(row=3, column=1, sticky="w", pady=3, padx=5)
+                            masse_volumique_apparente_label.grid(row=4, column=0, sticky="w", pady=3, padx=5)
+                            masse_volumique_apparente_entry.grid(row=4, column=1, sticky="w", pady=3, padx=5)
+                            profondeur_label.grid(row=5, column=0, sticky="w", pady=3, padx=5)
+                            profondeur_entry.grid(row=5, column=1, sticky="w", pady=3, padx=5)
+                            superficie_de_la_zone_label.grid(row=6, column=0, sticky="w", pady=3, padx=5)
+                            superficie_de_la_zone_entry.grid(row=6, column=1, sticky="w", pady=3, padx=5)
 
                             zone_de_gestion_frame.pack()
 
@@ -957,13 +958,13 @@ def run_gui(frame):
             nombre_de_zone_de_gestion_label = ttk.Label(nouveau_champs_frame,
                                                         text="Nombre de zone gestion: ")
             nombre_de_zone_de_gestion_entry = ttk.Entry(nouveau_champs_frame)
-            nom_du_champs_label.grid(row=0, column=0)
-            nom_du_champs_entry.grid(row=0, column=1)
-            nombre_de_zone_de_gestion_label.grid(row=1, column=0)
-            nombre_de_zone_de_gestion_entry.grid(row=1, column=1)
+            nom_du_champs_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
+            nom_du_champs_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
+            nombre_de_zone_de_gestion_label.grid(row=1, sticky="w", column=0, pady=3, padx=5)
+            nombre_de_zone_de_gestion_entry.grid(row=1, sticky="w", column=1, pady=3, padx=5)
             creer_nouveau_champs_bouton = ttk.Button(nouveau_champs_frame, text="Créer",
                                                      command=creation_des_zone_de_gestion_du_nouveau_champs)
-            creer_nouveau_champs_bouton.grid(row=3, column=0, columnspan=2)
+            creer_nouveau_champs_bouton.grid(row=3, column=0, columnspan=2, pady=3, padx=5)
             nouveau_champs_frame.pack()
 
         def set_up_champs(zone_notebook, nombre_de_zone, champs_notebook, simulation_copie=None, index_champs=None):
@@ -1090,20 +1091,20 @@ def run_gui(frame):
                 superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
                                                         text="Superficie de la zone (ha): ")
                 superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
-                taux_matiere_organique_label.grid(row=0, column=0)
-                taux_matiere_organique_entry.grid(row=0, column=1)
-                municipalite_label.grid(row=1, column=0)
-                municipalite_combobox.grid(row=1, column=1)
-                classe_texturale_label.grid(row=2, column=0)
-                classe_texturale_combobox.grid(row=2, column=1)
-                classe_de_drainage_label.grid(row=3, column=0)
-                classe_de_drainage_combobox.grid(row=3, column=1)
-                masse_volumique_apparente_label.grid(row=4, column=0)
-                masse_volumique_apparente_entry.grid(row=4, column=1)
-                profondeur_label.grid(row=5, column=0)
-                profondeur_entry.grid(row=5, column=1)
-                superficie_de_la_zone_label.grid(row=6, column=0)
-                superficie_de_la_zone_entry.grid(row=6, column=1)
+                taux_matiere_organique_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
+                taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
+                municipalite_label.grid(row=1, column=0, sticky="w", pady=3, padx=5)
+                municipalite_combobox.grid(row=1, column=1, sticky="w", pady=3, padx=5)
+                classe_texturale_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
+                classe_texturale_combobox.grid(row=2, column=1, sticky="w", pady=3, padx=5)
+                classe_de_drainage_label.grid(row=3, column=0, sticky="w", pady=3, padx=5)
+                classe_de_drainage_combobox.grid(row=3, column=1, sticky="w", pady=3, padx=5)
+                masse_volumique_apparente_label.grid(row=4, column=0, sticky="w", pady=3, padx=5)
+                masse_volumique_apparente_entry.grid(row=4, column=1, sticky="w", pady=3, padx=5)
+                profondeur_label.grid(row=5, column=0, sticky="w", pady=3, padx=5)
+                profondeur_entry.grid(row=5, column=1, sticky="w", pady=3, padx=5)
+                superficie_de_la_zone_label.grid(row=6, column=0, sticky="w", pady=3, padx=5)
+                superficie_de_la_zone_entry.grid(row=6, column=1, sticky="w", pady=3, padx=5)
 
                 zone_de_gestion_frame.pack()
 
@@ -1302,13 +1303,13 @@ def run_gui(frame):
             canvas_projection.pack(side="left", fill="both", expand=True)
             scrollbar_projection.pack(side="right", fill="y")
             ajouter_une_annee_a_la_rotation(scrollable_frame_projection, zone)
-            projection_frame.grid(row=1, column=0, columnspan=2)
+            projection_frame.grid(row=1, column=0, columnspan=2, pady=3)
             get_information_simulation_button = ttk.Button(zone_tab, text="Créer rapport",
                                                            command=get_information_toutes_les_simulations)
-            get_information_simulation_button.grid(row=2, column=0)
+            get_information_simulation_button.grid(row=2, column=0, pady=3)
             editer_information_entreprise_button = ttk.Button(zone_tab, text="Éditer attributs de l'entreprise",
                                                               command=editer_caracteristique_physique_entreprise)
-            editer_information_entreprise_button.grid(row=2, column=1)
+            editer_information_entreprise_button.grid(row=2, column=1, pady=3)
 
         def ajouter_une_annee_a_la_rotation(scrollable_frame_projection, zone=None, zone_rechauffement=None):
             if len(scrollable_frame_projection.winfo_children()) == 0:
@@ -1328,7 +1329,7 @@ def run_gui(frame):
                 ajouter_une_annee_a_la_rotation_button = ttk.Button(button_frame, text="Ajouter une année de rotation",
                                                                     command=lambda: ajouter_une_annee_a_la_rotation(
                                                                         scrollable_frame_projection))
-                ajouter_une_annee_a_la_rotation_button.grid(row=0, column=0)
+                ajouter_une_annee_a_la_rotation_button.grid(row=0, column=0, pady=3)
                 if zone is not None and len(zone) > 1:
                     enlever_une_annee_a_la_rotation_button = ttk.Button(button_frame,
                                                                         text="Enlever une année de rotation",
@@ -1338,7 +1339,7 @@ def run_gui(frame):
                     enlever_une_annee_a_la_rotation_button = ttk.Button(button_frame,
                                                                         text="Enlever une année de rotation",
                                                                         state="disabled")
-                enlever_une_annee_a_la_rotation_button.grid(row=0, column=1)
+                enlever_une_annee_a_la_rotation_button.grid(row=0, column=1, pady=3)
                 button_frame.pack()
             else:
                 scrollable_frame_projection.winfo_children()[
@@ -1350,11 +1351,11 @@ def run_gui(frame):
                 ajouter_une_annee_a_la_rotation_button = ttk.Button(button_frame, text="Ajouter une année de rotation",
                                                                     command=lambda: ajouter_une_annee_a_la_rotation(
                                                                         scrollable_frame_projection))
-                ajouter_une_annee_a_la_rotation_button.grid(row=0, column=0)
+                ajouter_une_annee_a_la_rotation_button.grid(row=0, column=0, pady=3)
                 enlever_une_annee_a_la_rotation_button = ttk.Button(button_frame, text="Enlever une année de rotation",
                                                                     command=lambda: enlever_une_annee_a_la_rotation(
                                                                         scrollable_frame_projection))
-                enlever_une_annee_a_la_rotation_button.grid(row=0, column=1)
+                enlever_une_annee_a_la_rotation_button.grid(row=0, column=1, pady=3)
                 button_frame.pack()
 
         def enlever_une_annee_a_la_rotation(scrollable_frame_projection):
@@ -1445,7 +1446,7 @@ def run_gui(frame):
                             ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame)
                         index += 1
                     index_champs += 1
-                rechauffement_frame.grid(row=1, column=0, columnspan=2)
+                rechauffement_frame.grid(row=1, column=0, columnspan=2, pady=3)
 
         def add_regies_historiques(scrollable_frame, regies_historiques=None):
             global annees_historiques
@@ -1504,25 +1505,25 @@ def run_gui(frame):
                 else:
                     ajouter_des_amendements(amendement_frame)
 
-                culture_principale_label.grid(row=0, column=0)
-                culture_principale_combobox.grid(row=0, column=1)
-                rendement_label.grid(row=1, column=0)
-                rendement_entry.grid(row=1, column=1)
-                proportion_tige_exporte_label.grid(row=2, column=0)
-                proportion_tige_exporte_entry.grid(row=2, column=1)
-                production_non_recolte_label.grid(row=3, column=0)
-                production_non_recolte_combobox.grid(row=3, column=1)
-                taux_matiere_seche_label.grid(row=4, column=0)
-                taux_matiere_seche_entry.grid(row=4, column=1)
-                travail_du_sol_label.grid(row=5, column=0)
-                travail_du_sol_combobox.grid(row=5, column=1)
-                profondeur_maximale_label.grid(row=6, column=0)
-                profondeur_maximale_entry.grid(row=6, column=1)
-                culture_secondaire_label.grid(row=7, column=0)
-                culture_secondaire_combobox.grid(row=7, column=1)
-                rendement_culture_secondaire_label.grid(row=8, column=0)
-                rendement_culture_secondaire_entry.grid(row=8, column=1)
-                amendement_frame.grid(row=9, column=0, columnspan=2)
+                culture_principale_label.grid(row=0, column=0, sticky="w", pady=3)
+                culture_principale_combobox.grid(row=0, column=1, sticky="w", pady=3)
+                rendement_label.grid(row=1, column=0, sticky="w", pady=3)
+                rendement_entry.grid(row=1, column=1, sticky="w", pady=3)
+                proportion_tige_exporte_label.grid(row=2, column=0, sticky="w", pady=3)
+                proportion_tige_exporte_entry.grid(row=2, column=1, sticky="w", pady=3)
+                production_non_recolte_label.grid(row=3, column=0, sticky="w", pady=3)
+                production_non_recolte_combobox.grid(row=3, column=1, sticky="w", pady=3)
+                taux_matiere_seche_label.grid(row=4, column=0, sticky="w", pady=3)
+                taux_matiere_seche_entry.grid(row=4, column=1, sticky="w", pady=3)
+                travail_du_sol_label.grid(row=5, column=0, sticky="w", pady=3)
+                travail_du_sol_combobox.grid(row=5, column=1, sticky="w", pady=3)
+                profondeur_maximale_label.grid(row=6, column=0, sticky="w", pady=3)
+                profondeur_maximale_entry.grid(row=6, column=1, sticky="w", pady=3)
+                culture_secondaire_label.grid(row=7, column=0, sticky="w", pady=3)
+                culture_secondaire_combobox.grid(row=7, column=1, sticky="w", pady=3)
+                rendement_culture_secondaire_label.grid(row=8, column=0, sticky="w", pady=3)
+                rendement_culture_secondaire_entry.grid(row=8, column=1, sticky="w", pady=3)
+                amendement_frame.grid(row=9, column=0, columnspan=2, pady=3)
 
                 annee_courante += 1
                 index += 1
@@ -1541,10 +1542,10 @@ def run_gui(frame):
                     apport_amendement_entry = ttk.Entry(amendement_frame)
                     if amendement["apport"] is not None:
                         apport_amendement_entry.insert(0, str(amendement["apport"]))
-                    amendement_label.grid(row=index, column=0)
-                    amendement_combobox.grid(row=index, column=1)
-                    apport_amendement_label.grid(row=index + 1, column=0)
-                    apport_amendement_entry.grid(row=index + 1, column=1)
+                    amendement_label.grid(row=index, column=0, sticky="w", pady=3)
+                    amendement_combobox.grid(row=index, column=1, sticky="w", pady=3)
+                    apport_amendement_label.grid(row=index + 1, column=0, sticky="w", pady=3)
+                    apport_amendement_entry.grid(row=index + 1, column=1, sticky="w", pady=3)
                     index += 2
             else:
                 index = 0
@@ -1552,10 +1553,10 @@ def run_gui(frame):
                 amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
                 apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t/ha):")
                 apport_amendement_entry = ttk.Entry(amendement_frame)
-                amendement_label.grid(row=0, column=0)
-                amendement_combobox.grid(row=0, column=1)
-                apport_amendement_label.grid(row=1, column=0)
-                apport_amendement_entry.grid(row=1, column=1)
+                amendement_label.grid(row=0, column=0, sticky="w", pady=3)
+                amendement_combobox.grid(row=0, column=1, sticky="w", pady=3)
+                apport_amendement_label.grid(row=1, column=0, sticky="w", pady=3)
+                apport_amendement_entry.grid(row=1, column=1, sticky="w", pady=3)
                 index += 2
 
             ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
@@ -1563,8 +1564,8 @@ def run_gui(frame):
             ajout_a_la_liste_amendement = ttk.Button(amendement_frame, text="Ajouter un nouvel amendement",
                                                      command=ajouter_nouvel_amendement)
 
-            ajout_a_la_regie_button.grid(row=index, column=0)
-            ajout_a_la_liste_amendement.grid(row=index, column=1)
+            ajout_a_la_regie_button.grid(row=index, column=0, pady=3)
+            ajout_a_la_liste_amendement.grid(row=index, column=1, pady=3)
 
         def ajouter_amendement_regie(amendement_frame):
             grid_size = amendement_frame.grid_size()
@@ -1579,12 +1580,12 @@ def run_gui(frame):
                                                  command=lambda: ajouter_amendement_regie(amendement_frame))
             ajout_a_la_liste_amendement = ttk.Button(amendement_frame, text="Ajouter un nouvel amendement",
                                                      command=ajouter_nouvel_amendement)
-            amendement_label.grid(row=grid_size[1] - 1, column=grid_size[0] - 2)
-            amendement_combobox.grid(row=grid_size[1] - 1, column=grid_size[0] - 1)
-            apport_amendement_label.grid(row=grid_size[1], column=grid_size[0] - 2)
-            apport_amendement_entry.grid(row=grid_size[1], column=grid_size[0] - 1)
-            ajout_a_la_regie_button.grid(row=grid_size[1] + 1, column=grid_size[0] - 2)
-            ajout_a_la_liste_amendement.grid(row=grid_size[1] + 1, column=grid_size[0] - 1)
+            amendement_label.grid(row=grid_size[1] - 1, column=grid_size[0] - 2, sticky="w", pady=3)
+            amendement_combobox.grid(row=grid_size[1] - 1, column=grid_size[0] - 1, sticky="w", pady=3)
+            apport_amendement_label.grid(row=grid_size[1], column=grid_size[0] - 2, sticky="w", pady=3)
+            apport_amendement_entry.grid(row=grid_size[1], column=grid_size[0] - 1, sticky="w", pady=3)
+            ajout_a_la_regie_button.grid(row=grid_size[1] + 1, column=grid_size[0] - 2, pady=3)
+            ajout_a_la_liste_amendement.grid(row=grid_size[1] + 1, column=grid_size[0] - 1, pady=3)
 
         def ajouter_nouvel_amendement():
             # TODO: Faire le UI et les calls nécessaire pour ajouter un amendement à la BD
@@ -1642,25 +1643,25 @@ def run_gui(frame):
             else:
                 ajouter_des_amendements(amendement_frame)
 
-            culture_principale_label.grid(row=0, column=0)
-            culture_principale_combobox.grid(row=0, column=1)
-            rendement_label.grid(row=1, column=0)
-            rendement_entry.grid(row=1, column=1)
-            proportion_tige_exporte_label.grid(row=2, column=0)
-            proportion_tige_exporte_entry.grid(row=2, column=1)
-            production_non_recolte_label.grid(row=3, column=0)
-            production_non_recolte_combobox.grid(row=3, column=1)
-            taux_matiere_seche_label.grid(row=4, column=0)
-            taux_matiere_seche_entry.grid(row=4, column=1)
-            travail_du_sol_label.grid(row=5, column=0)
-            travail_du_sol_combobox.grid(row=5, column=1)
-            profondeur_maximale_label.grid(row=6, column=0)
-            profondeur_maximale_entry.grid(row=6, column=1)
-            culture_secondaire_label.grid(row=7, column=0)
-            culture_secondaire_combobox.grid(row=7, column=1)
-            rendement_culture_secondaire_label.grid(row=8, column=0)
-            rendement_culture_secondaire_entry.grid(row=8, column=1)
-            amendement_frame.grid(row=9, column=0, columnspan=2)
+            culture_principale_label.grid(row=0, column=0, sticky="w", pady=3)
+            culture_principale_combobox.grid(row=0, column=1, sticky="w", pady=3)
+            rendement_label.grid(row=1, column=0, sticky="w", pady=3)
+            rendement_entry.grid(row=1, column=1, sticky="w", pady=3)
+            proportion_tige_exporte_label.grid(row=2, column=0, sticky="w", pady=3)
+            proportion_tige_exporte_entry.grid(row=2, column=1, sticky="w", pady=3)
+            production_non_recolte_label.grid(row=3, column=0, sticky="w", pady=3)
+            production_non_recolte_combobox.grid(row=3, column=1, sticky="w", pady=3)
+            taux_matiere_seche_label.grid(row=4, column=0, sticky="w", pady=3)
+            taux_matiere_seche_entry.grid(row=4, column=1, sticky="w", pady=3)
+            travail_du_sol_label.grid(row=5, column=0, sticky="w", pady=3)
+            travail_du_sol_combobox.grid(row=5, column=1, sticky="w", pady=3)
+            profondeur_maximale_label.grid(row=6, column=0, sticky="w", pady=3)
+            profondeur_maximale_entry.grid(row=6, column=1, sticky="w", pady=3)
+            culture_secondaire_label.grid(row=7, column=0, sticky="w", pady=3)
+            culture_secondaire_combobox.grid(row=7, column=1, sticky="w", pady=3)
+            rendement_culture_secondaire_label.grid(row=8, column=0, sticky="w", pady=3)
+            rendement_culture_secondaire_entry.grid(row=8, column=1, sticky="w", pady=3)
+            amendement_frame.grid(row=9, column=0, columnspan=2, pady=3)
             annee_courante_frame.pack()
 
         def get_information_toutes_les_simulations():
@@ -1682,6 +1683,7 @@ def run_gui(frame):
                 response = requests.post('http://localhost:5000/api/icbm-bilan', json={"simulations": simulations})
                 print(response.text)
                 # TODO: Ajouter la suite avec la generation du rapport
+                creation_du_rapport(response)
             else:
                 message = ""
                 for entree_invalide in entree_invalide_liste:
@@ -2358,8 +2360,8 @@ def run_gui(frame):
             nom_entreprise_entry = ttk.Entry(entreprise_label_frame)
             global nom_entreprise
             nom_entreprise_entry.insert(0, nom_entreprise)
-            nom_entreprise_label.grid(row=0, column=0)
-            nom_entreprise_entry.grid(row=0, column=1)
+            nom_entreprise_label.grid(row=0, column=0, sticky="w", pady=3)
+            nom_entreprise_entry.grid(row=0, column=1, sticky="w", pady=3)
             champs_row_index = 1
             global nombre_de_champs
             for champs_index in range(nombre_de_champs):
@@ -2369,8 +2371,8 @@ def run_gui(frame):
                 nom_champs_entry = ttk.Entry(champs_label_frame)
                 if information_champs[champs_index]["nom_du_champs"]:
                     nom_champs_entry.insert(0, information_champs[champs_index]["nom_du_champs"])
-                nom_champs_label.grid(row=0, column=0)
-                nom_champs_entry.grid(row=0, column=1)
+                nom_champs_label.grid(row=0, column=0, sticky="w", pady=3)
+                nom_champs_entry.grid(row=0, column=1, sticky="w", pady=3)
                 zone_row_index = 1
                 information_zones_de_gestion = information_champs[champs_index]["information_zone_de_gestion"]
                 for zone_index in range(int(information_champs[champs_index]["nombre_de_zone_de_gestion"])):
@@ -2408,25 +2410,25 @@ def run_gui(frame):
                     superficie_de_la_zone_entry = ttk.Entry(zone_label_frame)
                     if information_zone_de_gestion["superficie_de_la_zone"] is not None:
                         superficie_de_la_zone_entry.insert(0, information_zone_de_gestion["superficie_de_la_zone"])
-                    taux_matiere_organique_label.grid(row=0, column=0)
-                    taux_matiere_organique_entry.grid(row=0, column=1)
-                    municipalite_label.grid(row=1, column=0)
-                    municipalite_combobox.grid(row=1, column=1)
-                    classe_texturale_label.grid(row=2, column=0)
-                    classe_texturale_combobox.grid(row=2, column=1)
-                    classe_de_drainage_label.grid(row=3, column=0)
-                    classe_de_drainage_combobox.grid(row=3, column=1)
-                    masse_volumique_apparente_label.grid(row=4, column=0)
-                    masse_volumique_apparente_entry.grid(row=4, column=1)
-                    profondeur_label.grid(row=5, column=0)
-                    profondeur_entry.grid(row=5, column=1)
-                    superficie_de_la_zone_label.grid(row=6, column=0)
-                    superficie_de_la_zone_entry.grid(row=6, column=1)
-                    zone_label_frame.grid(row=zone_row_index, column=0, columnspan=2)
+                    taux_matiere_organique_label.grid(row=0, column=0, sticky="w", pady=3)
+                    taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3)
+                    municipalite_label.grid(row=1, column=0, sticky="w", pady=3)
+                    municipalite_combobox.grid(row=1, column=1, sticky="w", pady=3)
+                    classe_texturale_label.grid(row=2, column=0, sticky="w", pady=3)
+                    classe_texturale_combobox.grid(row=2, column=1, sticky="w", pady=3)
+                    classe_de_drainage_label.grid(row=3, column=0, sticky="w", pady=3)
+                    classe_de_drainage_combobox.grid(row=3, column=1, sticky="w", pady=3)
+                    masse_volumique_apparente_label.grid(row=4, column=0, sticky="w", pady=3)
+                    masse_volumique_apparente_entry.grid(row=4, column=1, sticky="w", pady=3)
+                    profondeur_label.grid(row=5, column=0, sticky="w", pady=3)
+                    profondeur_entry.grid(row=5, column=1, sticky="w", pady=3)
+                    superficie_de_la_zone_label.grid(row=6, column=0, sticky="w", pady=3)
+                    superficie_de_la_zone_entry.grid(row=6, column=1, sticky="w", pady=3)
+                    zone_label_frame.grid(row=zone_row_index, column=0, columnspan=2, padx=10)
                     zone_row_index += 1
-                champs_label_frame.grid(row=champs_row_index, column=0, columnspan=2)
+                champs_label_frame.grid(row=champs_row_index, column=0, columnspan=2, padx=10)
                 champs_row_index += 1
-            entreprise_label_frame.pack(ipadx=5, ipady=5, padx=101)
+            entreprise_label_frame.pack(padx=10, pady=10)
             canvas.pack(side="left", ipadx=5)
             scrollbar.pack(side="right", fill="y")
 
@@ -2565,7 +2567,7 @@ def run_gui(frame):
             widget.destroy()
 
         rechauffement_frame = ttk.Frame(parent_frame_tabs)
-        projection_frame = ttk.Frame(parent_frame_tabs, width=575, height=385)
+        projection_frame = ttk.Frame(parent_frame_tabs, width=575, height=400)
 
         rechauffement_frame.grid(row=0, column=1)
         projection_frame.grid(row=0, column=0)
@@ -2629,11 +2631,11 @@ def run_gui(frame):
         simulation_notebook.grid(row=0, column=1, sticky="nw")
 
         set_up_regies_rechauffement(donnees_de_rechauffement_label_frame, show_regie_historique, simulations)
-        donnees_de_rechauffement_label_frame.grid(row=0, column=0)
+        donnees_de_rechauffement_label_frame.grid(row=0, column=0, pady=3)
         sauvegarder_plan_de_gestion_button = ttk.Button(rechauffement_frame, text="Sauvegarder le plan de gestion",
                                                         command=lambda: sauvegarder_plan_de_gestion_de_carbone(
                                                             sauvegarder_toutes_les_simulations()))
-        sauvegarder_plan_de_gestion_button.grid(row=1, column=0)
+        sauvegarder_plan_de_gestion_button.grid(row=1, column=0, pady=3)
 
         if simulations is not None:
             simulation_notebook.winfo_children()[simulation_notebook.index("end") - 1].destroy()
@@ -2679,14 +2681,14 @@ def run_gui(frame):
         annee_historique_finale_label = ttk.Label(annee_historique_frame, text="Année historique finale: ")
         annee_historique_finale_entry = ttk.Entry(annee_historique_frame)
 
-        annee_historique_initiale_label.grid(row=0, column=0, pady=3)
-        annee_historique_initiale_entry.grid(row=0, column=1, pady=3)
-        annee_historique_finale_label.grid(row=1, column=0, pady=3)
-        annee_historique_finale_entry.grid(row=1, column=1, pady=3)
+        annee_historique_initiale_label.grid(row=0, column=0, sticky="w", pady=3)
+        annee_historique_initiale_entry.grid(row=0, column=1, sticky="w", pady=3)
+        annee_historique_finale_label.grid(row=1, column=0, sticky="w", pady=3)
+        annee_historique_finale_entry.grid(row=1, column=1, sticky="w", pady=3)
 
         get_annees_historiques_button = ttk.Button(annee_historique_frame, text="Confirmer",
                                                    command=get_annees_historiques)
-        get_annees_historiques_button.grid(row=2, column=0, columnspan=2)
+        get_annees_historiques_button.grid(row=2, column=0, columnspan=2, pady=3)
 
         annee_historique_frame.pack()
 
@@ -2840,7 +2842,8 @@ def run_gui(frame):
                      "information_champs": information_champs}
         global filename
         if filename is None:
-            response = messagebox.askyesno("Sauvegarde entreprise", "Souhaitez-vous sauvegarder les modifications apportées à l'entreprise?")
+            response = messagebox.askyesno("Sauvegarde entreprise",
+                                           "Souhaitez-vous sauvegarder les modifications apportées à l'entreprise?")
             if response:
                 filename_valide = sauvegarder_attributs_entreprise_apres_creation()
                 if filename_valide:
@@ -2876,6 +2879,312 @@ def run_gui(frame):
         with open(plan_gestion_filename, 'w') as json_file:
             json.dump(save_dict, json_file)
         root.deiconify()
+
+    def creation_du_rapport(bilan_response):
+        print(bilan_response.json())
+        bilan_workbook = Workbook()
+        description_champs_worksheet = bilan_workbook.active
+        index_column_cell = 1
+        index_row_cell = 1
+        global information_champs
+        for champs in information_champs:
+            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                              value=champs["nom_du_champs"])
+            index_row_cell += 1
+            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                              value="Taux de matière organique")
+            index_row_cell += 1
+            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                              value="Municipalité")
+            index_row_cell += 1
+            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                              value="Classe de drainage")
+            index_row_cell += 1
+            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                              value="Masse volumique apparente")
+            index_row_cell += 1
+            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                              value="Profondeur")
+            index_row_cell += 1
+            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                              value="Superficie de la zone")
+            index_column_cell += 1
+            index_zone = 1
+            for zones in champs["information_zone_de_gestion"]:
+                index_row_cell = 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Zone de gestion " + str(index_zone))
+                index_row_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zones["taux_matiere_organique"])
+                index_row_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zones["municipalite"])
+                index_row_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zones["classe_de_drainage"])
+                index_row_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zones["masse_volumique_apparente"])
+                index_row_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zones["profondeur"])
+                index_row_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zones["superficie_de_la_zone"])
+                index_column_cell += 1
+                index_zone += 1
+            index_row_cell = 1
+
+        global duree_simulation
+        index_row_cell = 1
+        index_column_cell = 1
+        index_simulation = 0
+        for simulation in bilan_response.json()["bilans_des_simulations"]:
+            description_simulation_worksheet = bilan_workbook.create_sheet(duree_simulation[index_simulation]["nom_simulation"])
+            for champs in simulation["bilans_des_champs"]:
+                row_shift = 0
+                count_row_shift = True
+                description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=champs["nom_du_champs"])
+                index_row_cell += 1
+                index = 1
+                for zone in champs["bilans_des_zones"]:
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Zone de gestion " + str(index))
+                    index_row_cell += 1
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Année de projection")
+                    index_row_cell += 1
+
+                    for annee in range(int(duree_simulation[index_simulation]["annee_projection_initiale"]), int(duree_simulation[index_simulation]["annee_projection_initiale"])+int(duree_simulation[index_simulation]["duree_projection"])):
+                        description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value=annee)
+                        index_row_cell += 1
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Total")
+                    index_row_cell += 1
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Moyenne")
+                    index_row_cell = 3
+                    index_column_cell += 1
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Apport culture principale")
+                    index_row_cell += 1
+                    for apport_culture_principale in zone["bilan_apports_cultures_principales"]:
+                        description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value=apport_culture_principale)
+                        if count_row_shift:
+                            row_shift += 1
+                        index_row_cell += 1
+
+                    count_row_shift = False
+
+                    row_shift += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="=SUM(" + str(index_row_cell) + "," + str(
+                                                          index_column_cell) + ")")
+                    index_row_cell += 1
+
+                    row_shift += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="=AVERAGE(" + str(index_row_cell) + "," + str(
+                                                          index_column_cell) + ")")
+                    index_row_cell = 3
+                    index_column_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Apport culture secondaire")
+                    index_row_cell += 1
+
+                    for apport_culture_secondaire in zone["bilan_apports_cultures_secondaires"]:
+                        description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value=apport_culture_secondaire)
+                        index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="=SUM(" + str(index_row_cell) + "," + str(
+                                                          index_column_cell) + ")")
+                    index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="=AVERAGE(" + str(index_row_cell) + "," + str(
+                                                          index_column_cell) + ")")
+                    index_row_cell = 3
+                    index_column_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Apport amendements")
+                    index_row_cell += 1
+
+                    for apport_amendement in zone["bilan_apports_amendements"]:
+                        description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value=apport_amendement)
+                        index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="=SUM(" + str(index_row_cell) + "," + str(
+                                                          index_column_cell) + ")")
+                    index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="=AVERAGE(" + str(index_row_cell) + "," + str(
+                                                          index_column_cell) + ")")
+
+                    index_row_cell += 1
+                    index_column_cell -= 3
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Teneur initiale en MOS de la zone")
+                    index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Teneur finale en MOS de la zone")
+                    index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Évolution du taux de MOS de la zone")
+                    index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Comparaison 50ème percentile de la zone")
+                    index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Comparaison 90ème percentile de la zone")
+
+                    index_row_cell -= 4
+                    index_column_cell += 1
+
+                    # TODO: Modifier les 5 valeurs plus bas pour les valeurs calcuclés dans le bilan
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Teneur initiale en MOS")
+                    index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Teneur finale en MOS")
+                    index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Évolution du taux de MOS")
+                    index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Comparaison 50ème percentile")
+                    index_row_cell += 1
+
+                    description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                          value="Comparaison 90ème percentile")
+
+                    index_row_cell = 2
+                    index_column_cell += 3
+
+                    index += 1
+
+                index_column_cell -= champs["nombre_de_zone_de_gestion"]*4
+                index_row_cell += row_shift
+
+                description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Teneur initiale en MOS du champs")
+                index_row_cell += 1
+
+                description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Teneur finale en MOS du champs")
+                index_row_cell += 1
+
+                description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Évolution du taux de MOS du champs")
+                index_row_cell += 1
+
+                description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Comparaison 50ème percentile du champs")
+                index_row_cell += 1
+
+                description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Comparaison 90ème percentile du champs")
+
+                index_row_cell -= 4
+                index_column_cell += 1
+
+                # TODO: Modifier les 5 valeurs plus bas pour les valeurs calcuclés dans le bilan
+
+                description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Teneur initiale en MOS")
+                index_row_cell += 1
+
+                description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Teneur finale en MOS")
+                index_row_cell += 1
+
+                description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Évolution du taux de MOS")
+                index_row_cell += 1
+
+                description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Comparaison 50ème percentile")
+                index_row_cell += 1
+
+                description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Comparaison 90ème percentile")
+
+                index_row_cell = 1
+                index_column_cell = 1 + champs["nombre_de_zone_de_gestion"]*4
+
+            index_row_cell = row_shift + 7
+            index_column_cell = 1
+
+            description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Teneur initiale en MOS du champs")
+            index_row_cell += 1
+
+            description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Teneur finale en MOS du champs")
+            index_row_cell += 1
+
+            description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Évolution du taux de MOS du champs")
+            index_row_cell += 1
+
+            description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Comparaison 50ème percentile du champs")
+            index_row_cell += 1
+
+            description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Comparaison 90ème percentile du champs")
+
+            index_row_cell -= 4
+            index_column_cell += 1
+
+            # TODO: Modifier les 5 valeurs plus bas pour les valeurs calcuclés dans le bilan
+
+            description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Teneur initiale en MOS")
+            index_row_cell += 1
+
+            description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Teneur finale en MOS")
+            index_row_cell += 1
+
+            description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Évolution du taux de MOS")
+            index_row_cell += 1
+
+            description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Comparaison 50ème percentile")
+            index_row_cell += 1
+
+            description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Comparaison 90ème percentile")
+
+            index_simulation += 1
+
+            index_row_cell = 1
+            index_column_cell = 1
+
+        bilan_workbook.save("C:\\Users\\Samuel\\Documents\\Stage IRDA\\Test sauvegarde\\test.xlsx")
 
     menu_initial_ogemos(frame)
 

@@ -80,7 +80,8 @@ class Champs:
         bilan_champs_ponderee = self.__calculer_moyenne_ponderee_champs_via_superficie_zone_de_gestion(
             bilans_des_zones)
         return {"bilans_des_zones": bilans_des_zones, "bilan_champs_pondere": bilan_champs_ponderee,
-                "taille_du_champs": self.__taille_du_champs}
+                "taille_du_champs": self.__taille_du_champs, "nom_du_champs": self.__nom_champs,
+                "nombre_de_zone_de_gestion": len(self.__zones_de_gestion)}
 
 
 class ZoneDeGestion:
@@ -159,24 +160,39 @@ class ZoneDeGestion:
 
     def __calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation(self):
         carbone_organique_du_sol_pour_la_duree_de_la_simulation = []
+        apport_carbone_culture_principale = []
+        apport_carbone_culture_secondaire = []
+        apport_carbone_culture_amendements = []
         if len(self.__regies_sol_et_culture_pour_la_duree_de_la_simulation) != 0:
             pool_carbone_jeune_initial = self.__calculer_pool_carbone_jeune_initial()
             pool_carbone_vieux_initial = self.__calculer_pool_carbone_vieux_initial(pool_carbone_jeune_initial)
             regie_annee_calcule, *regie_annee_simulation_restante = self.__regies_sol_et_culture_pour_la_duree_de_la_simulation
             carbone_organique_du_sol_pour_la_duree_de_la_simulation.append(
                 pool_carbone_jeune_initial + pool_carbone_vieux_initial)
+            carbone_total_annee_initiale = self.__regies_sol_et_culture_pour_la_duree_de_la_simulation[0].calculer_apport_annuel_en_carbone_de_la_regie()
+            apport_carbone_culture_principale.append(carbone_total_annee_initiale[1])
+            apport_carbone_culture_secondaire.append(carbone_total_annee_initiale[2])
+            apport_carbone_culture_amendements.append(carbone_total_annee_initiale[3])
             for regie_annee_de_simulation in regie_annee_simulation_restante:
-                carbone_organique_du_sol = regie_annee_de_simulation.calculer_apport_annuel_en_carbone_de_la_regie() / (
+                apports_annuel_de_carbone = regie_annee_de_simulation.calculer_apport_annuel_en_carbone_de_la_regie()
+                apport_annuel_total_a_la_regie = apports_annuel_de_carbone[0]
+                apport_carbone_culture_principale.append(apports_annuel_de_carbone[1])
+                apport_carbone_culture_secondaire.append(apports_annuel_de_carbone[2])
+                apport_carbone_culture_amendements.append(apports_annuel_de_carbone[3])
+                carbone_organique_du_sol = apport_annuel_total_a_la_regie / (
                         self.__facteur_climatique * (
                         (1 / self.__coefficient_mineralisation_pool_jeune) + (
                         regie_annee_de_simulation.calculer_coefficient_humification_residus_culture() / self.__coefficient_mineralisation_pool_vieux)))
                 carbone_organique_du_sol_pour_la_duree_de_la_simulation.append(carbone_organique_du_sol)
-                return carbone_organique_du_sol_pour_la_duree_de_la_simulation
+            return carbone_organique_du_sol_pour_la_duree_de_la_simulation, \
+                   apport_carbone_culture_principale, \
+                   apport_carbone_culture_secondaire, \
+                   apport_carbone_culture_amendements
 
     def __calculer_pool_carbone_jeune_initial(self):
         if len(self.__regies_sol_et_culture_pour_la_duree_de_la_simulation):
             return self.__regies_sol_et_culture_pour_la_duree_de_la_simulation[
-                       0].calculer_apport_annuel_en_carbone_de_la_regie() / (
+                       0].calculer_apport_annuel_en_carbone_de_la_regie()[0] / (
                            self.__facteur_climatique * self.__coefficient_mineralisation_pool_jeune)
         else:
             return 0
@@ -222,9 +238,11 @@ class ZoneDeGestion:
             else:
                 moyenne_de_chaque_annee_de_rotation[index_annee % len(self.__regies_sol_et_culture_projection)] = \
                     carbone_organique_de_sol_pour_la_duree_de_la_simulation[index_annee]
-                nombre_de_repetition_de_annee_de_rotation[index_annee % len(self.__regies_sol_et_culture_projection)] += 1
+                nombre_de_repetition_de_annee_de_rotation[
+                    index_annee % len(self.__regies_sol_et_culture_projection)] += 1
         for index_annee in range(len(moyenne_de_chaque_annee_de_rotation)):
-            moyenne_de_chaque_annee_de_rotation[index_annee] = moyenne_de_chaque_annee_de_rotation[index_annee]/ nombre_de_repetition_de_annee_de_rotation[index_annee]
+            moyenne_de_chaque_annee_de_rotation[index_annee] = moyenne_de_chaque_annee_de_rotation[index_annee] / \
+                                                               nombre_de_repetition_de_annee_de_rotation[index_annee]
 
         return moyenne_de_chaque_annee_de_rotation
 
@@ -232,7 +250,11 @@ class ZoneDeGestion:
         return self.__taille_de_la_zone_de_gestion
 
     def generer_le_bilan_de_zone(self):
-        bilan_carbon_pour_la_simulation = self.__calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation()
+        bilan_carbon_pour_la_simulation_et_apport = self.__calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation()
+        bilan_carbon_pour_la_simulation = bilan_carbon_pour_la_simulation_et_apport[0]
+        bilan_apports_cultures_principales = bilan_carbon_pour_la_simulation_et_apport[1]
+        bilan_apports_cultures_secondaires = bilan_carbon_pour_la_simulation_et_apport[2]
+        bilan_apports_amendements = bilan_carbon_pour_la_simulation_et_apport[3]
         bilan_annuel_moyen = self.__calculer_bilan_annuel_moyen(bilan_carbon_pour_la_simulation)
         teneur_finale_projetee = self.__calculer_teneur_finale_projetee(bilan_carbon_pour_la_simulation)
         difference_entre_teneur_initiale_et_finale = self.__calculer_difference_entre_teneur_initiale_et_finale(
@@ -245,12 +267,17 @@ class ZoneDeGestion:
             bilan_des_regies_projections.append(regie_projection.generer_bilan_regie())
         for regie_historique in self.__regies_sol_et_culture_historique:
             bilan_des_regies_historiques.append(regie_historique.generer_bilan_regie())
-        return {"bilan_carbone_de_la_zone_pour_la_simulation": bilan_carbon_pour_la_simulation,
-                "bilan_annuel_moyen_pour_la_zone": bilan_annuel_moyen, "teneur_finale_projetee": teneur_finale_projetee,
-                "difference_entre_la_teneur_finale_et_la_zone": difference_entre_teneur_initiale_et_finale,
-                "moyenne_de_chaque_annee_de_rotation": moyenne_de_chaque_annee_de_rotation,
-                "taille_de_la_zone": self.__taille_de_la_zone_de_gestion,
-                "taux_de_matiere_organique_initial": self.__taux_matiere_organique, "classe_texturale": self.__classe_texturale,
-                "classe_de_drainage": self.__classe_de_drainage,
-                "bilan_des_regies_projections": bilan_des_regies_projections,
-                "bilan_des_regies_historiques": bilan_des_regies_historiques}
+        return {
+            "bilan_carbone_de_la_zone_pour_la_simulation": bilan_carbon_pour_la_simulation,
+            "bilan_apports_cultures_principales": bilan_apports_cultures_principales,
+            "bilan_apports_cultures_secondaires": bilan_apports_cultures_secondaires,
+            "bilan_apports_amendements": bilan_apports_amendements,
+            "bilan_annuel_moyen_pour_la_zone": bilan_annuel_moyen, "teneur_finale_projetee": teneur_finale_projetee,
+            "difference_entre_la_teneur_finale_et_la_zone": difference_entre_teneur_initiale_et_finale,
+            "moyenne_de_chaque_annee_de_rotation": moyenne_de_chaque_annee_de_rotation,
+            "taille_de_la_zone": self.__taille_de_la_zone_de_gestion,
+            "taux_de_matiere_organique_initial": self.__taux_matiere_organique,
+            "classe_texturale": self.__classe_texturale,
+            "classe_de_drainage": self.__classe_de_drainage,
+            "bilan_des_regies_projections": bilan_des_regies_projections,
+            "bilan_des_regies_historiques": bilan_des_regies_historiques}
