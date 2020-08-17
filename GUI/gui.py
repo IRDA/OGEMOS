@@ -446,7 +446,7 @@ def run_gui(frame):
                                 if simulation_copie[0] is not None:
                                     simulation_copie = simulation_copie[0]
                                     duree_simulation_window.destroy()
-                                    set_up_simulation(simulation_notebook, simulation_copie)
+                                    set_up_simulation(simulation_notebook, simulation_copie, False)
                                 else:
                                     message = ""
                                     for entree_invalide in simulation_copie[1]:
@@ -459,7 +459,7 @@ def run_gui(frame):
                             else:
                                 simulation_copie = None
                                 duree_simulation_window.destroy()
-                                set_up_simulation(simulation_notebook, simulation_copie)
+                                set_up_simulation(simulation_notebook, simulation_copie, True)
                         else:
                             entree_invalide_liste = []
                             message = ""
@@ -563,7 +563,7 @@ def run_gui(frame):
                 duree_simulation.pop(index_clicked_tab)
                 max_index_simulation -= 1
 
-        def set_up_simulation(simulation_notebook, simulation_copie):
+        def set_up_simulation(simulation_notebook, simulation_copie, simulation_en_tete_de_liste):
             global nombre_simulations
             global furthest_left_tab_index_simulation
             global furthest_right_tab_index_simulation
@@ -673,21 +673,21 @@ def run_gui(frame):
             global furthest_right_tab_index_champs
             global furthest_left_tab_index_champs
             index_champs = 0
-            for champs in information_champs:
+            for champs in simulation_copie["entreprise_agricole"]["champs"]:
                 tab = ttk.Frame(champs_notebook)
 
-                if nombre_simulations == 1:
+                if simulation_en_tete_de_liste:
                     max_index_champs += 1
                     furthest_right_tab_index_champs += 1
                     if index_champs > 3:
                         champs_notebook.tab(furthest_left_tab_index_champs, state="hidden")
                         furthest_left_tab_index_champs += 1
-                champs_notebook.add(tab, text=champs["nom_du_champs"])
-                if nombre_simulations > 1 and (
+                champs_notebook.add(tab, text=champs["nom"])
+                if not simulation_en_tete_de_liste and (
                         index_champs < furthest_left_tab_index_champs or index_champs > furthest_right_tab_index_champs):
                     champs_notebook.tab(index_champs, state="hidden")
                 zone_de_gestion_notebook = ttk.Notebook(tab)
-                set_up_champs(zone_de_gestion_notebook, int(champs["nombre_de_zone_de_gestion"]), champs_notebook,
+                set_up_champs(zone_de_gestion_notebook, len(champs["zones_de_gestion"]), champs_notebook,
                               simulation_copie, index_champs)
                 index_champs += 1
 
@@ -2641,7 +2641,10 @@ def run_gui(frame):
             simulation_notebook.winfo_children()[simulation_notebook.index("end") - 1].destroy()
             index_simulation = 0
             for simulation in simulations:
-                set_up_simulation(simulation_notebook, simulation)
+                if index_simulation == 0:
+                    set_up_simulation(simulation_notebook, simulation, True)
+                else:
+                    set_up_simulation(simulation_notebook,simulation, False)
                 if index_simulation != len(simulations) - 1:
                     simulation_notebook.winfo_children()[simulation_notebook.index("end") - 1].destroy()
                 index_simulation += 1
@@ -2881,7 +2884,6 @@ def run_gui(frame):
         root.deiconify()
 
     def creation_du_rapport(bilan_response):
-        print(bilan_response.json())
         bilan_workbook = Workbook()
         description_champs_worksheet = bilan_workbook.active
         index_column_cell = 1
