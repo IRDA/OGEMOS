@@ -70,8 +70,8 @@ def get_types_travail_du_sol_supportes():
 
 def get_coefficient_des_amendements(amendement):
     session = Session()
-    query_result = session.query(CoefficientDesAmendements).filter(
-        CoefficientDesAmendements.amendement == amendement).one()
+    query_result = session.query(CoefficientAmendements).filter(
+        CoefficientAmendements.amendement == amendement).one()
     session.close()
     return query_result
 
@@ -79,7 +79,7 @@ def get_coefficient_des_amendements(amendement):
 def get_amendements_supportees():
     session = Session()
     query_result = []
-    for amendement in session.query(CoefficientDesAmendements.amendement).all():
+    for amendement in session.query(CoefficientAmendements.amendement).all():
         query_result.append(amendement.amendement)
     session.close()
     return query_result
