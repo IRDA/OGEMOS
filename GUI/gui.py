@@ -13,6 +13,7 @@ import requests
 # TODO: regarder les rendments et comparer avec  les cultures supportees car il risque d'y avoir des incohérence
 
 
+
 global furthest_left_tab_index_simulation
 furthest_left_tab_index_simulation = 0
 global furthest_right_tab_index_simulation
@@ -199,6 +200,7 @@ def run_gui(frame):
                 show_creation_zone_de_gestion(frame_champs_list)
 
         canvas = tk.Canvas(frame_champs_list)
+        canvas.bind_all('<MouseWheel>', lambda event: canvas.yview_scroll(int(-1*(event.delta/120)), "units"))
         scrollbar = ttk.Scrollbar(frame_champs_list, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
         scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
@@ -241,10 +243,10 @@ def run_gui(frame):
                             for entry in grid_slave0_1:
                                 taux_matiere_organique = entry.get()
                                 if not util.is_decimal_number(taux_matiere_organique) or float(
-                                        taux_matiere_organique) < 0:
+                                        taux_matiere_organique) < 0 or float(taux_matiere_organique) > 100:
                                     entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
                                                                   "Zone gestion " + str(index_zone),
-                                                                  "\"Taux de matière organique\" doit être un réel positif"))
+                                                                  "\"Taux de matière organique\" doit être un réel positif dans l'intervalle [0,100]"))
                                 else:
                                     taux_matiere_organique = float(taux_matiere_organique)
                             grid_slave1_1 = champs_frame_widget.grid_slaves(row=1, column=1)
@@ -339,6 +341,7 @@ def run_gui(frame):
                 messagebox.showwarning("Warning", message)
 
         canvas = tk.Canvas(zone_de_gestion_mainframe)
+        canvas.bind_all('<MouseWheel>', lambda event: canvas.yview_scroll(int(-1 * (event.delta / 120)), "units"))
         scrollbar = ttk.Scrollbar(zone_de_gestion_mainframe, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
         scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
@@ -673,7 +676,7 @@ def run_gui(frame):
             global furthest_right_tab_index_champs
             global furthest_left_tab_index_champs
             index_champs = 0
-            for champs in simulation_copie["entreprise_agricole"]["champs"]:
+            for champs in information_champs:
                 tab = ttk.Frame(champs_notebook)
 
                 if simulation_en_tete_de_liste:
@@ -682,12 +685,12 @@ def run_gui(frame):
                     if index_champs > 3:
                         champs_notebook.tab(furthest_left_tab_index_champs, state="hidden")
                         furthest_left_tab_index_champs += 1
-                champs_notebook.add(tab, text=champs["nom"])
+                champs_notebook.add(tab, text=champs["nom_du_champs"])
                 if not simulation_en_tete_de_liste and (
                         index_champs < furthest_left_tab_index_champs or index_champs > furthest_right_tab_index_champs):
                     champs_notebook.tab(index_champs, state="hidden")
                 zone_de_gestion_notebook = ttk.Notebook(tab)
-                set_up_champs(zone_de_gestion_notebook, len(champs["zones_de_gestion"]), champs_notebook,
+                set_up_champs(zone_de_gestion_notebook, int(champs["nombre_de_zone_de_gestion"]), champs_notebook,
                               simulation_copie, index_champs)
                 index_champs += 1
 
@@ -740,6 +743,8 @@ def run_gui(frame):
                             widget.destroy()
                         creation_zone_frame = ttk.Frame(new_champs_window)
                         canvas = tk.Canvas(creation_zone_frame)
+                        canvas.bind_all('<MouseWheel>',
+                                        lambda event: canvas.yview_scroll(int(-1 * (event.delta / 120)), "units"))
                         scrollbar = ttk.Scrollbar(creation_zone_frame, orient="vertical", command=canvas.yview)
                         scrollable_frame = ttk.Frame(canvas)
                         scrollable_frame.bind("<Configure>",
@@ -816,11 +821,11 @@ def run_gui(frame):
                             for entry in grid_slave0_1:
                                 taux_matiere_organique = entry.get()
                                 if not util.is_decimal_number(taux_matiere_organique) or float(
-                                        taux_matiere_organique) < 0:
+                                        taux_matiere_organique) < 0 or float(taux_matiere_organique) > 100:
                                     entree_invalide_liste.append(
                                         (information_champs[nombre_de_champs - 1]["nom_du_champs"],
                                          "Zone gestion " + str(index_zone + 1),
-                                         "\"Taux de matière organique\" doit être un réel positif"))
+                                         "\"Taux de matière organique\" doit être un réel positif dans l'intervalle [0,100]"))
                                 else:
                                     taux_matiere_organique = float(taux_matiere_organique)
                             grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
@@ -1062,6 +1067,8 @@ def run_gui(frame):
                 new_zone_window.protocol("WM_DELETE_WINDOW", remise_a_etat_initial)
                 creation_zone_frame = ttk.Frame(new_zone_window)
                 canvas = tk.Canvas(creation_zone_frame)
+                canvas.bind_all('<MouseWheel>',
+                                lambda event: canvas.yview_scroll(int(-1 * (event.delta / 120)), "units"))
                 scrollbar = ttk.Scrollbar(creation_zone_frame, orient="vertical", command=canvas.yview)
                 scrollable_frame = ttk.Frame(canvas)
                 scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
@@ -1125,12 +1132,12 @@ def run_gui(frame):
                             for entry in grid_slave0_1:
                                 taux_matiere_organique = entry.get()
                                 if not util.is_decimal_number(taux_matiere_organique) or float(
-                                        taux_matiere_organique) < 0:
+                                        taux_matiere_organique) < 0 or float(taux_matiere_organique) > 100:
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
                                          "Zone gestion " + str(
                                              information_champs[champs_index]["nombre_de_zone_de_gestion"]),
-                                         "\"Taux de matière organique\" doit être un réel positif"))
+                                         "\"Taux de matière organique\" doit être un réel positif dans l'intervalle [0-100]"))
                                 else:
                                     taux_matiere_organique = float(taux_matiere_organique)
                             grid_slave1_1 = scrollable_frame_widget.grid_slaves(row=1, column=1)
@@ -1293,6 +1300,7 @@ def run_gui(frame):
                 zone = None
             projection_frame = ttk.LabelFrame(zone_tab, text="Régies de la projection")
             canvas_projection = tk.Canvas(projection_frame)
+            canvas_projection.bind_all('<MouseWheel>', lambda event: canvas_projection.yview_scroll(int(-1 * (event.delta / 120)), "units"))
             scrollbar_projection = ttk.Scrollbar(projection_frame, orient="vertical",
                                                  command=canvas_projection.yview)
             scrollable_frame_projection = ttk.Frame(canvas_projection)
@@ -1371,6 +1379,8 @@ def run_gui(frame):
             global information_champs
             if show_regie_historique:
                 canvas_historique = tk.Canvas(rechauffement_frame)
+                canvas_historique.bind_all('<MouseWheel>',
+                                lambda event: canvas_historique.yview_scroll(int(-1 * (event.delta / 120)), "units"))
                 scrollbar_historique = ttk.Scrollbar(rechauffement_frame, orient="vertical",
                                                      command=canvas_historique.yview)
                 scrollable_frame_historique = ttk.Frame(canvas_historique)
@@ -1408,6 +1418,8 @@ def run_gui(frame):
                 scrollbar_historique.pack(side="right", fill="y")
             else:
                 canvas_rechauffement_via_rotation = tk.Canvas(rechauffement_frame)
+                canvas_rechauffement_via_rotation.bind_all('<MouseWheel>',
+                                lambda event: canvas_rechauffement_via_rotation.yview_scroll(int(-1 * (event.delta / 120)), "units"))
                 scrollbar_rechauffement_via_rotation = ttk.Scrollbar(rechauffement_frame, orient="vertical",
                                                                      command=canvas_rechauffement_via_rotation.yview)
                 scrollable_frame_rechauffement_via_rotation = ttk.Frame(canvas_rechauffement_via_rotation)
@@ -1809,7 +1821,7 @@ def run_gui(frame):
                              "\"Culture principale\" doit être parmis les choix disponibles",
                              "Régie projection Simulation " + str(simulation_index + 1)))
                     rendement = regie.grid_slaves(row=1, column=1)[0].get()
-                    if not util.is_decimal_number(rendement) and rendement != "":
+                    if not util.is_decimal_number(rendement) and rendement != "" and float(rendement) < 0:
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone gestion " + str(zone_index + 1),
@@ -1817,7 +1829,7 @@ def run_gui(frame):
                              "Régie projection Simulation " + str(simulation_index + 1)))
                     if rendement == "":
                         rendement = None
-                    if rendement is not None and util.is_decimal_number(rendement):
+                    if rendement is not None and util.is_decimal_number(rendement) and float(rendement) >= 0:
                         rendement = float(rendement)
                     proportion_tige_exporte = regie.grid_slaves(row=2, column=1)[0].get()
                     if (not util.is_decimal_number(
@@ -2350,6 +2362,7 @@ def run_gui(frame):
             edition_window.protocol("WM_DELETE_WINDOW", fenetre_edition_ferme)
             edition_frame = ttk.Frame(edition_window)
             canvas = tk.Canvas(edition_frame)
+            canvas.bind_all('<MouseWheel>', lambda event: canvas.yview_scroll(int(-1 * (event.delta / 120)), "units"))
             scrollbar = ttk.Scrollbar(edition_frame, orient="vertical", command=canvas.yview)
             scrollable_frame = ttk.Frame(canvas)
             scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
@@ -2450,11 +2463,11 @@ def run_gui(frame):
                         zone_frame = champs_widgets[zone_label_frame_index]
                         taux_matiere_organique = zone_frame.grid_slaves(row=0, column=1)[0].get()
                         if not util.is_decimal_number(taux_matiere_organique) or float(
-                                taux_matiere_organique) < 0:
+                                taux_matiere_organique) < 0 or float(taux_matiere_organique) > 100:
                             entree_invalide_liste.append(
                                 ("Champs " + str(champs_label_frame_index - 1),
                                  "Zone gestion " + str(zone_label_frame_index - 1),
-                                 "\"Taux de matière organique\" doit être un réel positif"))
+                                 "\"Taux de matière organique\" doit être un réel positif dans l'intervalle [0-100]"))
                         else:
                             taux_matiere_organique = float(taux_matiere_organique)
                         municipalite = zone_frame.grid_slaves(row=1, column=1)[0].get()

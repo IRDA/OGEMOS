@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, abort
-import json
-from ICBM.Simulations.gestion_de_simulation import *
 from waitress import serve
+
+from ICBM.Simulations.gestion_de_simulation import *
 
 app = Flask(__name__)
 
@@ -261,20 +261,37 @@ def __amendements_mapping(data):
 
 
 def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourragere, municipalite):
-    zone_patate = ["Pomme de terre"]
-    zone_mais = ["Maïs grain", "Soya"]
-    zone_foin = ["Avoine", "Blé", "Canola", "Maïs fourrager", "Orge", "Pâturage - en production",
-                 "Pâturage - fin de rotation", "Prairie - fin de rotation", "Prairie/Pâturage - entretien",
-                 "Prairie/Pâturage - semis", "Triticale", "Seigle"]
     culture_principale = data["culture_principale"]
     if data["rendement"] is None:
         rendements = get_rendement_et_propriete_municipalite(municipalite)
-        if culture_principale in zone_patate:
-            rendement = rendements.rendement_zone_patate
-        elif culture_principale in zone_mais:
-            rendement = rendements.rendement_zone_mais
+        if culture_principale == "Avoine":
+            rendement = rendements.rendement_avoine
+        elif culture_principale == "Blé":
+            rendement = rendements.rendement_ble
+        elif culture_principale == "Maïs fourrager":
+            rendement = rendements.rendement_mais_fourrager
+        elif culture_principale == "Orge":
+            rendement = rendements.rendement_orge
+        elif culture_principale == "Maïs grain":
+            rendement = rendements.rendement_mais_grain
+        elif culture_principale == "Soya":
+            rendement = rendements.rendement_soya
+        elif culture_principale == "Haricot":
+            rendement = rendements.rendement_haricot
+        elif culture_principale == "Pommes de terre - semence":
+            rendement = rendements.rendement_pomme_de_terre_de_semence
+        elif culture_principale == "Pommes de terre - table":
+            rendement = rendements.rendement_pomme_de_terre_de_table
+        elif culture_principale == "Pommes de terre - transformation":
+            rendement = rendements.rendement_pomme_de_terre_de_transformation
+        elif culture_principale == "Seigle":
+            rendement = rendements.rendement_seigle
+        elif culture_principale == "Triticale":
+            rendement = rendements.rendement_triticale
+        elif culture_principale == "Canola":
+            rendement = rendements.rendement_canola
         else:
-            rendement = rendements.rendement_zone_foin
+            rendement = rendements.rendement_foin
 
     else:
         rendement = data["rendement"]
