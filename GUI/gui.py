@@ -13,7 +13,6 @@ import requests
 # TODO: regarder les rendments et comparer avec  les cultures supportees car il risque d'y avoir des incohérence
 
 
-
 global furthest_left_tab_index_simulation
 furthest_left_tab_index_simulation = 0
 global furthest_right_tab_index_simulation
@@ -118,6 +117,28 @@ mainframe = ttk.Frame(root)
 mainframe.grid(row=0, column=0, ipadx=5, ipady=5)
 
 
+def on_mousewheel(event):
+    event_coordinates = root.winfo_pointerxy()
+    canvas_path = str(root.winfo_containing(event_coordinates[0], event_coordinates[1]))
+    if "canvas" in canvas_path:
+        canvas_found = False
+        widget_list = canvas_path.split(".")
+        real_canvas_path = ""
+        for widget in reversed(widget_list):
+            if canvas_found:
+                if widget != "":
+                    real_canvas_path = "." + widget + real_canvas_path
+            else:
+                if "canvas" in widget:
+                    real_canvas_path = "." + widget
+                    canvas_found = True
+        canvas = root.nametowidget(real_canvas_path)
+        canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+
+root.bind_all("<MouseWheel>", on_mousewheel)
+
+
 def closing_root_protocol():
     kill(sp.pid)
     root.destroy()
@@ -200,7 +221,6 @@ def run_gui(frame):
                 show_creation_zone_de_gestion(frame_champs_list)
 
         canvas = tk.Canvas(frame_champs_list)
-        canvas.bind_all('<MouseWheel>', lambda event: canvas.yview_scroll(int(-1*(event.delta/120)), "units"))
         scrollbar = ttk.Scrollbar(frame_champs_list, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
         scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
@@ -341,7 +361,6 @@ def run_gui(frame):
                 messagebox.showwarning("Warning", message)
 
         canvas = tk.Canvas(zone_de_gestion_mainframe)
-        canvas.bind_all('<MouseWheel>', lambda event: canvas.yview_scroll(int(-1 * (event.delta / 120)), "units"))
         scrollbar = ttk.Scrollbar(zone_de_gestion_mainframe, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
         scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
@@ -743,8 +762,6 @@ def run_gui(frame):
                             widget.destroy()
                         creation_zone_frame = ttk.Frame(new_champs_window)
                         canvas = tk.Canvas(creation_zone_frame)
-                        canvas.bind_all('<MouseWheel>',
-                                        lambda event: canvas.yview_scroll(int(-1 * (event.delta / 120)), "units"))
                         scrollbar = ttk.Scrollbar(creation_zone_frame, orient="vertical", command=canvas.yview)
                         scrollable_frame = ttk.Frame(canvas)
                         scrollable_frame.bind("<Configure>",
@@ -1067,8 +1084,6 @@ def run_gui(frame):
                 new_zone_window.protocol("WM_DELETE_WINDOW", remise_a_etat_initial)
                 creation_zone_frame = ttk.Frame(new_zone_window)
                 canvas = tk.Canvas(creation_zone_frame)
-                canvas.bind_all('<MouseWheel>',
-                                lambda event: canvas.yview_scroll(int(-1 * (event.delta / 120)), "units"))
                 scrollbar = ttk.Scrollbar(creation_zone_frame, orient="vertical", command=canvas.yview)
                 scrollable_frame = ttk.Frame(canvas)
                 scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
@@ -1300,7 +1315,6 @@ def run_gui(frame):
                 zone = None
             projection_frame = ttk.LabelFrame(zone_tab, text="Régies de la projection")
             canvas_projection = tk.Canvas(projection_frame)
-            canvas_projection.bind_all('<MouseWheel>', lambda event: canvas_projection.yview_scroll(int(-1 * (event.delta / 120)), "units"))
             scrollbar_projection = ttk.Scrollbar(projection_frame, orient="vertical",
                                                  command=canvas_projection.yview)
             scrollable_frame_projection = ttk.Frame(canvas_projection)
@@ -1379,8 +1393,6 @@ def run_gui(frame):
             global information_champs
             if show_regie_historique:
                 canvas_historique = tk.Canvas(rechauffement_frame)
-                canvas_historique.bind_all('<MouseWheel>',
-                                lambda event: canvas_historique.yview_scroll(int(-1 * (event.delta / 120)), "units"))
                 scrollbar_historique = ttk.Scrollbar(rechauffement_frame, orient="vertical",
                                                      command=canvas_historique.yview)
                 scrollable_frame_historique = ttk.Frame(canvas_historique)
@@ -1418,8 +1430,6 @@ def run_gui(frame):
                 scrollbar_historique.pack(side="right", fill="y")
             else:
                 canvas_rechauffement_via_rotation = tk.Canvas(rechauffement_frame)
-                canvas_rechauffement_via_rotation.bind_all('<MouseWheel>',
-                                lambda event: canvas_rechauffement_via_rotation.yview_scroll(int(-1 * (event.delta / 120)), "units"))
                 scrollbar_rechauffement_via_rotation = ttk.Scrollbar(rechauffement_frame, orient="vertical",
                                                                      command=canvas_rechauffement_via_rotation.yview)
                 scrollable_frame_rechauffement_via_rotation = ttk.Frame(canvas_rechauffement_via_rotation)
@@ -2362,7 +2372,6 @@ def run_gui(frame):
             edition_window.protocol("WM_DELETE_WINDOW", fenetre_edition_ferme)
             edition_frame = ttk.Frame(edition_window)
             canvas = tk.Canvas(edition_frame)
-            canvas.bind_all('<MouseWheel>', lambda event: canvas.yview_scroll(int(-1 * (event.delta / 120)), "units"))
             scrollbar = ttk.Scrollbar(edition_frame, orient="vertical", command=canvas.yview)
             scrollable_frame = ttk.Frame(canvas)
             scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
@@ -2657,7 +2666,7 @@ def run_gui(frame):
                 if index_simulation == 0:
                     set_up_simulation(simulation_notebook, simulation, True)
                 else:
-                    set_up_simulation(simulation_notebook,simulation, False)
+                    set_up_simulation(simulation_notebook, simulation, False)
                 if index_simulation != len(simulations) - 1:
                     simulation_notebook.winfo_children()[simulation_notebook.index("end") - 1].destroy()
                 index_simulation += 1
@@ -2956,39 +2965,42 @@ def run_gui(frame):
         index_column_cell = 1
         index_simulation = 0
         for simulation in bilan_response.json()["bilans_des_simulations"]:
-            description_simulation_worksheet = bilan_workbook.create_sheet(duree_simulation[index_simulation]["nom_simulation"])
+            description_simulation_worksheet = bilan_workbook.create_sheet(
+                duree_simulation[index_simulation]["nom_simulation"])
             for champs in simulation["bilans_des_champs"]:
                 row_shift = 0
                 count_row_shift = True
                 description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value=champs["nom_du_champs"])
+                                                      value=champs["nom_du_champs"])
                 index_row_cell += 1
                 index = 1
                 for zone in champs["bilans_des_zones"]:
                     description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="Zone de gestion " + str(index))
+                                                          value="Zone de gestion " + str(index))
                     index_row_cell += 1
                     description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="Année de projection")
+                                                          value="Année de projection")
                     index_row_cell += 1
 
-                    for annee in range(int(duree_simulation[index_simulation]["annee_projection_initiale"]), int(duree_simulation[index_simulation]["annee_projection_initiale"])+int(duree_simulation[index_simulation]["duree_projection"])):
+                    for annee in range(int(duree_simulation[index_simulation]["annee_projection_initiale"]),
+                                       int(duree_simulation[index_simulation]["annee_projection_initiale"]) + int(
+                                           duree_simulation[index_simulation]["duree_projection"])):
                         description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=annee)
+                                                              value=annee)
                         index_row_cell += 1
                     description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="Total")
+                                                          value="Total")
                     index_row_cell += 1
                     description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="Moyenne")
+                                                          value="Moyenne")
                     index_row_cell = 3
                     index_column_cell += 1
                     description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="Apport culture principale")
+                                                          value="Apport culture principale")
                     index_row_cell += 1
                     for apport_culture_principale in zone["bilan_apports_cultures_principales"]:
                         description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=apport_culture_principale)
+                                                              value=apport_culture_principale)
                         if count_row_shift:
                             row_shift += 1
                         index_row_cell += 1
@@ -2998,15 +3010,15 @@ def run_gui(frame):
                     row_shift += 1
 
                     description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="=SUM(" + str(index_row_cell) + "," + str(
-                                                          index_column_cell) + ")")
+                                                          value="=SUM(" + str(index_row_cell) + "," + str(
+                                                              index_column_cell) + ")")
                     index_row_cell += 1
 
                     row_shift += 1
 
                     description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="=AVERAGE(" + str(index_row_cell) + "," + str(
-                                                          index_column_cell) + ")")
+                                                          value="=AVERAGE(" + str(index_row_cell) + "," + str(
+                                                              index_column_cell) + ")")
                     index_row_cell = 3
                     index_column_cell += 1
 
@@ -3016,17 +3028,17 @@ def run_gui(frame):
 
                     for apport_culture_secondaire in zone["bilan_apports_cultures_secondaires"]:
                         description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=apport_culture_secondaire)
+                                                              value=apport_culture_secondaire)
                         index_row_cell += 1
 
                     description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="=SUM(" + str(index_row_cell) + "," + str(
-                                                          index_column_cell) + ")")
+                                                          value="=SUM(" + str(index_row_cell) + "," + str(
+                                                              index_column_cell) + ")")
                     index_row_cell += 1
 
                     description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="=AVERAGE(" + str(index_row_cell) + "," + str(
-                                                          index_column_cell) + ")")
+                                                          value="=AVERAGE(" + str(index_row_cell) + "," + str(
+                                                              index_column_cell) + ")")
                     index_row_cell = 3
                     index_column_cell += 1
 
@@ -3036,17 +3048,17 @@ def run_gui(frame):
 
                     for apport_amendement in zone["bilan_apports_amendements"]:
                         description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=apport_amendement)
+                                                              value=apport_amendement)
                         index_row_cell += 1
 
                     description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="=SUM(" + str(index_row_cell) + "," + str(
-                                                          index_column_cell) + ")")
+                                                          value="=SUM(" + str(index_row_cell) + "," + str(
+                                                              index_column_cell) + ")")
                     index_row_cell += 1
 
                     description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="=AVERAGE(" + str(index_row_cell) + "," + str(
-                                                          index_column_cell) + ")")
+                                                          value="=AVERAGE(" + str(index_row_cell) + "," + str(
+                                                              index_column_cell) + ")")
 
                     index_row_cell += 1
                     index_column_cell -= 3
@@ -3099,27 +3111,27 @@ def run_gui(frame):
 
                     index += 1
 
-                index_column_cell -= champs["nombre_de_zone_de_gestion"]*4
+                index_column_cell -= champs["nombre_de_zone_de_gestion"] * 4
                 index_row_cell += row_shift
 
                 description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value="Teneur initiale en MOS du champs")
+                                                      value="Teneur initiale en MOS du champs")
                 index_row_cell += 1
 
                 description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value="Teneur finale en MOS du champs")
+                                                      value="Teneur finale en MOS du champs")
                 index_row_cell += 1
 
                 description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value="Évolution du taux de MOS du champs")
+                                                      value="Évolution du taux de MOS du champs")
                 index_row_cell += 1
 
                 description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value="Comparaison 50ème percentile du champs")
+                                                      value="Comparaison 50ème percentile du champs")
                 index_row_cell += 1
 
                 description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value="Comparaison 90ème percentile du champs")
+                                                      value="Comparaison 90ème percentile du champs")
 
                 index_row_cell -= 4
                 index_column_cell += 1
@@ -3127,26 +3139,26 @@ def run_gui(frame):
                 # TODO: Modifier les 5 valeurs plus bas pour les valeurs calcuclés dans le bilan
 
                 description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value="Teneur initiale en MOS")
+                                                      value="Teneur initiale en MOS")
                 index_row_cell += 1
 
                 description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value="Teneur finale en MOS")
+                                                      value="Teneur finale en MOS")
                 index_row_cell += 1
 
                 description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value="Évolution du taux de MOS")
+                                                      value="Évolution du taux de MOS")
                 index_row_cell += 1
 
                 description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value="Comparaison 50ème percentile")
+                                                      value="Comparaison 50ème percentile")
                 index_row_cell += 1
 
                 description_simulation_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value="Comparaison 90ème percentile")
+                                                      value="Comparaison 90ème percentile")
 
                 index_row_cell = 1
-                index_column_cell = 1 + champs["nombre_de_zone_de_gestion"]*4
+                index_column_cell = 1 + champs["nombre_de_zone_de_gestion"] * 4
 
             index_row_cell = row_shift + 7
             index_column_cell = 1
