@@ -139,6 +139,18 @@ def on_mousewheel(event):
 root.bind_all("<MouseWheel>", on_mousewheel)
 
 
+def filter_combobox_values(combobox, values):
+    current_string_in_combobox = combobox.get()
+    if current_string_in_combobox == "":
+        combobox.configure(values=values)
+    else:
+        new_values = []
+        for item in values:
+            if current_string_in_combobox.lower() in item.lower():
+                new_values.append(item)
+        combobox.configure(values=new_values)
+
+
 def closing_root_protocol():
     kill(sp.pid)
     root.destroy()
@@ -377,13 +389,21 @@ def run_gui(frame):
                 taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
                 municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
                 global municipalites_supportees
-                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
+                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees,
+                                                     postcommand=lambda: filter_combobox_values(municipalite_combobox,
+                                                                                                municipalites_supportees))
                 classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
                 global classes_texturales_supportees
-                classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_texturales_supportees)
+                classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_texturales_supportees,
+                                                         postcommand=lambda: filter_combobox_values(
+                                                             classe_texturale_combobox,
+                                                             classes_texturales_supportees))
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                 global classes_de_drainage_supportees
-                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees)
+                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees,
+                                                           postcommand=lambda: filter_combobox_values(
+                                                               classe_de_drainage_combobox,
+                                                               classes_de_drainage_supportees))
                 masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                             text="Masse volumique apparente (g/cm3): ")
                 masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
@@ -778,15 +798,23 @@ def run_gui(frame):
                             taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
                             municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
                             global municipalites_supportees
-                            municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
+                            municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees,
+                                                                 postcommand=lambda: filter_combobox_values(
+                                                                     municipalite_combobox, municipalites_supportees))
                             classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
                             global classes_texturales_supportees
                             classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame,
-                                                                     values=classes_texturales_supportees)
+                                                                     values=classes_texturales_supportees,
+                                                                     postcommand=lambda: filter_combobox_values(
+                                                                         classe_texturale_combobox,
+                                                                         classes_texturales_supportees))
                             classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                             global classes_de_drainage_supportees
                             classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame,
-                                                                       values=classes_de_drainage_supportees)
+                                                                       values=classes_de_drainage_supportees,
+                                                                       postcommand=lambda: filter_combobox_values(
+                                                                           classe_de_drainage_combobox,
+                                                                           classes_de_drainage_supportees))
                             masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                                         text="Masse volumique apparente (g/cm3): ")
                             masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
@@ -1098,13 +1126,20 @@ def run_gui(frame):
                 taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
                 municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
                 global municipalites_supportees
-                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees)
+                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees,
+                                                     postcommand=lambda: filter_combobox_values(municipalite_combobox,
+                                                                                                municipalites_supportees))
                 classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
                 global classes_texturales_supportees
-                classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_texturales_supportees)
+                classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_texturales_supportees,
+                                                         postcommand=lambda: filter_combobox_values(
+                                                             classe_texturale_combobox, classes_texturales_supportees))
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                 global classes_de_drainage_supportees
-                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees)
+                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees,
+                                                           postcommand=lambda: filter_combobox_values(
+                                                               classe_de_drainage_combobox,
+                                                               classes_de_drainage_supportees))
                 masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                             text="Masse volumique apparente (g/cm3): ")
                 masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
@@ -1482,23 +1517,33 @@ def run_gui(frame):
                 annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(annee_courante))
                 culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
                 global cultures_principales_supportees
-                culture_principale_combobox = ttk.Combobox(annee_courante_frame, values=cultures_principales_supportees)
+                culture_principale_combobox = ttk.Combobox(annee_courante_frame, values=cultures_principales_supportees,
+                                                           postcommand=lambda: filter_combobox_values(
+                                                               culture_principale_combobox,
+                                                               cultures_principales_supportees))
                 rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
                 rendement_entry = ttk.Entry(annee_courante_frame)
                 proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté [0-1]: ")
                 proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
                 production_non_recolte_label = ttk.Label(annee_courante_frame, text="Production non récoltée: ")
-                production_non_recolte_combobox = ttk.Combobox(annee_courante_frame, values=["Oui", "Non"])
+                production_non_recolte_combobox = ttk.Combobox(annee_courante_frame, values=["Oui", "Non"],
+                                                               postcommand=lambda: filter_combobox_values(
+                                                                   production_non_recolte_combobox, ["Oui", "Non"]))
                 taux_matiere_seche_label = ttk.Label(annee_courante_frame, text="Taux de matière sèche [0-1]: ")
                 taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
                 travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
                 global types_travail_du_sol_supportes
-                travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes)
+                travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes,
+                                                       postcommand=lambda: filter_combobox_values(
+                                                           travail_du_sol_combobox, types_travail_du_sol_supportes))
                 profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maximale (cm): ")
                 profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
                 culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
                 global cultures_secondaires_supportees
-                culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees)
+                culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees,
+                                                           postcommand=lambda: filter_combobox_values(
+                                                               culture_secondaire_combobox,
+                                                               cultures_secondaires_supportees))
                 rendement_culture_secondaire_label = ttk.Label(annee_courante_frame,
                                                                text="Rendement culture secondaire (t/ha): ")
                 rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
@@ -1557,7 +1602,9 @@ def run_gui(frame):
                 index = 0
                 for amendement in amendements:
                     amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
-                    amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
+                    amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees,
+                                                       postcommand=lambda: filter_combobox_values(amendement_combobox,
+                                                                                                  amendements_supportees))
                     if amendement["amendement"] is not None:
                         amendement_combobox.set(amendement["amendement"])
                     apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t/ha):")
@@ -1572,7 +1619,9 @@ def run_gui(frame):
             else:
                 index = 0
                 amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
-                amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
+                amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees,
+                                                   postcommand=lambda: filter_combobox_values(amendement_combobox,
+                                                                                              amendements_supportees))
                 apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t/ha):")
                 apport_amendement_entry = ttk.Entry(amendement_frame)
                 amendement_label.grid(row=0, column=0, sticky="w", pady=3)
@@ -1595,8 +1644,10 @@ def run_gui(frame):
             amendement_frame.grid_slaves(grid_size[1] - 1, grid_size[0] - 2)[0].destroy()
             amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
             global amendements_supportees
-            amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees)
-            apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t):")
+            amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees,
+                                               postcommand=lambda: filter_combobox_values(amendement_combobox,
+                                                                                          amendements_supportees))
+            apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t/ha):")
             apport_amendement_entry = ttk.Entry(amendement_frame)
             ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
                                                  command=lambda: ajouter_amendement_regie(amendement_frame))
@@ -1617,23 +1668,33 @@ def run_gui(frame):
             annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(index))
             culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
             global cultures_principales_supportees
-            culture_principale_combobox = ttk.Combobox(annee_courante_frame, values=cultures_principales_supportees)
+            culture_principale_combobox = ttk.Combobox(annee_courante_frame, values=cultures_principales_supportees,
+                                                       postcommand=lambda: filter_combobox_values(
+                                                           culture_principale_combobox,
+                                                           cultures_principales_supportees))
             rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
             rendement_entry = ttk.Entry(annee_courante_frame)
             proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté [0-1]: ")
             proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
             production_non_recolte_label = ttk.Label(annee_courante_frame, text="Production non récoltée: ")
-            production_non_recolte_combobox = ttk.Combobox(annee_courante_frame, values=["Oui", "Non"])
+            production_non_recolte_combobox = ttk.Combobox(annee_courante_frame, values=["Oui", "Non"],
+                                                           postcommand=lambda: filter_combobox_values(
+                                                               production_non_recolte_combobox, ["Oui", "Non"]))
             taux_matiere_seche_label = ttk.Label(annee_courante_frame, text="Taux de matière sèche [0-1]: ")
             taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
             travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
             global types_travail_du_sol_supportes
-            travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes)
+            travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes,
+                                                   postcommand=lambda: filter_combobox_values(travail_du_sol_combobox,
+                                                                                              types_travail_du_sol_supportes))
             profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maxiamle (cm): ")
             profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
             culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
             global cultures_secondaires_supportees
-            culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees)
+            culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees,
+                                                       postcommand=lambda: filter_combobox_values(
+                                                           culture_secondaire_combobox,
+                                                           cultures_secondaires_supportees))
             rendement_culture_secondaire_label = ttk.Label(annee_courante_frame,
                                                            text="Rendement culture secondaire (t/ha): ")
             rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
@@ -2407,15 +2468,23 @@ def run_gui(frame):
                         taux_matiere_organique_entry.insert(0, information_zone_de_gestion["taux_matiere_organique"])
                     municipalite_label = ttk.Label(zone_label_frame, text="Municipalité: ")
                     global municipalites_supportees
-                    municipalite_combobox = ttk.Combobox(zone_label_frame, values=municipalites_supportees)
+                    municipalite_combobox = ttk.Combobox(zone_label_frame, values=municipalites_supportees,
+                                                         postcommand=lambda: filter_combobox_values(
+                                                             municipalite_combobox, municipalites_supportees))
                     municipalite_combobox.set(information_zone_de_gestion["municipalite"])
                     classe_texturale_label = ttk.Label(zone_label_frame, text="Classe texturale: ")
                     global classes_texturales_supportees
-                    classe_texturale_combobox = ttk.Combobox(zone_label_frame, values=classes_texturales_supportees)
+                    classe_texturale_combobox = ttk.Combobox(zone_label_frame, values=classes_texturales_supportees,
+                                                             postcommand=lambda: filter_combobox_values(
+                                                                 classe_texturale_combobox,
+                                                                 classes_texturales_supportees))
                     classe_texturale_combobox.set(information_zone_de_gestion["classe_texturale"])
                     classe_de_drainage_label = ttk.Label(zone_label_frame, text="Classe de drainage: ")
                     global classes_de_drainage_supportees
-                    classe_de_drainage_combobox = ttk.Combobox(zone_label_frame, values=classes_de_drainage_supportees)
+                    classe_de_drainage_combobox = ttk.Combobox(zone_label_frame, values=classes_de_drainage_supportees,
+                                                               postcommand=lambda: filter_combobox_values(
+                                                                   classe_de_drainage_combobox,
+                                                                   classes_de_drainage_supportees))
                     classe_de_drainage_combobox.set(information_zone_de_gestion["classe_de_drainage"])
                     masse_volumique_apparente_label = ttk.Label(zone_label_frame,
                                                                 text="Masse volumique apparente (g/cm3): ")
