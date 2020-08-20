@@ -10,8 +10,6 @@ import subprocess
 import psutil
 import requests
 
-# TODO: regarder les rendments et comparer avec  les cultures supportees car il risque d'y avoir des incohérence
-
 
 global furthest_left_tab_index_simulation
 furthest_left_tab_index_simulation = 0
@@ -119,24 +117,33 @@ mainframe.grid(row=0, column=0, ipadx=5, ipady=5)
 
 def on_mousewheel(event):
     event_coordinates = root.winfo_pointerxy()
-    canvas_path = str(root.winfo_containing(event_coordinates[0], event_coordinates[1]))
-    if "canvas" in canvas_path:
-        canvas_found = False
-        widget_list = canvas_path.split(".")
-        real_canvas_path = ""
-        for widget in reversed(widget_list):
-            if canvas_found:
-                if widget != "":
-                    real_canvas_path = "." + widget + real_canvas_path
-            else:
-                if "canvas" in widget:
-                    real_canvas_path = "." + widget
-                    canvas_found = True
-        canvas = root.nametowidget(real_canvas_path)
-        canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+    try:
+        canvas_path = str(root.winfo_containing(event_coordinates[0], event_coordinates[1]))
+        if "canvas" in canvas_path:
+            canvas_found = False
+            widget_list = canvas_path.split(".")
+            real_canvas_path = ""
+            for widget in reversed(widget_list):
+                if canvas_found:
+                    if widget != "":
+                        real_canvas_path = "." + widget + real_canvas_path
+                else:
+                    if "canvas" in widget:
+                        real_canvas_path = "." + widget
+                        canvas_found = True
+            canvas = root.nametowidget(real_canvas_path)
+            canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+    except KeyError:
+        pass
 
 
 root.bind_all("<MouseWheel>", on_mousewheel)
+root.bind_all("<Button-4>", on_mousewheel)
+root.bind_all("<Button-5>", on_mousewheel)
+
+root.unbind_class("TCombobox", "<MouseWheel>")
+root.unbind_class("TCombobox", "<ButtonPress-4>")
+root.unbind_class("TCombobox", "<ButtonPress-5>")
 
 
 def filter_combobox_values(combobox, values):
