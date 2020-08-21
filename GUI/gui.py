@@ -10,7 +10,6 @@ import subprocess
 import psutil
 import requests
 
-
 global furthest_left_tab_index_simulation
 furthest_left_tab_index_simulation = 0
 global furthest_right_tab_index_simulation
@@ -223,14 +222,14 @@ def run_gui(frame):
                             champs_valides = False
                             information_champs = []
                             messagebox.showwarning("Warning",
-                                                   "Le nom du champs devrait être composé de 12 caractères ou moins.")
+                                                   "Le nom du champ devrait être composé de 12 caractères ou moins.")
                             break
 
                     else:
                         champs_valides = False
                         information_champs = []
                         messagebox.showwarning("Warning",
-                                               "Une entrée \"Nombre de zone gestion\" est invalide.Veuillez entrer un nombre naturel plus grand que 0.")
+                                               "Une entrée \"Nombre de zones gestion\" est invalide.Veuillez entrer un nombre naturel plus grand que 0.")
                         break
 
             if champs_valides:
@@ -248,9 +247,9 @@ def run_gui(frame):
 
         for index_champ in range(int(nombre_de_champs)):
             champs_frame = ttk.LabelFrame(scrollable_frame, text="Champs " + str(index_champ + 1))
-            nom_du_champs_label = ttk.Label(champs_frame, text="Nom du champs: ")
+            nom_du_champs_label = ttk.Label(champs_frame, text="Nom du champ: ")
             nom_du_champs_entry = ttk.Entry(champs_frame)
-            nombre_de_zone_de_gestion_label = ttk.Label(champs_frame, text="Nombre de zone gestion: ")
+            nombre_de_zone_de_gestion_label = ttk.Label(champs_frame, text="Nombre de zones gestion: ")
             nombre_de_zone_de_gestion_entry = ttk.Entry(champs_frame)
             nombre_de_zone_de_gestion_entry.insert(0, "1")
             nom_du_champs_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
@@ -267,7 +266,7 @@ def run_gui(frame):
                                             command=lambda: get_information_champs(scrollable_frame))
         creation_champs_bouton.pack()
 
-    def show_creation_zone_de_gestion(zone_de_gestion_mainframe):
+    def show_creation_zone_de_gestion(zone_de_gestion_mainframe, fill_fields=False):
         def get_information_zone_de_gestion(scrollable_frame):
             entree_invalide_liste = []
             global information_champs
@@ -370,7 +369,7 @@ def run_gui(frame):
                 if sauvegarde_reussi:
                     question_ajout_regie_historique(zone_de_gestion_mainframe)
                 else:
-                    show_creation_zone_de_gestion(zone_de_gestion_mainframe)
+                    show_creation_zone_de_gestion(zone_de_gestion_mainframe, fill_fields=True)
             else:
                 information_champs = info_champs_temporaire
                 message = ""
@@ -418,6 +417,16 @@ def run_gui(frame):
                 profondeur_entry = ttk.Entry(zone_de_gestion_frame)
                 superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame, text="Superficie de la zone (ha): ")
                 superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
+
+                if fill_fields:
+                    taux_matiere_organique_entry.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["taux_matiere_organique"])
+                    municipalite_combobox.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["municipalite"])
+                    classe_texturale_combobox.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["classe_texturale"])
+                    classe_de_drainage_combobox.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["classe_de_drainage"])
+                    masse_volumique_apparente_entry.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["masse_volumique_apparente"])
+                    profondeur_entry.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["profondeur"])
+                    superficie_de_la_zone_entry.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["superficie_de_la_zone"])
+
                 taux_matiere_organique_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
                 taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
                 municipalite_label.grid(row=1, column=0, sticky="w", pady=3, padx=5)
@@ -855,10 +864,10 @@ def run_gui(frame):
                         creation_zone_frame.pack(fill=None, expand=False)
                     else:
                         messagebox.showwarning("Warning",
-                                               "Le nom du champs devrait être composé de 12 caractères ou moins.")
+                                               "Le nom du champ devrait être composé de 12 caractères ou moins.")
                         new_champs_window.focus()
                 else:
-                    message = "L'entrée \"Nombre de zone gestion\" est invalide. Elle doit être un nombre naturel plus grand que 0."
+                    message = "L'entrée \"Nombre de zones gestion\" est invalide. Elle doit être un nombre naturel plus grand que 0."
                     messagebox.showwarning("Warning", message)
                     new_champs_window.focus()
 
@@ -1010,10 +1019,10 @@ def run_gui(frame):
                         new_champs_window.focus()
 
             nouveau_champs_frame = ttk.Frame(new_champs_window)
-            nom_du_champs_label = ttk.Label(nouveau_champs_frame, text="Nom du champs: ")
+            nom_du_champs_label = ttk.Label(nouveau_champs_frame, text="Nom du champ: ")
             nom_du_champs_entry = ttk.Entry(nouveau_champs_frame)
             nombre_de_zone_de_gestion_label = ttk.Label(nouveau_champs_frame,
-                                                        text="Nombre de zone gestion: ")
+                                                        text="Nombre de zones gestion: ")
             nombre_de_zone_de_gestion_entry = ttk.Entry(nouveau_champs_frame)
             nom_du_champs_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
             nom_du_champs_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
@@ -2457,7 +2466,7 @@ def run_gui(frame):
             for champs_index in range(nombre_de_champs):
                 champs_label_frame = ttk.LabelFrame(entreprise_label_frame, text="Champs " + str(champs_index + 1))
                 global information_champs
-                nom_champs_label = ttk.Label(champs_label_frame, text="Nom du champs: ")
+                nom_champs_label = ttk.Label(champs_label_frame, text="Nom du champ: ")
                 nom_champs_entry = ttk.Entry(champs_label_frame)
                 if information_champs[champs_index]["nom_du_champs"]:
                     nom_champs_entry.insert(0, information_champs[champs_index]["nom_du_champs"])
