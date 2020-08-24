@@ -1817,7 +1817,6 @@ def run_gui(frame):
                         entree_invalide_liste.append(entree)
                     simulations.append(simulation)
                 index_simulation += 1
-
             if len(entree_invalide_liste) == 0:
                 global annees_historiques
                 return {"simulations": simulations,
@@ -1829,12 +1828,13 @@ def run_gui(frame):
         def get_information_simulation(simulation_frame, index_simulation, simulation_unique):
             global information_champs
             global nombre_de_champs
-            entree_invalide_simulation_liste = []
+            entree_invalide_simulation_liste = [[], []]
             if simulation_unique:
                 regies_rechauffement, entree_invalide_liste = None, []
             else:
                 regies_rechauffement, entree_invalide_liste = get_regies_rechauffement()
-            entree_invalide_simulation_liste.append(entree_invalide_liste)
+            for entree in entree_invalide_liste:
+                entree_invalide_simulation_liste[0].append(entree)
             champs_notebook = simulation_frame.winfo_children()[0]
             index_champs = 0
             champs_list = []
@@ -1854,7 +1854,8 @@ def run_gui(frame):
                                 regie_rechauffement = None
                             zone_list.append({"regies_projection": regies_projection,
                                               "regies_rechauffement": regie_rechauffement})
-                            entree_invalide_simulation_liste.append(entree_invalide_liste)
+                            for entree in entree_invalide_liste:
+                                entree_invalide_simulation_liste[1].append(entree)
                         index_zone += 1
                     champs_list.append(zone_list)
                 index_champs += 1
@@ -1916,14 +1917,14 @@ def run_gui(frame):
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone gestion " + str(zone_index + 1),
                              "\"Culture principale\" doit être parmis les choix disponibles",
-                             "Régie projection Simulation " + str(simulation_index + 1)))
+                             "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                     rendement = regie.grid_slaves(row=1, column=1)[0].get()
                     if not util.is_decimal_number(rendement) and rendement != "" and float(rendement) < 0:
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone gestion " + str(zone_index + 1),
                              "\"Rendement\" doit être un réel positif ou la case peut être vide pour aller chercher un rendement par défaut",
-                             "Régie projection Simulation " + str(simulation_index + 1)))
+                             "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                     if rendement == "":
                         rendement = None
                     if rendement is not None and util.is_decimal_number(rendement) and float(rendement) >= 0:
@@ -1937,7 +1938,7 @@ def run_gui(frame):
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone gestion " + str(zone_index + 1),
                              "\"Proportion tige exportée\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
-                             "Régie projection Simulation " + str(simulation_index + 1)))
+                             "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                     if proportion_tige_exporte == "":
                         proportion_tige_exporte = None
                     if proportion_tige_exporte is not None and util.is_decimal_number(proportion_tige_exporte):
@@ -1948,7 +1949,7 @@ def run_gui(frame):
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone gestion " + str(zone_index + 1),
                              "\"Production non récolté\" doit être l'une des options de la combobox",
-                             "Régie projection"))
+                             "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                     else:
                         if production_non_recolte == "Oui":
                             production_non_recolte = True
@@ -1963,7 +1964,7 @@ def run_gui(frame):
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone gestion " + str(zone_index + 1),
                              "\"Taux matière sèche\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
-                             "Régie projection Simulation " + str(simulation_index + 1)))
+                             "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                     if taux_matiere_seche == "":
                         taux_matiere_seche = None
                     if taux_matiere_seche is not None and util.is_decimal_number(taux_matiere_seche):
@@ -1980,7 +1981,7 @@ def run_gui(frame):
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone gestion " + str(zone_index + 1),
                              "\"Travail du sol\" doit être parmis les choix disponibles",
-                             "Régie projection Simulation " + str(simulation_index + 1)))
+                             "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                     profondeur = regie.grid_slaves(row=6, column=1)[0].get()
                     if not util.is_decimal_number(profondeur) or float(
                             profondeur) < 0:
@@ -1988,7 +1989,7 @@ def run_gui(frame):
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone gestion " + str(zone_index + 1),
                              "\"Profondeur\" doit être un réel positif",
-                             "Régie projection Simulation " + str(simulation_index + 1)))
+                             "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                     if profondeur == "":
                         profondeur = None
                     if profondeur is not None and util.is_decimal_number(profondeur):
@@ -2004,7 +2005,7 @@ def run_gui(frame):
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone gestion " + str(zone_index + 1),
                              "\"Culture secondaire\" doit être parmis les choix disponibles ou laissé vide s'il n'y a pas de culture secondaire",
-                             "Régie projection Simulation " + str(simulation_index + 1)))
+                             "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                     rendement_culture_secondaire = regie.grid_slaves(row=8, column=1)[0].get()
                     if rendement_culture_secondaire == "":
                         rendement_culture_secondaire = None
@@ -2014,14 +2015,14 @@ def run_gui(frame):
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone gestion " + str(zone_index + 1),
                              "\"Rendement culture secondaire\" doit être un réel positif ou laissé vide s'il n'y a pas de culture secondaire",
-                             "Régie projection Simulation " + str(simulation_index + 1)))
+                             "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                     elif (culture_secondaire is None and rendement_culture_secondaire is not None) or (
                             culture_secondaire is not None and rendement_culture_secondaire is None):
                         entree_invalide_liste.append(
                             (information_champs[champs_index]["nom_du_champs"],
                              "Zone gestion " + str(zone_index + 1),
                              "\"Rendement culture secondaire\" et \"Culture secondaire\" doivent être tout deux laissé vide s'il n'y a pas de culture secondaire",
-                             "Régie projection Simulation " + str(simulation_index + 1)))
+                             "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                     else:
                         if rendement_culture_secondaire is not None:
                             rendement_culture_secondaire = float(rendement_culture_secondaire)
@@ -2043,7 +2044,7 @@ def run_gui(frame):
                                  "Zone gestion " + str(zone_index + 1),
                                  "\"Amendement\" " + str(
                                      index_composante_amendement + 1) + " doit être parmis les choix disponibles",
-                                 "Régie projection Simulation " + str(simulation_index + 1)))
+                                 "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                         apport = composante_amendement_liste.grid_slaves([index_composante_amendement + 1], column=1)[
                             0].get()
                         if apport == "":
@@ -2054,7 +2055,7 @@ def run_gui(frame):
                                  "Zone gestion " + str(zone_index + 1),
                                  "\"Apport\" " + str(index_composante_amendement + 1) +
                                  " est invalide, il doit être un réel positif ou laissé vide s'il n'y a pas d'amendements",
-                                 "Régie projection Simulation " + str(simulation_index + 1)))
+                                 "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                         elif (amendement is None and apport is not None) or (amendement is not None and apport is None):
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
@@ -2063,7 +2064,7 @@ def run_gui(frame):
                                      index_composante_amendement + 1) + " et \"Amendement\" " + str(
                                      index_composante_amendement + 1) +
                                  " doivent être tout deux laissé vide s'il n'y a pas d'amendements",
-                                 "Régie projection Simulation " + str(simulation_index + 1)))
+                                 "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                         else:
                             if apport is not None:
                                 apport = float(apport)
@@ -2562,7 +2563,7 @@ def run_gui(frame):
                     nom_du_champs = champs_frame.winfo_children()[1].get()
                     if len(nom_du_champs) > 12:
                         entree_invalide_liste.append(("Champs " + str(champs_label_frame_index - 1),
-                                                     "Le nom du champ devrait être composé de 12 caractères ou moins."))
+                                                      "Le nom du champ devrait être composé de 12 caractères ou moins."))
                     champs_widgets = champs_frame.winfo_children()
                     zone_label_frame_index = 2
                     info_zones_de_gestion = []
@@ -2986,7 +2987,7 @@ def run_gui(frame):
             entree_invalide_liste = simulations
             message = ""
             for entree_invalide in entree_invalide_liste:
-                message = message + "Dans la " + entree_invalide[3] + ", le " + entree_invalide[0] + " et la " + \
+                message = message + "Dans la " + entree_invalide[3] + ", le  champ " + entree_invalide[0] + " et la " + \
                           entree_invalide[
                               1] + " l'entrée " + entree_invalide[2] + "\n"
             messagebox.showwarning("Warning", message)
