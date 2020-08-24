@@ -419,13 +419,23 @@ def run_gui(frame):
                 superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
 
                 if fill_fields:
-                    taux_matiere_organique_entry.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["taux_matiere_organique"])
-                    municipalite_combobox.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["municipalite"])
-                    classe_texturale_combobox.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["classe_texturale"])
-                    classe_de_drainage_combobox.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["classe_de_drainage"])
-                    masse_volumique_apparente_entry.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["masse_volumique_apparente"])
-                    profondeur_entry.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["profondeur"])
-                    superficie_de_la_zone_entry.insert(0, information_champs[index_champs]["information_zone_de_gestion"][index_zone_de_gestion]["superficie_de_la_zone"])
+                    taux_matiere_organique_entry.insert(0,
+                                                        information_champs[index_champs]["information_zone_de_gestion"][
+                                                            index_zone_de_gestion]["taux_matiere_organique"])
+                    municipalite_combobox.insert(0, information_champs[index_champs]["information_zone_de_gestion"][
+                        index_zone_de_gestion]["municipalite"])
+                    classe_texturale_combobox.insert(0, information_champs[index_champs]["information_zone_de_gestion"][
+                        index_zone_de_gestion]["classe_texturale"])
+                    classe_de_drainage_combobox.insert(0,
+                                                       information_champs[index_champs]["information_zone_de_gestion"][
+                                                           index_zone_de_gestion]["classe_de_drainage"])
+                    masse_volumique_apparente_entry.insert(0, information_champs[index_champs][
+                        "information_zone_de_gestion"][index_zone_de_gestion]["masse_volumique_apparente"])
+                    profondeur_entry.insert(0, information_champs[index_champs]["information_zone_de_gestion"][
+                        index_zone_de_gestion]["profondeur"])
+                    superficie_de_la_zone_entry.insert(0,
+                                                       information_champs[index_champs]["information_zone_de_gestion"][
+                                                           index_zone_de_gestion]["superficie_de_la_zone"])
 
                 taux_matiere_organique_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
                 taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
@@ -2550,6 +2560,9 @@ def run_gui(frame):
                 while champs_label_frame_index < len(entreprise_widgets):
                     champs_frame = entreprise_widgets[champs_label_frame_index]
                     nom_du_champs = champs_frame.winfo_children()[1].get()
+                    if len(nom_du_champs) > 12:
+                        entree_invalide_liste.append(("Champs " + str(champs_label_frame_index - 1),
+                                                     "Le nom du champ devrait être composé de 12 caractères ou moins."))
                     champs_widgets = champs_frame.winfo_children()
                     zone_label_frame_index = 2
                     info_zones_de_gestion = []
@@ -2639,8 +2652,11 @@ def run_gui(frame):
                 else:
                     message = ""
                     for entree_invalide in entree_invalide_liste:
-                        message = message + "Dans le " + entree_invalide[0] + " et la " + entree_invalide[
-                            1] + " l'entrée " + entree_invalide[2] + "\n"
+                        if len(entree_invalide) == 2:
+                            message = message + "Dans le " + entree_invalide[0] + ", " + entree_invalide[1] + "\n"
+                        else:
+                            message = message + "Dans le " + entree_invalide[0] + " et la " + entree_invalide[
+                                1] + " l'entrée " + entree_invalide[2] + "\n"
                     messagebox.showwarning("Warning", message)
                     edition_window.focus()
 
@@ -2852,6 +2868,7 @@ def run_gui(frame):
                                                                filetypes=(
                                                                    ("json files", "*.json"), ("all files", "*.*")))
             if plan_gestion_filename == "":
+                simulations_chargees = False
                 menu_initial_ogemos(menu_frame)
                 root.deiconify()
                 return
@@ -2903,6 +2920,7 @@ def run_gui(frame):
                 no_error = False
                 messagebox.showwarning("Fichier Invalide", "Le fichier ne correspondant pas au format désiré.")
                 root.deiconify()
+                simulations_chargees = False
                 menu_initial_ogemos(menu_frame)
 
             if no_error:
