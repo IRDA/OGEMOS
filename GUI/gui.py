@@ -1413,7 +1413,7 @@ def run_gui(frame):
                                                                     command=lambda: ajouter_une_annee_a_la_rotation(
                                                                         scrollable_frame_projection))
                 ajouter_une_annee_a_la_rotation_button.grid(row=0, column=0, pady=3)
-                if zone is not None and len(zone) > 1:
+                if zone is not None and len(zone["regies_sol_et_culture_projection"]) > 1:
                     enlever_une_annee_a_la_rotation_button = ttk.Button(button_frame,
                                                                         text="Enlever une année de rotation",
                                                                         command=lambda: enlever_une_annee_a_la_rotation(
