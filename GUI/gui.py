@@ -2970,7 +2970,7 @@ def run_gui(frame):
                      "nombre_de_champs": nombre_de_champs,
                      "information_champs": information_champs}
         global filename
-        if filename is None:
+        if filename is None or filename == "":
             response = messagebox.askyesno("Sauvegarde entreprise",
                                            "Souhaitez-vous sauvegarder les modifications apportées à l'entreprise?")
             if response:

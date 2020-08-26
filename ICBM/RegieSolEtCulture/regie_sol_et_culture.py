@@ -13,10 +13,10 @@ class RegieDesSolsEtCultures:
         apport_culture_principale = self.__culture_principale.calculer_apport_en_carbone_culture_principale()
         apport_culture_secondaire = self.__culture_secondaire.calculer_apport_en_carbone_culture_secondaire()
         apport_amendements = self.__amendements.calculer_apport_en_carbone_amendements()
-        return apport_culture_principale \
-               + apport_culture_secondaire \
-               + apport_amendements \
-               + self.__travail_du_sol.calculer_apport_en_carbone_travail_du_sol(), \
+        return (apport_culture_principale
+                + apport_culture_secondaire
+                + apport_amendements) \
+               * self.__travail_du_sol.calculer_apport_en_carbone_travail_du_sol(), \
                apport_culture_principale, \
                apport_culture_secondaire, \
                apport_amendements
@@ -28,7 +28,8 @@ class RegieDesSolsEtCultures:
         return self.__culture_principale.get_coefficient_calcul().coefficient_humification_residus_culture
 
     def generer_bilan_regie(self):
-        return {"culture_principale": self.__culture_principale.generer_bilan_culture_principale(),
+        return {"annee_culture": self.__annee_de_culture,
+                "culture_principale": self.__culture_principale.generer_bilan_culture_principale(),
                 "culture_secondaire": self.__culture_secondaire.generer_bilan_culture_secondaire(),
                 "amendements": self.__amendements.generer_bilan_amendements()}
 
@@ -67,9 +68,9 @@ class CulturePrincipale:
             quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_extra_racinaire / coefficient_de_calcul.ratio_partie_recolte)
             if self.__produit_non_recolte:
-                return coefficient_de_calcul.htige * quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
-            else:
                 return coefficient_de_calcul.hproduit * quantite_carbone_partie_recolte + coefficient_de_calcul.htige * quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
+            else:
+                return coefficient_de_calcul.htige * quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
         else:
             quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * self.__taux_matiere_seche * proportion_tige_laissee_au_champs
             quantite_carbone_partie_racinaire = quantite_carbone_partie_recolte * (
