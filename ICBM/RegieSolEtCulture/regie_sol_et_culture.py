@@ -16,7 +16,7 @@ class RegieDesSolsEtCultures:
         return (apport_culture_principale
                 + apport_culture_secondaire
                 + apport_amendements) \
-               * self.__travail_du_sol.calculer_apport_en_carbone_travail_du_sol(), \
+               * self.__travail_du_sol.calculer_facteur_apport_en_carbone_travail_du_sol(), \
                apport_culture_principale, \
                apport_culture_secondaire, \
                apport_amendements
@@ -107,7 +107,7 @@ class CultureSecondaire:
                 coefficient_de_calcul.ratio_partie_racinaire / coefficient_de_calcul.ratio_partie_recolte)
         quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
                 coefficient_de_calcul.ratio_partie_extra_racinaire / coefficient_de_calcul.ratio_partie_recolte)
-        return coefficient_de_calcul.htige * quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
+        return coefficient_de_calcul.hproduit * quantite_carbone_partie_recolte + coefficient_de_calcul.htige * quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
 
     def generer_bilan_culture_secondaire(self):
         return {"culture_secondaire": self.__type_de_culture_secondaire}
@@ -152,5 +152,5 @@ class TravailDuSol:
         self.__type_de_travail_du_sol = type_de_travail_du_sol
         self.__profondeur_maximale_du_travail = profondeur_maximale_du_travail
 
-    def calculer_apport_en_carbone_travail_du_sol(self):
+    def calculer_facteur_apport_en_carbone_travail_du_sol(self):
         return get_facteur_travail_du_sol(self.__type_de_travail_du_sol).facteur_travail_du_sol
