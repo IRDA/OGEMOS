@@ -2,10 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
 
-# TODO: vérifier si le cacul du path risque de planter
 
 path = os.path.abspath(__file__)
-while path != 'C:\\Users\\Samuel\\PycharmProjects\\OGEMOS\\ICBM':
+while not path.endswith("ICBM"):
     path = os.path.dirname(path)
 connection_string = 'sqlite:///'+path+'\\BaseDeDonnees\\coefficient.db'
 engine = create_engine(connection_string)
