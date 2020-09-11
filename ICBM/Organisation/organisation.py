@@ -230,15 +230,15 @@ class ZoneDeGestion:
         moyenne_de_chaque_annee_de_rotation = []
         nombre_de_repetition_de_annee_de_rotation = []
         for index_annee in range(len(self.__regies_sol_et_culture_historique), len(carbone_organique_de_sol_pour_la_duree_de_la_simulation)):
-            if index_annee < len(self.__regies_sol_et_culture_projection):
+            if (index_annee - len(self.__regies_sol_et_culture_historique)) < len(self.__regies_sol_et_culture_projection):
                 moyenne_de_chaque_annee_de_rotation.append(
                     carbone_organique_de_sol_pour_la_duree_de_la_simulation[index_annee])
                 nombre_de_repetition_de_annee_de_rotation.append(1)
             else:
-                moyenne_de_chaque_annee_de_rotation[index_annee % len(self.__regies_sol_et_culture_projection)] += \
+                moyenne_de_chaque_annee_de_rotation[(index_annee - len(self.__regies_sol_et_culture_historique)) % len(self.__regies_sol_et_culture_projection)] += \
                     carbone_organique_de_sol_pour_la_duree_de_la_simulation[index_annee]
                 nombre_de_repetition_de_annee_de_rotation[
-                    index_annee % len(self.__regies_sol_et_culture_projection)] += 1
+                    (index_annee - len(self.__regies_sol_et_culture_historique)) % len(self.__regies_sol_et_culture_projection)] += 1
         for index_annee in range(len(moyenne_de_chaque_annee_de_rotation)):
             moyenne_de_chaque_annee_de_rotation[index_annee] = moyenne_de_chaque_annee_de_rotation[index_annee] / \
                                                                nombre_de_repetition_de_annee_de_rotation[index_annee]

@@ -3009,7 +3009,29 @@ def run_gui(frame):
     def creation_du_rapport(bilan_response):
         bilan_workbook = Workbook()
         description_champs_worksheet = bilan_workbook.active
-        
+        index_column_cell = 1
+        index_row_cell = 1
+        global information_champs
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Producteue")
+        index_column_cell += 1
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Champ")
+        index_column_cell += 1
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Zone de gestion")
+        index_column_cell += 1
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Superficie de la zone (ha)")
+        index_column_cell += 1
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Municipalité")
+        index_column_cell += 1
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Taux de matière organique (%)")
+        index_column_cell += 1
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Masse volumique apparente (g/cm3)")
+        index_column_cell += 1
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Profondeur (cm)")
+        index_column_cell += 1
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Groupe texturale")
+        index_column_cell += 1
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Classe de drainage")
+        index_column_cell = 1
 
         bilan_workbook.save("C:\\Users\\Samuel\\Documents\\Stage IRDA\\Test sauvegarde\\test.xlsx")
 
