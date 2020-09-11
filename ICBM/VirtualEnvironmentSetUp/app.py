@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 
 @app.route('/api/icbm-bilan', methods=['POST'])
-def add():
+def post_simulation():
     data_request = request.get_json()
     response = __launch_icbm_simulation(data_request)
     return jsonify(response)
@@ -233,6 +233,12 @@ def __travail_du_sol_mapping(data):
         assert travail_du_sol in types_travail_du_sol_supportee
     except AssertionError:
         message_erreur = str(travail_du_sol) + " n'est pas un travail du sol supporté."
+        abort(400, message_erreur)
+
+    try:
+        assert isinstance(profondeur_du_travail, (float, int))
+    except AssertionError:
+        message_erreur = str(travail_du_sol) + " n'est pas une profondeur du travail valide. Voir documentation API."
         abort(400, message_erreur)
 
     return TravailDuSol(travail_du_sol, profondeur_du_travail)
