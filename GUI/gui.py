@@ -3,6 +3,7 @@ from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
 from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment
 import json
 import copy
 import GUI.fonction_utilitaire as util
@@ -1789,7 +1790,7 @@ def run_gui(frame):
                 response = requests.post('http://localhost:5000/api/icbm-bilan', json={"simulations": simulations})
                 print(response.text)
                 # TODO: Ajouter la suite avec la generation du rapport
-                creation_du_rapport(response)
+                creation_du_rapport(response.json())
             else:
                 message = ""
                 for entree_invalide in entree_invalide_liste:
@@ -3009,22 +3010,28 @@ def run_gui(frame):
     def creation_du_rapport(bilan_response):
         bilan_workbook = Workbook()
         description_champs_worksheet = bilan_workbook.active
+        description_champs_worksheet.title = "Zone"
         index_column_cell = 1
         index_row_cell = 1
         global information_champs
-        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Producteue")
+        global nom_entreprise
+        global duree_simulation
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Producteur")
         index_column_cell += 1
         description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Champ")
         index_column_cell += 1
         description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Zone de gestion")
         index_column_cell += 1
-        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Superficie de la zone (ha)")
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                          value="Superficie de la zone (ha)")
         index_column_cell += 1
         description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Municipalité")
         index_column_cell += 1
-        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Taux de matière organique (%)")
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                          value="Taux de matière organique (%)")
         index_column_cell += 1
-        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Masse volumique apparente (g/cm3)")
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                          value="Masse volumique apparente (g/cm3)")
         index_column_cell += 1
         description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Profondeur (cm)")
         index_column_cell += 1
@@ -3032,6 +3039,231 @@ def run_gui(frame):
         index_column_cell += 1
         description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Classe de drainage")
         index_column_cell = 1
+        index_row_cell += 1
+        font = Font(bold=True)
+        for cell_name in ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1']:
+            cell = description_champs_worksheet[cell_name]
+            cell.font = font
+
+        for champ in information_champs:
+            index_zone = 1
+            for zone in champ["information_zone_de_gestion"]:
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=nom_entreprise)
+                index_column_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=champ["nom_du_champs"])
+                index_column_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=str(index_zone))
+                index_column_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zone["superficie_de_la_zone"])
+                index_column_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zone["municipalite"])
+                index_column_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zone["taux_matiere_organique"])
+                index_column_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zone["masse_volumique_apparente"])
+                index_column_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zone["profondeur"])
+                index_column_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zone["classe_texturale"])
+                index_column_cell += 1
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value=zone["classe_de_drainage"])
+                index_zone += 1
+                index_column_cell = 1
+                index_row_cell += 1
+        description_regies_simulations_worksheet = bilan_workbook.create_sheet("Simulation")
+        index_column_cell = 1
+        index_row_cell = 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Producteur")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Champ")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Zone de gestion")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Simulation")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Année")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Culture principale")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Culture secondaire")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Amendements")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Apport Cult. Princ. Racinaire (kg/m2)")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Apport Cult. Princ. Aérien (kg/m2)")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Apport Cult. Sec. Racinaire (kg/m2)")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Apport Cult. Sec. Aérien (kg/m2)")
+        index_column_cell += 1
+        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                      value="Amendements (kg/m2)")
+        index_column_cell = 1
+        index_row_cell += 1
+        index_simulation = 0
+        bilans_simulations = bilan_response["bilans_des_simulations"]
+        for simulation in bilans_simulations:
+            for champ in simulation["bilans_des_champs"]:
+                index_zone = 1
+                for zone in champ["bilans_des_zones"]:
+                    index_annee = 0
+                    for year in zone["bilan_des_regies_pour_la_duree_de_la_simulation"]:
+                        if index_annee > len(zone["bilan_des_regies_historiques"]):
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=simulation["nom_entreprise"])
+                            index_column_cell += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=champ["nom_champs"])
+                            index_column_cell += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=str(index_zone))
+                            index_column_cell += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=duree_simulation[index_simulation][
+                                                                              "nom_simulation"])
+                            index_column_cell += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=year["annee_culture"])
+                            index_column_cell += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=year["culture_principale"][
+                                                                              "culture_principale"])
+                            index_column_cell += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=year["culture_secondaire"][
+                                                                              "culture_secondaire"])
+                            index_column_cell += 1
+                            amendements = ""
+                            index_amendements = 0
+                            for amendement in year["amendements"]["amendements"]:
+                                if index_amendements < len(year["amendements"]["amendements"])-1:
+                                    amendements = amendements + amendement["amendement"] + " + "
+                                else:
+                                    amendements = amendements + amendement["amendement"]
+                                index_amendements += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=amendements)
+                            index_column_cell += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=zone[
+                                                                              "bilan_apports_cultures_principales_racinaires"][
+                                                                              index_annee-len(zone["bilan_des_regies_historiques"])])
+                            index_column_cell += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=zone[
+                                                                              "bilan_apports_cultures_principales_aeriennes"][
+                                                                              index_annee-len(zone["bilan_des_regies_historiques"])])
+                            index_column_cell += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=zone[
+                                                                              "bilan_apports_cultures_secondaires_racinaires"][
+                                                                              index_annee-len(zone["bilan_des_regies_historiques"])])
+                            index_column_cell += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=zone[
+                                                                              "bilan_apports_cultures_secondaires_aeriennes"][
+                                                                              index_annee-len(zone["bilan_des_regies_historiques"])])
+
+                            index_column_cell += 1
+                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                          value=zone[
+                                                                              "bilan_apports_amendements"][
+                                                                              index_annee-len(zone["bilan_des_regies_historiques"])])
+                            index_column_cell = 1
+                            index_row_cell += 1
+                        index_annee += 1
+                    index_zone += 1
+            index_simulation += 1
+
+        description_resultats_annuels_worksheet = bilan_workbook.create_sheet("Résultats annuels")
+        index_column_cell = 1
+        index_row_cell = 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Producteur")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Champ")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Zone de gestion")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Année de projection")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Y aérien princ. C (kg/m2)")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Y aérien sec. C (kg/m2)")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Y racinaire princ. C (kg/m2)")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Y racinaire sec. C (kg/m2)")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="C jeune total princ. (kg/m2)")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="C jeune total sec. (kg/m2)")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="C jeune amendements (kg/m2)")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="C jeune total (t/ha)")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="C stable total (t/ha)")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="C total (t/ha)")
+        index_column_cell += 1
+        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="MO (t/ha)")
+        index_column_cell += 1
+        index_row_cell += 1
+        #TODO ajouter la partie qui décrit les valeurs des colonnes ci-haut
+
+        description_resultats_sommaire_worksheet = bilan_workbook.create_sheet("Résultats sommaires")
+        index_column_cell = 1
+        index_row_cell = 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Producteur")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Champ")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Zone de gestion")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Simulation")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Nombre d'années"
+                                                                                                          "projetées")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Apport moyen culture principale")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Apport moyen culture secondaire")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Apport moyen amendement")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Teneur initiale en MOS")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Teneur finale en MOS")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Évolution du taux de MOS")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Comparaison 50ème percentile")
+        index_column_cell += 1
+        description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Comparaison 90ème percentile")
+        index_column_cell += 1
 
         bilan_workbook.save("C:\\Users\\Samuel\\Documents\\Stage IRDA\\Test sauvegarde\\test.xlsx")
 

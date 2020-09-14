@@ -10,16 +10,28 @@ class RegieDesSolsEtCultures:
         self.__travail_du_sol = travail_du_sol
 
     def calculer_apport_annuel_en_carbone_de_la_regie(self):
+        culture_principale = self.__culture_principale.get_coefficient_calcul()
+        culture_secondaire = self.__culture_secondaire.get_coefficient_calcul()
         apport_culture_principale = self.__culture_principale.calculer_apport_en_carbone_culture_principale()
         apport_culture_secondaire = self.__culture_secondaire.calculer_apport_en_carbone_culture_secondaire()
         apport_amendements = self.__amendements.calculer_apport_en_carbone_amendements()
-        return (apport_culture_principale
-                + apport_culture_secondaire
-                + apport_amendements) \
-               * self.__travail_du_sol.calculer_facteur_apport_en_carbone_travail_du_sol(), \
-               apport_culture_principale, \
-               apport_culture_secondaire, \
-               apport_amendements
+        apport_culture_principale_racinaire = apport_culture_principale / (
+                culture_principale.biomasse_aerienne_sur_racinaire + 1)
+        apport_culture_principale_aerienne = apport_culture_principale_racinaire * culture_principale.biomasse_aerienne_sur_racinaire
+        apport_culture_secondaire_racinaire = apport_culture_secondaire / (
+                culture_secondaire.biomasse_aerienne_sur_racinaire + 1)
+        apport_culture_secondaire_aerienne = apport_culture_secondaire_racinaire * culture_secondaire.biomasse_aerienne_sur_racinaire
+        return ((apport_culture_principale
+                 + apport_culture_secondaire
+                 + apport_amendements)
+                * self.__travail_du_sol.calculer_facteur_apport_en_carbone_travail_du_sol(),
+                apport_culture_principale,
+                apport_culture_secondaire,
+                apport_amendements,
+                apport_culture_principale_aerienne,
+                apport_culture_principale_racinaire,
+                apport_culture_secondaire_aerienne,
+                apport_culture_secondaire_racinaire)
 
     def set_annee_de_culture(self, annee_de_culture):
         self.__annee_de_culture = annee_de_culture
@@ -108,6 +120,9 @@ class CultureSecondaire:
         quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
                 coefficient_de_calcul.ratio_partie_extra_racinaire / coefficient_de_calcul.ratio_partie_recolte)
         return coefficient_de_calcul.hproduit * quantite_carbone_partie_recolte + coefficient_de_calcul.htige * quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
+
+    def get_coefficient_calcul(self):
+        return get_coefficients_culture_secondaire(self.__type_de_culture_secondaire)
 
     def generer_bilan_culture_secondaire(self):
         return {"culture_secondaire": self.__type_de_culture_secondaire}
