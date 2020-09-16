@@ -47,9 +47,6 @@ class RegieDesSolsEtCultures:
 
 
 class CulturePrincipale:
-    """
-    :param rendement: rendement en ton/ha
-    """
 
     def __init__(self, type_de_culture_principale, rendement, proportion_tige_exporte, produit_non_recolte,
                  est_derniere_annee_rotation_plante_fourragere, taux_matiere_seche=None):

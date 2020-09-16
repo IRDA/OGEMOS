@@ -89,16 +89,6 @@ class Champs:
 
 
 class ZoneDeGestion:
-    """
-    :param taux_matiere_organique: taux de matière organique (%)
-    :param masse_volumique_apparente: masse volumique apparente  1.318 par défaut(g/cm3)
-    :param profondeur: profondeur donnée pour le calcul de la masse de carbone organique du sol (cm)
-    :param municipalite: municipalite dans laquelle se trouve la zone de gestion
-    :param classe_texturale: classe texturale de la zone de gestion
-    :param classe_de_drainage: classe de drainage de la zone de gestion
-    :param regies_sol_et_culture_projection: Régies des sols constitué des cultures, amendement, etc, pour les quelques années
-    qui correspondent à une rotation
-    """
 
     def __init__(self, taux_matiere_organique, municipalite, classe_texturale, classe_de_drainage,
                  masse_volumique_apparente, profondeur, taille_de_la_zone, regies_sol_et_culture_projection,
@@ -143,15 +133,11 @@ class ZoneDeGestion:
             compteur_annee = 0
             while annee_courante <= annee_finale:
                 regie_annee_courante = copy.deepcopy(self.__regies_sol_et_culture_projection[
-                    compteur_annee % len(self.__regies_sol_et_culture_projection)])
+                                                         compteur_annee % len(self.__regies_sol_et_culture_projection)])
                 regie_annee_courante.set_annee_de_culture(annee_courante)
                 self.__regies_sol_et_culture_pour_la_duree_de_la_simulation.append(regie_annee_courante)
                 annee_courante += 1
                 compteur_annee += 1
-
-    """
-    :returns carbone organique du sol initial ou TTS (total carbon at steady state) (kg C/m2)
-    """
 
     def __calculer_carbone_organique_initial_du_sol(self):
         facteur_conversion_de_g_cm2_a_kg_m2 = 1000 / 100 ** 2
