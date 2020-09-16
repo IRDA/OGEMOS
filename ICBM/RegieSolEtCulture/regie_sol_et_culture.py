@@ -77,7 +77,7 @@ class CulturePrincipale:
             quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_extra_racinaire / coefficient_de_calcul.ratio_partie_recolte)
             if self.__produit_non_recolte:
-                return coefficient_de_calcul.hproduit * quantite_carbone_partie_recolte + coefficient_de_calcul.htige * quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
+                return quantite_carbone_partie_recolte + quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
             else:
                 return coefficient_de_calcul.htige * quantite_carbone_partie_tige_non_recolte + coefficient_de_calcul.hracine * quantite_carbone_partie_racinaire + coefficient_de_calcul.hextraracinaire * quantite_carbone_partie_extra_racinaire
         else:
