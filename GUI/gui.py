@@ -3235,25 +3235,13 @@ def run_gui(frame):
                                                      value="Année de projection")
         index_column_cell += 1
         description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                     value="Y aérien princ. C (kg/m2)")
+                                                     value="Y aérien C (kg/m2)")
         index_column_cell += 1
         description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                     value="Y aérien sec. C (kg/m2)")
-        index_column_cell += 1
-        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                     value="Y racinaire princ. C (kg/m2)")
-        index_column_cell += 1
-        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                     value="Y racinaire sec. C (kg/m2)")
+                                                     value="Y racinaire C (kg/m2)")
         index_column_cell += 1
         description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                      value="Y amendements C (kg/m2)")
-        index_column_cell += 1
-        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                     value="C jeune total princ. (kg/m2)")
-        index_column_cell += 1
-        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                     value="C jeune total sec. (kg/m2)")
         index_column_cell += 1
         description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                      value="C jeune total (t/ha)")
@@ -3265,20 +3253,81 @@ def run_gui(frame):
                                                      value="C total (t/ha)")
         index_column_cell += 1
         description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell, value="MO (t/ha)")
-        index_column_cell += 1
+        index_column_cell = 1
         index_row_cell += 1
 
         font = Font(bold=True)
         alignment = Alignment(wrap_text=True)
-        for cell_name in ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1', 'K1', 'L1', 'M1', 'N1', 'O1',
-                          'P1']:
+        for cell_name in ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1', 'K1', 'L1']:
             cell = description_resultats_annuels_worksheet[cell_name]
             cell.font = font
             cell.alignment = alignment
-        for column_name in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
-                            'P']:
+        for column_name in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']:
             description_resultats_annuels_worksheet.column_dimensions[column_name].width = 14
-        # TODO ajouter la partie qui décrit les valeurs des colonnes ci-haut
+        index_simulation = 0
+        for simulation in bilans_simulations:
+            for champ in simulation["bilans_des_champs"]:
+                index_zone = 1
+                for zone in champ["bilans_des_zones"]:
+                    index_annee = 0
+                    for year in zone["bilan_des_regies_pour_la_duree_de_la_simulation"]:
+                        if index_annee > len(zone["bilan_des_regies_historiques"]):
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=simulation[
+                                                                             "nom_entreprise"]).alignment = alignment
+                            index_column_cell += 1
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=champ[
+                                                                             "nom_champs"]).alignment = alignment
+                            index_column_cell += 1
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=str(index_zone)).alignment = alignment
+                            index_column_cell += 1
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=duree_simulation[index_simulation][
+                                                                             "nom_simulation"]).alignment = alignment
+                            index_column_cell += 1
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=year[
+                                                                             "annee_culture"]).alignment = alignment
+                            index_column_cell += 1
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=zone["bilan_etats_pool_jeune_aerien"][
+                                                                             index_annee]).alignment = alignment
+                            index_column_cell += 1
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=zone["bilan_etats_pool_jeune_racinaire"][
+                                                                             index_annee]).alignment = alignment
+                            index_column_cell += 1
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=zone["bilan_etats_pool_jeune_amendements"][
+                                                                             index_annee]).alignment = alignment
+                            index_column_cell += 1
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=
+                                                                         zone["bilan_etats_pool_jeune_total"][
+                                                                             index_annee]).alignment = alignment
+                            index_column_cell += 1
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=
+                                                                         zone["bilan_etats_pool_stable"][
+                                                                             index_annee]).alignment = alignment
+                            index_column_cell += 1
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=
+                                                                         zone["bilan_carbone_de_la_zone_pour_la_simulation"][
+                                                                             index_annee]).alignment = alignment
+                            index_column_cell += 1
+                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                         value=
+                                                                         zone[
+                                                                             "bilan_matiere_orgagnique_pour_la_simulation"][
+                                                                             index_annee]).alignment = alignment
+                            index_column_cell = 1
+                            index_row_cell += 1
+                        index_annee += 1
+                    index_zone += 1
+            index_simulation += 1
 
         description_resultats_sommaire_worksheet = bilan_workbook.create_sheet("Résultats sommaires")
         index_column_cell = 1
@@ -3293,8 +3342,7 @@ def run_gui(frame):
         description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Simulation")
         index_column_cell += 1
         description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                      value="Nombre d'années"
-                                                            "projetées")
+                                                      value="Nombre d'années projetées")
         index_column_cell += 1
         description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                       value="Apport moyen culture principale")
