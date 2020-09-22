@@ -4,23 +4,25 @@ from ICBM.database_setup import *
 
 def get_facteur_climatique(municipalite):
     session = Session()
-    query_result = session.query(TableDesMunicipalites).filter(TableDesMunicipalites.nom_municipalite == municipalite).one().utm
+    query_result = session.query(TableDesMunicipalites).filter(
+        TableDesMunicipalites.nom_municipalite == municipalite).one().utm
     session.close()
     return query_result
 
 
-def get_facteur_classe_texturale(classe_texturale):
+def get_facteur_groupe_textural(groupe_textural):
     session = Session()
-    query_result = session.query(FacteurClasseTexturale).filter(FacteurClasseTexturale.classe_texturale == classe_texturale).one()
+    query_result = session.query(FacteurGroupeTextural).filter(
+        FacteurGroupeTextural.groupe_textural == groupe_textural).one()
     session.close()
     return query_result
 
 
-def get_classes_texturales_supportees():
+def get_groupes_texturaux_supportees():
     session = Session()
     query_result = []
-    for classe_texturale in session.query(FacteurClasseTexturale.classe_texturale).all():
-        query_result.append(classe_texturale.classe_texturale)
+    for groupe_textural in session.query(FacteurGroupeTextural.groupe_textural).all():
+        query_result.append(groupe_textural.groupe_textural)
     session.close()
     return query_result
 
@@ -121,7 +123,8 @@ def get_cultures_secondaires_supportees():
 
 def get_rendement_et_propriete_municipalite(municipalite):
     session = Session()
-    query_result = session.query(TableDesMunicipalites).filter(TableDesMunicipalites.nom_municipalite == municipalite).one()
+    query_result = session.query(TableDesMunicipalites).filter(
+        TableDesMunicipalites.nom_municipalite == municipalite).one()
     session.close()
     return query_result
 
@@ -132,4 +135,18 @@ def get_municipalites_supportees():
     for municipalite in session.query(TableDesMunicipalites.nom_municipalite).all():
         query_result.append(municipalite.nom_municipalite)
     session.close()
+    return query_result
+
+
+def get_percentile50(utm, groupe_textural):
+    session = Session()
+    query_result = session.query(TablePercentile.percentile50).filter(
+        TablePercentile.utm == utm, TablePercentile.groupe_textural == groupe_textural).one()
+    return query_result
+
+
+def get_percentile90(utm, groupe_textural):
+    session = Session()
+    query_result = session.query(TablePercentile.percentile90).filter(
+        TablePercentile.utm == utm, TablePercentile.groupe_textural == groupe_textural).one()
     return query_result

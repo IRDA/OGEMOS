@@ -91,7 +91,7 @@ class Champs:
 
 class ZoneDeGestion:
 
-    def __init__(self, taux_matiere_organique, municipalite, classe_texturale, classe_de_drainage,
+    def __init__(self, taux_matiere_organique, municipalite, groupe_textural, classe_de_drainage,
                  masse_volumique_apparente, profondeur, taille_de_la_zone, regies_sol_et_culture_projection,
                  regies_sol_et_culture_historique):
         self.FACTEUR_CONVERSION_MATIERE_ORGANIQUE_CARBONE_ORGANIQUE_SOL = 1.724
@@ -111,7 +111,7 @@ class ZoneDeGestion:
             self.__profondeur = profondeur
         self.__taux_matiere_organique = taux_matiere_organique
         self.__municipalite = municipalite
-        self.__classe_texturale = classe_texturale
+        self.__groupe_textural = groupe_textural
         self.__classe_de_drainage = classe_de_drainage
         self.__coefficient_mineralisation_pool_jeune = self.__calculer_coefficient_mineralisation_pool_jeune()
         self.__coefficient_mineralisation_pool_vieux = self.__calculer_coefficient_mineralisation_pool_vieux()
@@ -331,10 +331,10 @@ class ZoneDeGestion:
         return self.__carbone_organique_initial_du_sol - pool_carbone_jeune_initial
 
     def __calculer_coefficient_mineralisation_pool_jeune(self):
-        return get_facteur_classe_texturale(self.__classe_texturale).coefficient_mineralisation_pool_jeune
+        return get_facteur_groupe_textural(self.__groupe_textural).coefficient_mineralisation_pool_jeune
 
     def __calculer_coefficient_mineralisation_pool_vieux(self):
-        return get_facteur_classe_texturale(self.__classe_texturale).coefficient_mineralisation_pool_vieux
+        return get_facteur_groupe_textural(self.__groupe_textural).coefficient_mineralisation_pool_vieux
 
     def __calculer_facteur_climatique(self):
         facteur_climatique = get_facteur_climatique(self.__municipalite)
@@ -414,6 +414,11 @@ class ZoneDeGestion:
             bilan_des_regies_historiques.append(regie_historique.generer_bilan_regie())
         for regie_simulation in self.__regies_sol_et_culture_pour_la_duree_de_la_simulation:
             bilan_des_regies_simulation.append(regie_simulation.generer_bilan_regie())
+        utm = get_facteur_climatique(self.__municipalite)
+        percentile50 = get_percentile50(utm.utm, self.__groupe_textural)
+        percentile90 = get_percentile90(utm.utm, self.__groupe_textural)
+        difference_entre_teneur_finale_et_percentile50 = teneur_finale_projetee - percentile50.percentile50
+        difference_entre_teneur_finale_et_percentile90 = teneur_finale_projetee - percentile90.percentile90
         return {
             "bilan_des_regies_pour_la_duree_de_la_simulation": bilan_des_regies_simulation,
             "bilan_carbone_de_la_zone_pour_la_simulation": bilan_carbon_pour_la_simulation,
@@ -432,10 +437,12 @@ class ZoneDeGestion:
             "bilan_matiere_orgagnique_pour_la_simulation": bilan_matiere_orgagnique_pour_la_simulation,
             "bilan_annuel_moyen_pour_la_zone": bilan_annuel_moyen, "teneur_finale_projetee": teneur_finale_projetee,
             "difference_entre_la_teneur_finale_et_la_zone": difference_entre_teneur_initiale_et_finale,
+            "comparaison_percentile50": difference_entre_teneur_finale_et_percentile50,
+            "comparaison_percentile90": difference_entre_teneur_finale_et_percentile90,
             "moyenne_de_chaque_annee_de_rotation": moyenne_de_chaque_annee_de_rotation,
             "taille_de_la_zone": self.__taille_de_la_zone_de_gestion,
             "taux_de_matiere_organique_initial": self.__taux_matiere_organique,
-            "classe_texturale": self.__classe_texturale,
+            "groupe_textural": self.__groupe_textural,
             "classe_de_drainage": self.__classe_de_drainage,
             "bilan_des_regies_projections": bilan_des_regies_projections,
             "bilan_des_regies_historiques": bilan_des_regies_historiques}

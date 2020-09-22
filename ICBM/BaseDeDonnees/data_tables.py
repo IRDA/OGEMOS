@@ -1,6 +1,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Float, String, Boolean, Integer
 from sqlalchemy import ForeignKey
+from sqlalchemy import Sequence
 from sqlalchemy.orm import relationship
 
 Base = declarative_base()
@@ -13,9 +14,9 @@ class FacteurClimatique(Base):
     facteur_humidite_sol = Column(Float)
 
 
-class FacteurClasseTexturale(Base):
-    __tablename__ = 'FacteurClasseTexturale'
-    classe_texturale = Column(String, primary_key=True)
+class FacteurGroupeTextural(Base):
+    __tablename__ = 'FacteurGroupeTextural'
+    groupe_textural = Column(String, primary_key=True)
     coefficient_mineralisation_pool_jeune = Column(Float)
     coefficient_mineralisation_pool_vieux = Column(Float)
 
@@ -99,3 +100,12 @@ class TableDesMunicipalites(Base):
     rendement_canola = Column(Float)
     utm_principal = Column(Integer, ForeignKey('FacteurClimatique.utm'))
     utm = relationship("FacteurClimatique")
+
+
+class TablePercentile(Base):
+    __tablename__ = 'TablePercentile'
+    id = Column(Integer, Sequence('percentile_seq'), primary_key=True)
+    utm = Column(Integer)
+    groupe_textural = Column(String)
+    percentile50 = Column(Float)
+    percentile90 = Column(Float)

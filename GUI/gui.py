@@ -77,10 +77,10 @@ municipalites_supportees_temporaire = requests.get("http://localhost:5000/api/ge
 municipalites_supportees = municipalites_supportees_temporaire.json()["municipalites_supportees"]
 municipalites_supportees.sort()
 
-global classes_texturales_supportees
-classes_texturales_supportees_temporaire = requests.get("http://localhost:5000/api/get-classe_texturale")
-classes_texturales_supportees = classes_texturales_supportees_temporaire.json()["classes_texturales_supportees"]
-classes_texturales_supportees.sort()
+global groupes_texturaux_supportees
+groupes_texturaux_supportees_temporaire = requests.get("http://localhost:5000/api/get-groupe_textural")
+groupes_texturaux_supportees = groupes_texturaux_supportees_temporaire.json()["groupes_texturaux_supportees"]
+groupes_texturaux_supportees.sort()
 
 global classes_de_drainage_supportees
 classe_de_drainage_supportees_temporaire = requests.get("http://localhost:5000/api/get-classe_de_drainage")
@@ -297,13 +297,13 @@ def run_gui(frame):
                                          "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = champs_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
-                                classe_texturale = entry.get()
-                                global classes_texturales_supportees
-                                if classe_texturale not in classes_texturales_supportees:
+                                groupe_textural = entry.get()
+                                global groupes_texturaux_supportees
+                                if groupe_textural not in groupes_texturaux_supportees:
                                     entree_invalide_liste.append(
                                         (information_champs[index]["nom_du_champs"],
                                          "Zone gestion " + str(index_zone),
-                                         "\"Classe texturale\" doit être parmis les choix disponibles"))
+                                         "\"Groupe textural\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = champs_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
                                 classe_de_drainage = entry.get()
@@ -353,7 +353,7 @@ def run_gui(frame):
                             information_champs[index]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
-                                 "classe_texturale": classe_texturale,
+                                 "groupe_textural": groupe_textural,
                                  "classe_de_drainage": classe_de_drainage,
                                  "masse_volumique_apparente": masse_volumique_apparente,
                                  "profondeur": profondeur,
@@ -397,12 +397,12 @@ def run_gui(frame):
                 municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees,
                                                      postcommand=lambda: filter_combobox_values(municipalite_combobox,
                                                                                                 municipalites_supportees))
-                classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
-                global classes_texturales_supportees
-                classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_texturales_supportees,
+                groupe_textural_label = ttk.Label(zone_de_gestion_frame, text="Groupe textural: ")
+                global groupes_texturaux_supportees
+                groupe_textural_combobox = ttk.Combobox(zone_de_gestion_frame, values=groupes_texturaux_supportees,
                                                          postcommand=lambda: filter_combobox_values(
-                                                             classe_texturale_combobox,
-                                                             classes_texturales_supportees))
+                                                             groupe_textural_combobox,
+                                                             groupes_texturaux_supportees))
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                 global classes_de_drainage_supportees
                 classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees,
@@ -423,8 +423,8 @@ def run_gui(frame):
                                                             index_zone_de_gestion]["taux_matiere_organique"])
                     municipalite_combobox.insert(0, information_champs[index_champs]["information_zone_de_gestion"][
                         index_zone_de_gestion]["municipalite"])
-                    classe_texturale_combobox.insert(0, information_champs[index_champs]["information_zone_de_gestion"][
-                        index_zone_de_gestion]["classe_texturale"])
+                    groupe_textural_combobox.insert(0, information_champs[index_champs]["information_zone_de_gestion"][
+                        index_zone_de_gestion]["groupe_textural"])
                     classe_de_drainage_combobox.insert(0,
                                                        information_champs[index_champs]["information_zone_de_gestion"][
                                                            index_zone_de_gestion]["classe_de_drainage"])
@@ -440,8 +440,8 @@ def run_gui(frame):
                 taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
                 municipalite_label.grid(row=1, column=0, sticky="w", pady=3, padx=5)
                 municipalite_combobox.grid(row=1, column=1, sticky="w", pady=3, padx=5)
-                classe_texturale_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
-                classe_texturale_combobox.grid(row=2, column=1, sticky="w", pady=3, padx=5)
+                groupe_textural_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
+                groupe_textural_combobox.grid(row=2, column=1, sticky="w", pady=3, padx=5)
                 classe_de_drainage_label.grid(row=3, column=0, sticky="w", pady=3, padx=5)
                 classe_de_drainage_combobox.grid(row=3, column=1, sticky="w", pady=3, padx=5)
                 masse_volumique_apparente_label.grid(row=4, column=0, sticky="w", pady=3, padx=5)
@@ -826,13 +826,13 @@ def run_gui(frame):
                             municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees,
                                                                  postcommand=lambda: filter_combobox_values(
                                                                      municipalite_combobox, municipalites_supportees))
-                            classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
-                            global classes_texturales_supportees
-                            classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame,
-                                                                     values=classes_texturales_supportees,
+                            groupe_textural_label = ttk.Label(zone_de_gestion_frame, text="Groupe textural: ")
+                            global groupes_texturaux_supportees
+                            groupe_textural_combobox = ttk.Combobox(zone_de_gestion_frame,
+                                                                     values=groupes_texturaux_supportees,
                                                                      postcommand=lambda: filter_combobox_values(
-                                                                         classe_texturale_combobox,
-                                                                         classes_texturales_supportees))
+                                                                         groupe_textural_combobox,
+                                                                         groupes_texturaux_supportees))
                             classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                             global classes_de_drainage_supportees
                             classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame,
@@ -852,8 +852,8 @@ def run_gui(frame):
                             taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
                             municipalite_label.grid(row=1, column=0, sticky="w", pady=3, padx=5)
                             municipalite_combobox.grid(row=1, column=1, sticky="w", pady=3, padx=5)
-                            classe_texturale_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
-                            classe_texturale_combobox.grid(row=2, column=1, sticky="w", pady=3, padx=5)
+                            groupe_textural_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
+                            groupe_textural_combobox.grid(row=2, column=1, sticky="w", pady=3, padx=5)
                             classe_de_drainage_label.grid(row=3, column=0, sticky="w", pady=3, padx=5)
                             classe_de_drainage_combobox.grid(row=3, column=1, sticky="w", pady=3, padx=5)
                             masse_volumique_apparente_label.grid(row=4, column=0, sticky="w", pady=3, padx=5)
@@ -909,13 +909,13 @@ def run_gui(frame):
                                          "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
-                                classe_texturale = entry.get()
-                                global classes_texturales_supportees
-                                if classe_texturale not in classes_texturales_supportees:
+                                groupe_textural = entry.get()
+                                global groupes_texturaux_supportees
+                                if groupe_textural not in groupes_texturaux_supportees:
                                     entree_invalide_liste.append(
                                         (information_champs[nombre_de_champs - 1]["nom_du_champs"],
                                          "Zone gestion " + str(index_zone + 1),
-                                         "\"Classe texturale\" doit être parmis les choix disponibles"))
+                                         "\"Groupe textural\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
                                 classe_de_drainage = entry.get()
@@ -967,7 +967,7 @@ def run_gui(frame):
                             information_champs[len(information_champs) - 1]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
-                                 "classe_texturale": classe_texturale,
+                                 "groupe_textural": groupe_textural,
                                  "classe_de_drainage": classe_de_drainage,
                                  "masse_volumique_apparente": masse_volumique_apparente,
                                  "profondeur": profondeur,
@@ -1154,11 +1154,11 @@ def run_gui(frame):
                 municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees,
                                                      postcommand=lambda: filter_combobox_values(municipalite_combobox,
                                                                                                 municipalites_supportees))
-                classe_texturale_label = ttk.Label(zone_de_gestion_frame, text="Classe texturale: ")
-                global classes_texturales_supportees
-                classe_texturale_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_texturales_supportees,
+                groupe_textural_label = ttk.Label(zone_de_gestion_frame, text="Groupe textural: ")
+                global groupes_texturaux_supportees
+                groupe_textural_combobox = ttk.Combobox(zone_de_gestion_frame, values=groupes_texturaux_supportees,
                                                          postcommand=lambda: filter_combobox_values(
-                                                             classe_texturale_combobox, classes_texturales_supportees))
+                                                             groupe_textural_combobox, groupes_texturaux_supportees))
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                 global classes_de_drainage_supportees
                 classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees,
@@ -1177,8 +1177,8 @@ def run_gui(frame):
                 taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
                 municipalite_label.grid(row=1, column=0, sticky="w", pady=3, padx=5)
                 municipalite_combobox.grid(row=1, column=1, sticky="w", pady=3, padx=5)
-                classe_texturale_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
-                classe_texturale_combobox.grid(row=2, column=1, sticky="w", pady=3, padx=5)
+                groupe_textural_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
+                groupe_textural_combobox.grid(row=2, column=1, sticky="w", pady=3, padx=5)
                 classe_de_drainage_label.grid(row=3, column=0, sticky="w", pady=3, padx=5)
                 classe_de_drainage_combobox.grid(row=3, column=1, sticky="w", pady=3, padx=5)
                 masse_volumique_apparente_label.grid(row=4, column=0, sticky="w", pady=3, padx=5)
@@ -1227,14 +1227,14 @@ def run_gui(frame):
                                          "\"Municipalité\" doit être parmis les choix disponibles"))
                             grid_slave2_1 = scrollable_frame_widget.grid_slaves(row=2, column=1)
                             for entry in grid_slave2_1:
-                                classe_texturale = entry.get()
-                                global classes_texturales_supportees
-                                if classe_texturale not in classes_texturales_supportees:
+                                groupe_textural = entry.get()
+                                global groupes_texturaux_supportees
+                                if groupe_textural not in groupes_texturaux_supportees:
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
                                          "Zone gestion " + str(
                                              information_champs[champs_index]["nombre_de_zone_de_gestion"]),
-                                         "\"Classe texturale\" doit être parmis les choix disponibles"))
+                                         "\"Groupe textural\" doit être parmis les choix disponibles"))
                             grid_slave3_1 = scrollable_frame_widget.grid_slaves(row=3, column=1)
                             for entry in grid_slave3_1:
                                 classe_de_drainage = entry.get()
@@ -1289,7 +1289,7 @@ def run_gui(frame):
                             information_champs[champs_index]["information_zone_de_gestion"].append(
                                 {"taux_matiere_organique": taux_matiere_organique,
                                  "municipalite": municipalite,
-                                 "classe_texturale": classe_texturale,
+                                 "groupe_textural": groupe_textural,
                                  "classe_de_drainage": classe_de_drainage,
                                  "masse_volumique_apparente": masse_volumique_apparente,
                                  "profondeur": profondeur,
@@ -1867,7 +1867,7 @@ def run_gui(frame):
                     for zone in champs["information_zone_de_gestion"]:
                         zones_de_gestion.append({"taux_matiere_organique": zone["taux_matiere_organique"],
                                                  "municipalite": zone["municipalite"],
-                                                 "classe_texturale": zone["classe_texturale"],
+                                                 "groupe_textural": zone["groupe_textural"],
                                                  "classe_de_drainage": zone["classe_de_drainage"],
                                                  "masse_volumique_apparente": zone["masse_volumique_apparente"],
                                                  "profondeur": zone["profondeur"],
@@ -2498,13 +2498,13 @@ def run_gui(frame):
                                                          postcommand=lambda: filter_combobox_values(
                                                              municipalite_combobox, municipalites_supportees))
                     municipalite_combobox.set(information_zone_de_gestion["municipalite"])
-                    classe_texturale_label = ttk.Label(zone_label_frame, text="Classe texturale: ")
-                    global classes_texturales_supportees
-                    classe_texturale_combobox = ttk.Combobox(zone_label_frame, values=classes_texturales_supportees,
+                    groupe_textural_label = ttk.Label(zone_label_frame, text="Groupe textural: ")
+                    global groupes_texturaux_supportees
+                    groupe_textural_combobox = ttk.Combobox(zone_label_frame, values=groupes_texturaux_supportees,
                                                              postcommand=lambda: filter_combobox_values(
-                                                                 classe_texturale_combobox,
-                                                                 classes_texturales_supportees))
-                    classe_texturale_combobox.set(information_zone_de_gestion["classe_texturale"])
+                                                                 groupe_textural_combobox,
+                                                                 groupes_texturaux_supportees))
+                    groupe_textural_combobox.set(information_zone_de_gestion["groupe_textural"])
                     classe_de_drainage_label = ttk.Label(zone_label_frame, text="Classe de drainage: ")
                     global classes_de_drainage_supportees
                     classe_de_drainage_combobox = ttk.Combobox(zone_label_frame, values=classes_de_drainage_supportees,
@@ -2531,8 +2531,8 @@ def run_gui(frame):
                     taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3)
                     municipalite_label.grid(row=1, column=0, sticky="w", pady=3)
                     municipalite_combobox.grid(row=1, column=1, sticky="w", pady=3)
-                    classe_texturale_label.grid(row=2, column=0, sticky="w", pady=3)
-                    classe_texturale_combobox.grid(row=2, column=1, sticky="w", pady=3)
+                    groupe_textural_label.grid(row=2, column=0, sticky="w", pady=3)
+                    groupe_textural_combobox.grid(row=2, column=1, sticky="w", pady=3)
                     classe_de_drainage_label.grid(row=3, column=0, sticky="w", pady=3)
                     classe_de_drainage_combobox.grid(row=3, column=1, sticky="w", pady=3)
                     masse_volumique_apparente_label.grid(row=4, column=0, sticky="w", pady=3)
@@ -2584,13 +2584,13 @@ def run_gui(frame):
                                 ("Champs " + str(champs_label_frame_index - 1),
                                  "Zone gestion " + str(zone_label_frame_index - 1),
                                  "\"Municipalité\" doit être parmis les choix disponibles"))
-                        classe_texturale = zone_frame.grid_slaves(row=2, column=1)[0].get()
-                        global classes_texturales_supportees
-                        if classe_texturale not in classes_texturales_supportees:
+                        groupe_textural = zone_frame.grid_slaves(row=2, column=1)[0].get()
+                        global groupes_texturaux_supportees
+                        if groupe_textural not in groupes_texturaux_supportees:
                             entree_invalide_liste.append(
                                 ("Champs " + str(champs_label_frame_index - 1),
                                  "Zone gestion " + str(zone_label_frame_index - 1),
-                                 "\"Classe texturale\" doit être parmis les choix disponibles"))
+                                 "\"Groupe textural\" doit être parmis les choix disponibles"))
                         classe_de_drainage = zone_frame.grid_slaves(row=3, column=1)[0].get()
                         global classes_de_drainage_supportees
                         if classe_de_drainage not in classes_de_drainage_supportees:
@@ -2633,7 +2633,7 @@ def run_gui(frame):
                         info_zones_de_gestion.append(
                             {"taux_matiere_organique": taux_matiere_organique,
                              "municipalite": municipalite,
-                             "classe_texturale": classe_texturale,
+                             "groupe_textural": groupe_textural,
                              "classe_de_drainage": classe_de_drainage,
                              "masse_volumique_apparente": masse_volumique_apparente,
                              "profondeur": profondeur,
@@ -2907,7 +2907,7 @@ def run_gui(frame):
                                     information_zone_de_gestion.append(
                                         {"taux_matiere_organique": zone_de_gestion["taux_matiere_organique"],
                                          "municipalite": zone_de_gestion["municipalite"],
-                                         "classe_texturale": zone_de_gestion["classe_texturale"],
+                                         "groupe_textural": zone_de_gestion["groupe_textural"],
                                          "classe_de_drainage": zone_de_gestion["classe_de_drainage"],
                                          "masse_volumique_apparente": zone_de_gestion["masse_volumique_apparente"],
                                          "profondeur": zone_de_gestion["profondeur"],
@@ -3036,7 +3036,7 @@ def run_gui(frame):
         index_column_cell += 1
         description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Profondeur (cm)")
         index_column_cell += 1
-        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Groupe texturale")
+        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Groupe textural")
         index_column_cell += 1
         description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Classe de drainage")
         index_column_cell = 1
@@ -3077,7 +3077,7 @@ def run_gui(frame):
                                                   value=zone["profondeur"]).alignment = alignment
                 index_column_cell += 1
                 description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                  value=zone["classe_texturale"]).alignment = alignment
+                                                  value=zone["groupe_textural"]).alignment = alignment
                 index_column_cell += 1
                 description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                   value=zone["classe_de_drainage"]).alignment = alignment
