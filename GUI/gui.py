@@ -3367,7 +3367,8 @@ def run_gui(frame):
         index_column_cell += 1
         description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                       value="Comparaison 90ème percentile")
-        index_column_cell += 1
+        index_column_cell = 1
+        index_row_cell += 1
 
         font = Font(bold=True)
         alignment = Alignment(wrap_text=True)
@@ -3377,8 +3378,56 @@ def run_gui(frame):
             cell.alignment = alignment
         for column_name in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M']:
             description_resultats_sommaire_worksheet.column_dimensions[column_name].width = 14
-        # TODO ajouter la partie qui décrit les valeurs des colonnes ci-haut
-
+        index_simulation = 0
+        for simulation in bilans_simulations:
+            for champ in simulation["bilans_des_champs"]:
+                index_zone = 1
+                for zone in champ["bilans_des_zones"]:
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=simulation["nom_entreprise"]).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=champ["nom_champs"]).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=str(index_zone)).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=duree_simulation[index_simulation][
+                                                                             "nom_simulation"]).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=len(zone["bilan_des_regies_projections"])).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=zone["moyenne_apports_cultures_principales"]).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=zone["moyenne_apports_cultures_secondaires"]).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=zone["moyenne_apports_amendements"]).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=zone["taux_de_matiere_organique_initial"]).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=zone["teneur_finale_projetee"]).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=zone["difference_entre_la_teneur_finale_et_la_zone"]).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=zone[
+                                                                      "comparaison_percentile50"]).alignment = alignment
+                    index_column_cell += 1
+                    description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                  value=zone[
+                                                                      "comparaison_percentile90"]).alignment = alignment
+                    index_column_cell = 1
+                    index_row_cell += 1
+                    index_zone += 1
+            index_simulation += 1
         bilan_workbook.save("C:\\Users\\Samuel\\Documents\\Stage IRDA\\Test sauvegarde\\test.xlsx")
 
     menu_initial_ogemos(frame)

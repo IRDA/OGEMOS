@@ -142,6 +142,7 @@ def get_percentile50(utm, groupe_textural):
     session = Session()
     query_result = session.query(TablePercentile.percentile50).filter(
         TablePercentile.utm == utm, TablePercentile.groupe_textural == groupe_textural).one()
+    session.close()
     return query_result
 
 
@@ -149,4 +150,5 @@ def get_percentile90(utm, groupe_textural):
     session = Session()
     query_result = session.query(TablePercentile.percentile90).filter(
         TablePercentile.utm == utm, TablePercentile.groupe_textural == groupe_textural).one()
+    session.close()
     return query_result

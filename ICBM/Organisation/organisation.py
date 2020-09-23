@@ -380,6 +380,26 @@ class ZoneDeGestion:
 
         return moyenne_de_chaque_annee_de_rotation
 
+    def __calculer_moyenne_des_apports_des_cultures_principales_pour_la_simulation(self, apports_de_la_culture_principale_aerien, apports_de_la_culture_principale_racinnaire):
+        somme_apports_des_cultures_principales = 0
+        for index_annee in range(len(self.__regies_sol_et_culture_historique), len(apports_de_la_culture_principale_aerien)):
+            somme_apports_des_cultures_principales += apports_de_la_culture_principale_aerien[index_annee]
+            somme_apports_des_cultures_principales += apports_de_la_culture_principale_racinnaire[index_annee]
+        return somme_apports_des_cultures_principales/len(self.__regies_sol_et_culture_projection)
+
+    def __calculer_moyenne_des_apports_des_cultures_secondaires_pour_la_simulation(self, apports_de_la_culture_secondaire_aerien, apports_de_la_culture_secondaire_racinnaire):
+        somme_apports_des_cultures_secondaires = 0
+        for index_annee in range(len(self.__regies_sol_et_culture_historique), len(apports_de_la_culture_secondaire_aerien)):
+            somme_apports_des_cultures_secondaires += apports_de_la_culture_secondaire_aerien[index_annee]
+            somme_apports_des_cultures_secondaires += apports_de_la_culture_secondaire_racinnaire[index_annee]
+        return somme_apports_des_cultures_secondaires/len(self.__regies_sol_et_culture_projection)
+
+    def __calculer_moyenne_des_apports_des_amendements_pour_la_simulation(self, apports_des_amendements):
+        somme_apports_des_amendements = 0
+        for index_annee in range(len(self.__regies_sol_et_culture_historique), len(apports_des_amendements)):
+            somme_apports_des_amendements += apports_des_amendements[index_annee]
+        return somme_apports_des_amendements
+
     def get_taille_de_la_zone(self):
         return self.__taille_de_la_zone_de_gestion
 
@@ -405,6 +425,9 @@ class ZoneDeGestion:
             bilan_carbon_pour_la_simulation, teneur_finale_projetee)
         moyenne_de_chaque_annee_de_rotation = self.__calculer_moyenne_de_chaque_annee_de_rotation_dans_la_projection(
             bilan_carbon_pour_la_simulation)
+        moyenne_apports_cultures_principales = self.__calculer_moyenne_des_apports_des_cultures_principales_pour_la_simulation(bilan_apports_cultures_principales_aeriennes, bilan_apports_cultures_principales_racinaires)
+        moyenne_apports_cultures_secondaire = self.__calculer_moyenne_des_apports_des_cultures_secondaires_pour_la_simulation(bilan_apports_cultures_secondaires_aeriennes, bilan_apports_cultures_secondaires_racinaires)
+        moyenne_apports_amendements = self.__calculer_moyenne_des_apports_des_amendements_pour_la_simulation(bilan_apports_amendements)
         bilan_des_regies_projections = []
         bilan_des_regies_historiques = []
         bilan_des_regies_simulation = []
@@ -440,6 +463,9 @@ class ZoneDeGestion:
             "comparaison_percentile50": difference_entre_teneur_finale_et_percentile50,
             "comparaison_percentile90": difference_entre_teneur_finale_et_percentile90,
             "moyenne_de_chaque_annee_de_rotation": moyenne_de_chaque_annee_de_rotation,
+            "moyenne_apports_cultures_principales": moyenne_apports_cultures_principales,
+            "moyenne_apports_cultures_secondaires": moyenne_apports_cultures_secondaire,
+            "moyenne_apports_amendements": moyenne_apports_amendements,
             "taille_de_la_zone": self.__taille_de_la_zone_de_gestion,
             "taux_de_matiere_organique_initial": self.__taux_matiere_organique,
             "groupe_textural": self.__groupe_textural,
