@@ -96,7 +96,7 @@ class ZoneDeGestion:
                  regies_sol_et_culture_historique):
         self.FACTEUR_CONVERSION_MATIERE_ORGANIQUE_CARBONE_ORGANIQUE_SOL = 1.724
         self.COEFFICIENT_MINERALISATION_POOL_JEUNE = 0.8
-        self.COEFFICIENT_MINERALISATION_POOL_VIEUX = 0.006
+        self.COEFFICIENT_MINERALISATION_POOL_STABLE = 0.006
         self.COEFFICIENT_HUMIFICATION_AMENDEMENT = 0.3
         self.COEFFICIENT_HUMIFICATION_AERIEN = 0.1
         self.COEFFICIENT_HUMIFICATION_RACINNAIRE = 0.3
@@ -114,7 +114,7 @@ class ZoneDeGestion:
         self.__groupe_textural = groupe_textural
         self.__classe_de_drainage = classe_de_drainage
         self.__coefficient_mineralisation_pool_jeune = self.__calculer_coefficient_mineralisation_pool_jeune()
-        self.__coefficient_mineralisation_pool_vieux = self.__calculer_coefficient_mineralisation_pool_vieux()
+        self.__coefficient_mineralisation_pool_stable = self.__calculer_coefficient_mineralisation_pool_stable()
         self.__facteur_climatique = self.__calculer_facteur_climatique()
         self.__regies_sol_et_culture_projection = regies_sol_et_culture_projection
         if regies_sol_et_culture_historique is None:
@@ -178,7 +178,7 @@ class ZoneDeGestion:
             pool_jeune_initial = 0
             for pool in pools_carbone_jeune_initiaux:
                 pool_jeune_initial += pool
-            pool_carbone_stable_initial = self.__calculer_pool_carbone_vieux_initial(pool_jeune_initial)
+            pool_carbone_stable_initial = self.__calculer_pool_carbone_stable_initial(pool_jeune_initial)
             etats_pool_stable.append(pool_carbone_stable_initial)
             etats_pool_jeune_amendements.append(pools_carbone_jeune_initiaux[0])
             pool_humification[0]["Amendements"]["etat_pool_annee_precedente"] = pools_carbone_jeune_initiaux[0]
@@ -241,19 +241,19 @@ class ZoneDeGestion:
                                 apport_amendement = apports_annuel_de_carbone[3]
                             somme_pools_amendments += coefficient[amendement]["coefficient_humification"] * (
                                     self.COEFFICIENT_MINERALISATION_POOL_JEUNE / (
-                                    self.COEFFICIENT_MINERALISATION_POOL_VIEUX - self.COEFFICIENT_MINERALISATION_POOL_JEUNE)) * (
+                                    self.COEFFICIENT_MINERALISATION_POOL_STABLE - self.COEFFICIENT_MINERALISATION_POOL_JEUNE)) * (
                                                               apport_amendement + coefficient[amendement][
                                                           "etat_pool_annee_precedente"])
                             index_amendement += 1
                         pool_carbone_stable -= somme_pools_amendments
                     else:
                         pool_carbone_stable -= coefficient * (self.COEFFICIENT_MINERALISATION_POOL_JEUNE / (
-                                self.COEFFICIENT_MINERALISATION_POOL_VIEUX - self.COEFFICIENT_MINERALISATION_POOL_JEUNE)) * (
+                                self.COEFFICIENT_MINERALISATION_POOL_STABLE - self.COEFFICIENT_MINERALISATION_POOL_JEUNE)) * (
                                                        apports_carbone[index_pools] + pools_carbone_jeune[
                                                    index_pools])
                     index_pools += 1
                 pool_carbone_stable = pool_carbone_stable * math.exp(
-                    -self.COEFFICIENT_MINERALISATION_POOL_VIEUX * self.__facteur_climatique)
+                    -self.COEFFICIENT_MINERALISATION_POOL_STABLE * self.__facteur_climatique)
                 index_pools = 0
                 for coefficient in pool_humification:
                     if index_pools == 0:
@@ -267,7 +267,7 @@ class ZoneDeGestion:
                                 apport_amendement = apports_annuel_de_carbone[3]
                             somme_pools_amendments += coefficient[amendement]["coefficient_humification"] * (
                                     self.COEFFICIENT_MINERALISATION_POOL_JEUNE / (
-                                    self.COEFFICIENT_MINERALISATION_POOL_VIEUX - self.COEFFICIENT_MINERALISATION_POOL_JEUNE)) * (
+                                    self.COEFFICIENT_MINERALISATION_POOL_STABLE - self.COEFFICIENT_MINERALISATION_POOL_JEUNE)) * (
                                                               apport_amendement + coefficient[amendement][
                                                           "etat_pool_annee_precedente"]) * math.exp(
                                 -self.COEFFICIENT_MINERALISATION_POOL_JEUNE * self.__facteur_climatique)
@@ -275,7 +275,7 @@ class ZoneDeGestion:
                         pool_carbone_stable += somme_pools_amendments
                     else:
                         pool_carbone_stable += coefficient * (self.COEFFICIENT_MINERALISATION_POOL_JEUNE / (
-                                self.COEFFICIENT_MINERALISATION_POOL_VIEUX - self.COEFFICIENT_MINERALISATION_POOL_JEUNE)) * (
+                                self.COEFFICIENT_MINERALISATION_POOL_STABLE - self.COEFFICIENT_MINERALISATION_POOL_JEUNE)) * (
                                                        apports_carbone[index_pools] + pools_carbone_jeune[
                                                    index_pools]) * math.exp(
                             -self.COEFFICIENT_MINERALISATION_POOL_JEUNE * self.__facteur_climatique)
@@ -327,14 +327,14 @@ class ZoneDeGestion:
         else:
             return 0, 0, 0, 0, 0
 
-    def __calculer_pool_carbone_vieux_initial(self, pool_carbone_jeune_initial):
+    def __calculer_pool_carbone_stable_initial(self, pool_carbone_jeune_initial):
         return self.__carbone_organique_initial_du_sol - pool_carbone_jeune_initial
 
     def __calculer_coefficient_mineralisation_pool_jeune(self):
         return get_facteur_groupe_textural(self.__groupe_textural).coefficient_mineralisation_pool_jeune
 
-    def __calculer_coefficient_mineralisation_pool_vieux(self):
-        return get_facteur_groupe_textural(self.__groupe_textural).coefficient_mineralisation_pool_vieux
+    def __calculer_coefficient_mineralisation_pool_stable(self):
+        return get_facteur_groupe_textural(self.__groupe_textural).coefficient_mineralisation_pool_stable
 
     def __calculer_facteur_climatique(self):
         facteur_climatique = get_facteur_climatique(self.__municipalite)

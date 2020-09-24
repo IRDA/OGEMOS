@@ -18,7 +18,7 @@ class FacteurGroupeTextural(Base):
     __tablename__ = 'FacteurGroupeTextural'
     groupe_textural = Column(String, primary_key=True)
     coefficient_mineralisation_pool_jeune = Column(Float)
-    coefficient_mineralisation_pool_vieux = Column(Float)
+    coefficient_mineralisation_pool_stable = Column(Float)
 
 
 class CoefficientDesResidusDeCulture(Base):
@@ -29,15 +29,9 @@ class CoefficientDesResidusDeCulture(Base):
     ratio_partie_racinaire = Column(Float)
     ratio_partie_extra_racinaire = Column(Float)
     taux_carbone_chaque_partie = Column(Float)
-    coefficient_humification_residus_culture = Column(Float)
     est_culture_fourragere = Column(Boolean)
-    hproduit = Column(Float)
-    htige = Column(Float)
-    hracine = Column(Float)
-    hextraracinaire = Column(Float)
     proportion_des_tiges_exportees = Column(Float)
     taux_matiere_seche = Column(Float)
-    indice_de_recolte = Column(Float)
     biomasse_aerienne_sur_racinaire = Column(Float)
 
 
@@ -69,14 +63,8 @@ class CoefficientDesCulturesSecondaires(Base):
     ratio_partie_racinaire = Column(Float)
     ratio_partie_extra_racinaire = Column(Float)
     taux_carbone_chaque_partie = Column(Float)
-    coefficient_humification_residus_culture = Column(Float)
-    hproduit = Column(Float)
-    htige = Column(Float)
-    hracine = Column(Float)
-    hextraracinaire = Column(Float)
     proportion_des_tiges_exportees = Column(Float)
     taux_matiere_seche = Column(Float)
-    indice_de_recolte = Column(Float)
     biomasse_aerienne_sur_racinaire = Column(Float)
 
 
