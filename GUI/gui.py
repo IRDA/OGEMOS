@@ -3010,6 +3010,23 @@ def run_gui(frame):
 
     def creation_du_rapport(bilan_response):
         bilan_workbook = Workbook()
+        def sauvegarder_rapport_des_resultats():
+            root.withdraw()
+            filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer", filetypes=(("xlsx files", "*.xlsx"), ("all files","*.*")))
+            if filename == "":
+                root.deiconify()
+                return (1, "")
+            if ".xlsx" not in filename:
+                filename = filename + ".xlsx"
+            try:
+                bilan_workbook.save(filename)
+                root.deiconify()
+                message = (2, "La sauvegarde a été un succès!")
+                return message
+            except PermissionError:
+                message = (3, "La sauvegarde a échoué car le fichier était ouvert par une autre application!")
+                root.deiconify()
+                return message
         description_champs_worksheet = bilan_workbook.active
         description_champs_worksheet.title = "Zone"
         index_column_cell = 1
@@ -3428,7 +3445,13 @@ def run_gui(frame):
                     index_row_cell += 1
                     index_zone += 1
             index_simulation += 1
-        bilan_workbook.save("C:\\Users\\Samuel\\Documents\\Stage IRDA\\Test sauvegarde\\test.xlsx")
+        sauvegarde_succes = sauvegarder_rapport_des_resultats()
+        if sauvegarde_succes[0] == 2:
+            messagebox.showinfo("Résultat sauvegarde", sauvegarde_succes[1])
+        elif sauvegarde_succes[0] == 1:
+            pass
+        else:
+            messagebox.showinfo("Résultat sauvegarde", sauvegarde_succes[1])
 
     menu_initial_ogemos(frame)
 

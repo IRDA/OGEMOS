@@ -87,9 +87,9 @@ class CulturePrincipale:
             quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_extra_racinaire / coefficient_de_calcul.ratio_partie_recolte)
             if self.__est_derniere_annee_rotation_plante_fourragere:
-                return quantite_carbone_partie_recolte + quantite_carbone_partie_racinaire + quantite_carbone_partie_extra_racinaire
+                return proportion_tige_laissee_au_champs  #quantite_carbone_partie_recolte + quantite_carbone_partie_racinaire + quantite_carbone_partie_extra_racinaire
             else:
-                return quantite_carbone_partie_recolte + quantite_carbone_partie_extra_racinaire
+                return proportion_tige_laissee_au_champs  #quantite_carbone_partie_recolte + quantite_carbone_partie_extra_racinaire
 
     def get_coefficient_calcul(self):
         return get_coefficients_des_residus_de_culture(self.__type_de_culture_principale)
@@ -149,10 +149,11 @@ class Amendement:
         self.__apport = apport
 
     def calculer_apport_en_carbone(self):
+        ha_to_m2 = 1/10000
         if self.__type_amendement is None:
             return 0
         coefficient_de_calcul = get_coefficient_des_amendements(self.__type_amendement)
-        quantite_carbone_amendement = self.__apport * coefficient_de_calcul.nitrogen_total * coefficient_de_calcul.carbon_nitrogen
+        quantite_carbone_amendement = self.__apport * coefficient_de_calcul.nitrogen_total * coefficient_de_calcul.carbon_nitrogen * ha_to_m2
         return quantite_carbone_amendement
 
     def generer_bilan_amendement(self):
