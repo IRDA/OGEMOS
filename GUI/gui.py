@@ -48,9 +48,6 @@ nombre_simulations = 0
 global duree_simulation
 duree_simulation = []
 
-global annees_historiques
-annees_historiques = None
-
 global simulations_chargees
 simulations_chargees = False
 
@@ -366,7 +363,7 @@ def run_gui(frame):
                     widget.destroy()
 
                 if sauvegarde_reussi:
-                    question_ajout_regie_historique(zone_de_gestion_mainframe)
+                    show_creation_des_regies(zone_de_gestion_mainframe)
                 else:
                     show_creation_zone_de_gestion(zone_de_gestion_mainframe, fill_fields=True)
             else:
@@ -400,9 +397,9 @@ def run_gui(frame):
                 groupe_textural_label = ttk.Label(zone_de_gestion_frame, text="Groupe textural: ")
                 global groupes_texturaux_supportees
                 groupe_textural_combobox = ttk.Combobox(zone_de_gestion_frame, values=groupes_texturaux_supportees,
-                                                         postcommand=lambda: filter_combobox_values(
-                                                             groupe_textural_combobox,
-                                                             groupes_texturaux_supportees))
+                                                        postcommand=lambda: filter_combobox_values(
+                                                            groupe_textural_combobox,
+                                                            groupes_texturaux_supportees))
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                 global classes_de_drainage_supportees
                 classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees,
@@ -462,7 +459,7 @@ def run_gui(frame):
                                                      command=lambda: get_information_zone_de_gestion(scrollable_frame))
         creation_zone_de_gestion_bouton.pack()
 
-    def show_creation_des_regies(parent_frame_tabs, show_regie_historique, simulations=None):
+    def show_creation_des_regies(parent_frame_tabs, simulations=None):
         def add_new_simulation_tab(event):
             clicked_tab = simulation_notebook.tk.call(simulation_notebook._w, "identify", "tab", event.x, event.y)
             if clicked_tab == simulation_notebook.index("end") - 1:
@@ -488,12 +485,8 @@ def run_gui(frame):
                         numero_simulation_copie = numero_simulation_copie_entry.get()
                         if numero_simulation_copie == "":
                             numero_simulation_copie = None
-                        global annees_historiques
                         global nombre_simulations
                         annee_projection_initiale_valide = True
-                        if annees_historiques is not None:
-                            if int(annees_historiques["annee_historique_finale"]) + 1 != int(annee_projection_initiale):
-                                annee_projection_initiale_valide = False
                         if annee_projection_initiale.isdigit() and duree_projection.isdigit() \
                                 and int(duree_projection) > 0 \
                                 and annee_projection_initiale_valide and \
@@ -532,7 +525,7 @@ def run_gui(frame):
                             message = ""
                             if not annee_projection_initiale.isdigit() or not annee_projection_initiale_valide:
                                 entree_invalide_liste.append(
-                                    "L'entrée \"Année de projection initiale\" est invalide. Si il y a une année historique finale, elle doit être supérieur d'une année à celle-ci et être un nombre naturel plus grand que 0.")
+                                    "L'entrée \"Année de projection initiale\" est invalide.")
                             if not duree_projection.isdigit() or int(duree_projection) <= 0:
                                 entree_invalide_liste.append(
                                     "L'entrée \"Durée de la projection\" est invalide. Elle doit être un nombre naturel plus grand que 0.")
@@ -829,10 +822,10 @@ def run_gui(frame):
                             groupe_textural_label = ttk.Label(zone_de_gestion_frame, text="Groupe textural: ")
                             global groupes_texturaux_supportees
                             groupe_textural_combobox = ttk.Combobox(zone_de_gestion_frame,
-                                                                     values=groupes_texturaux_supportees,
-                                                                     postcommand=lambda: filter_combobox_values(
-                                                                         groupe_textural_combobox,
-                                                                         groupes_texturaux_supportees))
+                                                                    values=groupes_texturaux_supportees,
+                                                                    postcommand=lambda: filter_combobox_values(
+                                                                        groupe_textural_combobox,
+                                                                        groupes_texturaux_supportees))
                             classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                             global classes_de_drainage_supportees
                             classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame,
@@ -1013,10 +1006,7 @@ def run_gui(frame):
                                                                             text="Zone gestion " + str(
                                                                                 index_zone + 1))
                             rechauffement_zone_label_frame.pack()
-                            if show_regie_historique:
-                                add_regies_historiques(rechauffement_zone_label_frame)
-                            else:
-                                ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame)
+                            ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame)
                             index_zone += 1
                     else:
                         information_champs[nombre_de_champs - 1]["information_zone_de_gestion"] = []
@@ -1157,8 +1147,8 @@ def run_gui(frame):
                 groupe_textural_label = ttk.Label(zone_de_gestion_frame, text="Groupe textural: ")
                 global groupes_texturaux_supportees
                 groupe_textural_combobox = ttk.Combobox(zone_de_gestion_frame, values=groupes_texturaux_supportees,
-                                                         postcommand=lambda: filter_combobox_values(
-                                                             groupe_textural_combobox, groupes_texturaux_supportees))
+                                                        postcommand=lambda: filter_combobox_values(
+                                                            groupe_textural_combobox, groupes_texturaux_supportees))
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                 global classes_de_drainage_supportees
                 classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame, values=classes_de_drainage_supportees,
@@ -1305,10 +1295,7 @@ def run_gui(frame):
                                                                                    text="Zone gestion " + str(len(
                                                                                        rechauffement_champs_label_frame.winfo_children()) + 1))
                         rechauffement_champs_new_zone_label_frame.pack()
-                        if show_regie_historique:
-                            add_regies_historiques(rechauffement_champs_new_zone_label_frame)
-                        else:
-                            ajouter_une_annee_a_la_rotation(rechauffement_champs_new_zone_label_frame)
+                        ajouter_une_annee_a_la_rotation(rechauffement_champs_new_zone_label_frame)
                         new_zone_window.destroy()
 
                         global furthest_left_tab_index_zone
@@ -1449,177 +1436,48 @@ def run_gui(frame):
                     len(scrollable_frame_projection.winfo_children()) - 1].grid_slaves(row=0, column=1)[0].configure(
                     state="disabled")
 
-        def set_up_regies_rechauffement(rechauffement_frame, show_regie_historique, simulations):
+        def set_up_regies_rechauffement(rechauffement_frame, simulations):
             global information_champs
-            if show_regie_historique:
-                canvas_historique = tk.Canvas(rechauffement_frame)
-                scrollbar_historique = ttk.Scrollbar(rechauffement_frame, orient="vertical",
-                                                     command=canvas_historique.yview)
-                scrollable_frame_historique = ttk.Frame(canvas_historique)
-                scrollable_frame_historique.bind("<Configure>", lambda e: canvas_historique.configure(
-                    scrollregion=canvas_historique.bbox("all")))
+            canvas_rechauffement_via_rotation = tk.Canvas(rechauffement_frame)
+            scrollbar_rechauffement_via_rotation = ttk.Scrollbar(rechauffement_frame, orient="vertical",
+                                                                 command=canvas_rechauffement_via_rotation.yview)
+            scrollable_frame_rechauffement_via_rotation = ttk.Frame(canvas_rechauffement_via_rotation)
+            scrollable_frame_rechauffement_via_rotation.bind("<Configure>",
+                                                             lambda e: canvas_rechauffement_via_rotation.configure(
+                                                                 scrollregion=canvas_rechauffement_via_rotation.bbox(
+                                                                     "all")))
+            canvas_rechauffement_via_rotation.create_window((0, 0),
+                                                            window=scrollable_frame_rechauffement_via_rotation,
+                                                            anchor="nw")
+            canvas_rechauffement_via_rotation.configure(yscrollcommand=scrollbar_rechauffement_via_rotation.set)
+            canvas_rechauffement_via_rotation.pack(side="left", fill="both", expand=True)
+            scrollbar_rechauffement_via_rotation.pack(side="right", fill="y")
+            if simulations is not None:
+                entreprise = simulations[0]["entreprise_agricole"]
+                champs_liste = entreprise["champs"]
+            index_champs = 0
+            for champs in information_champs:
+                rechauffement_champs_label_frame = ttk.LabelFrame(scrollable_frame_rechauffement_via_rotation,
+                                                                  text=champs["nom_du_champs"])
+                rechauffement_champs_label_frame.pack()
                 if simulations is not None:
-                    entreprise = simulations[0]["entreprise_agricole"]
-                    champs_liste = entreprise["champs"]
-                index_champs = 0
-                for champs in information_champs:
-                    rechauffement_champs_label_frame = ttk.LabelFrame(scrollable_frame_historique,
-                                                                      text=champs["nom_du_champs"])
-                    rechauffement_champs_label_frame.pack()
+                    champs_courant = champs_liste[index_champs]
+                    zone_liste = champs_courant["zones_de_gestion"]
+                index = 0
+                while index < int(champs["nombre_de_zone_de_gestion"]):
+                    rechauffement_zone_label_frame = ttk.LabelFrame(rechauffement_champs_label_frame,
+                                                                    text="Zone gestion " + str(index + 1))
                     if simulations is not None:
-                        champs_courant = champs_liste[index_champs]
-                        zone_liste = champs_courant["zones_de_gestion"]
-                    index = 0
-                    while index < int(champs["nombre_de_zone_de_gestion"]):
-                        rechauffement_zone_label_frame = ttk.LabelFrame(rechauffement_champs_label_frame,
-                                                                        text="Zone gestion " + str(index + 1))
-                        if simulations is not None:
-                            regies_historiques = zone_liste[index]["regies_sol_et_culture_historique"]
-                        rechauffement_zone_label_frame.pack()
-                        if simulations is not None:
-                            add_regies_historiques(rechauffement_zone_label_frame,
-                                                   regies_historiques=regies_historiques)
-                        else:
-                            add_regies_historiques(rechauffement_zone_label_frame)
-                        index += 1
-                    index_champs += 1
-
-                canvas_historique.create_window((0, 0), window=scrollable_frame_historique, anchor="nw")
-                canvas_historique.configure(yscrollcommand=scrollbar_historique.set)
-                canvas_historique.pack(side="left", fill="both", expand=True)
-                scrollbar_historique.pack(side="right", fill="y")
-            else:
-                canvas_rechauffement_via_rotation = tk.Canvas(rechauffement_frame)
-                scrollbar_rechauffement_via_rotation = ttk.Scrollbar(rechauffement_frame, orient="vertical",
-                                                                     command=canvas_rechauffement_via_rotation.yview)
-                scrollable_frame_rechauffement_via_rotation = ttk.Frame(canvas_rechauffement_via_rotation)
-                scrollable_frame_rechauffement_via_rotation.bind("<Configure>",
-                                                                 lambda e: canvas_rechauffement_via_rotation.configure(
-                                                                     scrollregion=canvas_rechauffement_via_rotation.bbox(
-                                                                         "all")))
-                canvas_rechauffement_via_rotation.create_window((0, 0),
-                                                                window=scrollable_frame_rechauffement_via_rotation,
-                                                                anchor="nw")
-                canvas_rechauffement_via_rotation.configure(yscrollcommand=scrollbar_rechauffement_via_rotation.set)
-                canvas_rechauffement_via_rotation.pack(side="left", fill="both", expand=True)
-                scrollbar_rechauffement_via_rotation.pack(side="right", fill="y")
-                if simulations is not None:
-                    entreprise = simulations[0]["entreprise_agricole"]
-                    champs_liste = entreprise["champs"]
-                index_champs = 0
-                for champs in information_champs:
-                    rechauffement_champs_label_frame = ttk.LabelFrame(scrollable_frame_rechauffement_via_rotation,
-                                                                      text=champs["nom_du_champs"])
-                    rechauffement_champs_label_frame.pack()
+                        zone_rechauffement = zone_liste[index]
+                    rechauffement_zone_label_frame.pack()
                     if simulations is not None:
-                        champs_courant = champs_liste[index_champs]
-                        zone_liste = champs_courant["zones_de_gestion"]
-                    index = 0
-                    while index < int(champs["nombre_de_zone_de_gestion"]):
-                        rechauffement_zone_label_frame = ttk.LabelFrame(rechauffement_champs_label_frame,
-                                                                        text="Zone gestion " + str(index + 1))
-                        if simulations is not None:
-                            zone_rechauffement = zone_liste[index]
-                        rechauffement_zone_label_frame.pack()
-                        if simulations is not None:
-                            ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame,
-                                                            zone_rechauffement=zone_rechauffement)
-                        else:
-                            ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame)
-                        index += 1
-                    index_champs += 1
-                rechauffement_frame.grid(row=1, column=0, columnspan=2, pady=3)
-
-        def add_regies_historiques(scrollable_frame, regies_historiques=None):
-            global annees_historiques
-            annee_historique_initiale = int(annees_historiques["annee_historique_initiale"])
-            annee_historique_finale = int(annees_historiques["annee_historique_finale"])
-            annee_courante = annee_historique_initiale
-            index = 0
-            while annee_courante <= annee_historique_finale:
-                if regies_historiques is not None:
-                    regie_historique = regies_historiques[index]
-                annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(annee_courante))
-                culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
-                global cultures_principales_supportees
-                culture_principale_combobox = ttk.Combobox(annee_courante_frame, values=cultures_principales_supportees,
-                                                           postcommand=lambda: filter_combobox_values(
-                                                               culture_principale_combobox,
-                                                               cultures_principales_supportees))
-                rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
-                rendement_entry = ttk.Entry(annee_courante_frame)
-                proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté [0-1]: ")
-                proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
-                production_non_recolte_label = ttk.Label(annee_courante_frame, text="Production non récoltée: ")
-                production_non_recolte_combobox = ttk.Combobox(annee_courante_frame, values=["Oui", "Non"],
-                                                               postcommand=lambda: filter_combobox_values(
-                                                                   production_non_recolte_combobox, ["Oui", "Non"]))
-                taux_matiere_seche_label = ttk.Label(annee_courante_frame, text="Taux de matière sèche [0-1]: ")
-                taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
-                travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
-                global types_travail_du_sol_supportes
-                travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes,
-                                                       postcommand=lambda: filter_combobox_values(
-                                                           travail_du_sol_combobox, types_travail_du_sol_supportes))
-                profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maximale (cm): ")
-                profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
-                culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
-                global cultures_secondaires_supportees
-                culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees,
-                                                           postcommand=lambda: filter_combobox_values(
-                                                               culture_secondaire_combobox,
-                                                               cultures_secondaires_supportees))
-                rendement_culture_secondaire_label = ttk.Label(annee_courante_frame,
-                                                               text="Rendement culture secondaire (t/ha): ")
-                rendement_culture_secondaire_entry = ttk.Entry(annee_courante_frame)
-                amendement_frame = ttk.LabelFrame(annee_courante_frame, text="Liste des amendements")
-                if regies_historiques is not None:
-                    culture_principale_combobox.set(regie_historique["culture_principale"]["culture_principale"])
-                    if regie_historique["culture_principale"]["rendement"] is not None:
-                        rendement_entry.insert(0, regie_historique["culture_principale"]["rendement"])
-                    if regie_historique["culture_principale"]["proportion_tige_exporte"] is not None:
-                        proportion_tige_exporte_entry.insert(0, regie_historique["culture_principale"][
-                            "proportion_tige_exporte"])
-                    if regie_historique["culture_principale"]["produit_non_recolte"]:
-                        production_non_recolte_combobox.set("Oui")
+                        ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame,
+                                                        zone_rechauffement=zone_rechauffement)
                     else:
-                        production_non_recolte_combobox.set("Non")
-                    if taux_matiere_seche_entry is not None:
-                        taux_matiere_seche_entry.insert(0, regie_historique["culture_principale"]["taux_matiere_seche"])
-                    travail_du_sol_combobox.set(regie_historique["travail_du_sol"]["travail_du_sol"])
-                    if profondeur_maximale_entry is not None:
-                        profondeur_maximale_entry.insert(0, regie_historique["travail_du_sol"]["profondeur_du_travail"])
-                    culture_secondaire_combobox.set(regie_historique["culture_secondaire"]["culture_secondaire"])
-                    if rendement_culture_secondaire_entry is not None:
-                        rendement_culture_secondaire_entry.insert(0,
-                                                                  regie_historique["culture_secondaire"]["rendement"])
-                    ajouter_des_amendements(amendement_frame, regie_historique["amendements"])
-                else:
-                    ajouter_des_amendements(amendement_frame)
-
-                culture_principale_label.grid(row=0, column=0, sticky="w", pady=3)
-                culture_principale_combobox.grid(row=0, column=1, sticky="w", pady=3)
-                rendement_label.grid(row=1, column=0, sticky="w", pady=3)
-                rendement_entry.grid(row=1, column=1, sticky="w", pady=3)
-                proportion_tige_exporte_label.grid(row=2, column=0, sticky="w", pady=3)
-                proportion_tige_exporte_entry.grid(row=2, column=1, sticky="w", pady=3)
-                production_non_recolte_label.grid(row=3, column=0, sticky="w", pady=3)
-                production_non_recolte_combobox.grid(row=3, column=1, sticky="w", pady=3)
-                taux_matiere_seche_label.grid(row=4, column=0, sticky="w", pady=3)
-                taux_matiere_seche_entry.grid(row=4, column=1, sticky="w", pady=3)
-                travail_du_sol_label.grid(row=5, column=0, sticky="w", pady=3)
-                travail_du_sol_combobox.grid(row=5, column=1, sticky="w", pady=3)
-                profondeur_maximale_label.grid(row=6, column=0, sticky="w", pady=3)
-                profondeur_maximale_entry.grid(row=6, column=1, sticky="w", pady=3)
-                culture_secondaire_label.grid(row=7, column=0, sticky="w", pady=3)
-                culture_secondaire_combobox.grid(row=7, column=1, sticky="w", pady=3)
-                rendement_culture_secondaire_label.grid(row=8, column=0, sticky="w", pady=3)
-                rendement_culture_secondaire_entry.grid(row=8, column=1, sticky="w", pady=3)
-                amendement_frame.grid(row=9, column=0, columnspan=2, pady=3)
-
-                annee_courante += 1
-                index += 1
-                annee_courante_frame.pack()
+                        ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame)
+                    index += 1
+                index_champs += 1
+            rechauffement_frame.grid(row=1, column=0, columnspan=2, pady=3)
 
         def ajouter_des_amendements(amendement_frame, amendements=None):
             global amendements_supportees
@@ -1817,10 +1675,7 @@ def run_gui(frame):
                     simulations.append(simulation)
                 index_simulation += 1
             if len(entree_invalide_liste) == 0:
-                global annees_historiques
-                return {"simulations": simulations,
-                        "presence_regie_historique": show_regie_historique,
-                        "annees_historiques": annees_historiques}
+                return {"simulations": simulations}
             else:
                 return entree_invalide_liste
 
@@ -1891,7 +1746,7 @@ def run_gui(frame):
                     "annee_initiale_projection": int(duree_simulation[index_simulation]["annee_projection_initiale"]),
                     "annee_finale_projection": int(
                         duree_simulation[index_simulation]["annee_projection_initiale"]) + int(
-                        duree_simulation[index_simulation]["duree_projection"]),
+                        duree_simulation[index_simulation]["duree_projection"]) - 1,
                     "entreprise_agricole": entreprise_agricole}
                 return simulation, []
             else:
@@ -2267,133 +2122,135 @@ def run_gui(frame):
                     regies_de_rechauffement = zone_label_frame.winfo_children()
                     index_regie = 0
                     zone_regies = []
-                    if show_regie_historique:
-                        number_of_label_frames = len(regies_de_rechauffement)
-                    else:
-                        number_of_label_frames = len(regies_de_rechauffement) - 1
+                    number_of_label_frames = len(regies_de_rechauffement) - 1
                     while index_regie < number_of_label_frames:
                         regie = regies_de_rechauffement[index_regie]
                         culture_principale = regie.grid_slaves(row=0, column=1)[0].get()
-                        global cultures_principales_supportees
-                        if culture_principale not in cultures_principales_supportees:
-                            entree_invalide_liste.append(
-                                (information_champs[champs_index]["nom_du_champs"],
-                                 "Zone gestion " + str(zone_index + 1),
-                                 "\"Culture principale\" doit être parmis les choix disponibles",
-                                 " section Données réchauffement"))
                         rendement = regie.grid_slaves(row=1, column=1)[0].get()
-                        if not util.is_decimal_number(rendement) and rendement != "":
-                            entree_invalide_liste.append(
-                                (information_champs[champs_index]["nom_du_champs"],
-                                 "Zone gestion " + str(zone_index + 1),
-                                 "\"Rendement\" doit être un réel positif ou la case peut être vide pour aller chercher un rendement par défaut",
-                                 " section Données réchauffement"))
-                        if rendement == "":
-                            rendement = None
-                        if rendement is not None and util.is_decimal_number(rendement):
-                            rendement = float(rendement)
                         proportion_tige_exporte = regie.grid_slaves(row=2, column=1)[0].get()
-                        if (not util.is_decimal_number(
-                                proportion_tige_exporte) and proportion_tige_exporte != "") or (
-                                util.is_decimal_number(proportion_tige_exporte) and (
-                                float(proportion_tige_exporte) < 0 or float(proportion_tige_exporte) > 1)):
-                            entree_invalide_liste.append(
-                                (information_champs[champs_index]["nom_du_champs"],
-                                 "Zone gestion " + str(zone_index + 1),
-                                 "\"Proportion tige exportée\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
-                                 "section Données réchauffement"))
-                        if proportion_tige_exporte == "":
-                            proportion_tige_exporte = None
-                        if proportion_tige_exporte is not None and util.is_decimal_number(proportion_tige_exporte):
-                            proportion_tige_exporte = float(proportion_tige_exporte)
                         production_non_recolte = regie.grid_slaves(row=3, column=1)[0].get()
-                        if production_non_recolte not in ["Oui", "Non"]:
-                            entree_invalide_liste.append(
-                                (information_champs[champs_index]["nom_du_champs"],
-                                 "Zone gestion " + str(zone_index + 1),
-                                 "\"Production non récolté\" doit être parmis les choix disponibles",
-                                 "sectionDonnées réchauffement"))
-                        else:
-                            if production_non_recolte == "Oui":
-                                production_non_recolte = True
-                            else:
-                                production_non_recolte = False
                         taux_matiere_seche = regie.grid_slaves(row=4, column=1)[0].get()
-                        if (not util.is_decimal_number(
-                                taux_matiere_seche) and taux_matiere_seche != "") or (
-                                util.is_decimal_number(taux_matiere_seche) and (
-                                float(taux_matiere_seche) < 0 or float(taux_matiere_seche) > 1)):
-                            entree_invalide_liste.append(
-                                (information_champs[champs_index]["nom_du_champs"],
-                                 "Zone gestion " + str(zone_index + 1),
-                                 "\"Taux matière sèche\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
-                                 "section Données réchauffement"))
-                        if taux_matiere_seche == "":
-                            taux_matiere_seche = None
-                        if taux_matiere_seche is not None and util.is_decimal_number(taux_matiere_seche):
-                            taux_matiere_seche = float(taux_matiere_seche)
-                        culture_principale_dict = {"culture_principale": culture_principale,
-                                                   "rendement": rendement,
-                                                   "proportion_tige_exporte": proportion_tige_exporte,
-                                                   "produit_non_recolte": production_non_recolte,
-                                                   "taux_matiere_seche": taux_matiere_seche}
                         travail_du_sol = regie.grid_slaves(row=5, column=1)[0].get()
-                        global types_travail_du_sol_supportes
-                        if travail_du_sol not in types_travail_du_sol_supportes:
-                            entree_invalide_liste.append(
-                                (information_champs[champs_index]["nom_du_champs"],
-                                 "Zone gestion " + str(zone_index + 1),
-                                 "\"Travail du sol\" doit être parmis les choix disponibles",
-                                 " section Données réchauffement"))
                         profondeur = regie.grid_slaves(row=6, column=1)[0].get()
-                        if not util.is_decimal_number(profondeur) or float(
-                                profondeur) < 0:
-                            entree_invalide_liste.append(
-                                (information_champs[champs_index]["nom_du_champs"],
-                                 "Zone gestion " + str(zone_index + 1),
-                                 "\"Profondeur\" doit être un réel positif",
-                                 "section Données réchauffement"))
-                        if profondeur == "":
-                            profondeur = None
-                        if profondeur is not None and util.is_decimal_number(profondeur):
-                            profondeur = float(profondeur)
-                        travail_du_sol_dict = {"travail_du_sol": travail_du_sol,
-                                               "profondeur_du_travail": profondeur}
                         culture_secondaire = regie.grid_slaves(row=7, column=1)[0].get()
-                        global cultures_secondaires_supportees
-                        if culture_secondaire == "":
-                            culture_secondaire = None
-                        if culture_secondaire is not None and culture_secondaire not in cultures_secondaires_supportees:
-                            entree_invalide_liste.append(
-                                (information_champs[champs_index]["nom_du_champs"],
-                                 "Zone gestion " + str(zone_index + 1),
-                                 "\"Culture secondaire\" doit être parmis les choix disponibles ou laissé vide s'il n'y a pas de culture secondaire",
-                                 " section Données réchauffement"))
                         rendement_culture_secondaire = regie.grid_slaves(row=8, column=1)[0].get()
-                        if rendement_culture_secondaire == "":
-                            rendement_culture_secondaire = None
-                        if rendement_culture_secondaire is not None and not util.is_decimal_number(
-                                rendement_culture_secondaire):
-                            entree_invalide_liste.append(
-                                (information_champs[champs_index]["nom_du_champs"],
-                                 "Zone gestion " + str(zone_index + 1),
-                                 "\"Rendement culture secondaire\" doit être un réel positif ou laissé vide s'il n'y a pas de culture secondaire",
-                                 "section Données réchauffement"))
-                        elif (culture_secondaire is None and rendement_culture_secondaire is not None) or (
-                                culture_secondaire is not None and rendement_culture_secondaire is None):
-                            entree_invalide_liste.append(
-                                (information_champs[champs_index]["nom_du_champs"],
-                                 "Zone gestion " + str(zone_index + 1),
-                                 "\"Rendement culture secondaire\" et \"Culture secondaire\" doivent être tout deux laissé vide s'il n'y a pas de culture secondaire",
-                                 "section Données réchauffement"))
+                        regie_vide = {"partie_culture": False, "partie_amendement": False}
+                        if culture_principale == "" and rendement == "" and proportion_tige_exporte == "" and production_non_recolte == "" and taux_matiere_seche == "" and travail_du_sol == "" and profondeur == "" and culture_secondaire == "" and rendement_culture_secondaire == "":
+                            regie_vide["partie_culture"] = True
                         else:
-                            if rendement_culture_secondaire is not None:
-                                rendement_culture_secondaire = float(rendement_culture_secondaire)
-                        culture_secondaire_dict = {"culture_secondaire": culture_secondaire,
-                                                   "rendement": rendement_culture_secondaire}
+                            global cultures_principales_supportees
+                            if culture_principale not in cultures_principales_supportees:
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone gestion " + str(zone_index + 1),
+                                     "\"Culture principale\" doit être parmis les choix disponibles",
+                                     " section Données réchauffement"))
+                            if not util.is_decimal_number(rendement) and rendement != "":
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone gestion " + str(zone_index + 1),
+                                     "\"Rendement\" doit être un réel positif ou la case peut être vide pour aller chercher un rendement par défaut",
+                                     " section Données réchauffement"))
+                            if rendement == "":
+                                rendement = None
+                            if rendement is not None and util.is_decimal_number(rendement):
+                                rendement = float(rendement)
+                            if (not util.is_decimal_number(
+                                    proportion_tige_exporte) and proportion_tige_exporte != "") or (
+                                    util.is_decimal_number(proportion_tige_exporte) and (
+                                    float(proportion_tige_exporte) < 0 or float(proportion_tige_exporte) > 1)):
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone gestion " + str(zone_index + 1),
+                                     "\"Proportion tige exportée\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
+                                     "section Données réchauffement"))
+                            if proportion_tige_exporte == "":
+                                proportion_tige_exporte = None
+                            if proportion_tige_exporte is not None and util.is_decimal_number(proportion_tige_exporte):
+                                proportion_tige_exporte = float(proportion_tige_exporte)
+                            if production_non_recolte not in ["Oui", "Non"]:
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone gestion " + str(zone_index + 1),
+                                     "\"Production non récolté\" doit être parmis les choix disponibles",
+                                     "sectionDonnées réchauffement"))
+                            else:
+                                if production_non_recolte == "Oui":
+                                    production_non_recolte = True
+                                else:
+                                    production_non_recolte = False
+                            if (not util.is_decimal_number(
+                                    taux_matiere_seche) and taux_matiere_seche != "") or (
+                                    util.is_decimal_number(taux_matiere_seche) and (
+                                    float(taux_matiere_seche) < 0 or float(taux_matiere_seche) > 1)):
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone gestion " + str(zone_index + 1),
+                                     "\"Taux matière sèche\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
+                                     "section Données réchauffement"))
+                            if taux_matiere_seche == "":
+                                taux_matiere_seche = None
+                            if taux_matiere_seche is not None and util.is_decimal_number(taux_matiere_seche):
+                                taux_matiere_seche = float(taux_matiere_seche)
+                            culture_principale_dict = {"culture_principale": culture_principale,
+                                                       "rendement": rendement,
+                                                       "proportion_tige_exporte": proportion_tige_exporte,
+                                                       "produit_non_recolte": production_non_recolte,
+                                                       "taux_matiere_seche": taux_matiere_seche}
+                            global types_travail_du_sol_supportes
+                            if travail_du_sol not in types_travail_du_sol_supportes:
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone gestion " + str(zone_index + 1),
+                                     "\"Travail du sol\" doit être parmis les choix disponibles",
+                                     " section Données réchauffement"))
+                            if not util.is_decimal_number(profondeur) or float(
+                                    profondeur) < 0:
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone gestion " + str(zone_index + 1),
+                                     "\"Profondeur\" doit être un réel positif",
+                                     "section Données réchauffement"))
+                            if profondeur == "":
+                                profondeur = None
+                            if profondeur is not None and util.is_decimal_number(profondeur):
+                                profondeur = float(profondeur)
+                            travail_du_sol_dict = {"travail_du_sol": travail_du_sol,
+                                                   "profondeur_du_travail": profondeur}
+                            global cultures_secondaires_supportees
+                            if culture_secondaire == "":
+                                culture_secondaire = None
+                            if culture_secondaire is not None and culture_secondaire not in cultures_secondaires_supportees:
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone gestion " + str(zone_index + 1),
+                                     "\"Culture secondaire\" doit être parmis les choix disponibles ou laissé vide s'il n'y a pas de culture secondaire",
+                                     " section Données réchauffement"))
+                            if rendement_culture_secondaire == "":
+                                rendement_culture_secondaire = None
+                            if rendement_culture_secondaire is not None and not util.is_decimal_number(
+                                    rendement_culture_secondaire):
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone gestion " + str(zone_index + 1),
+                                     "\"Rendement culture secondaire\" doit être un réel positif ou laissé vide s'il n'y a pas de culture secondaire",
+                                     "section Données réchauffement"))
+                            elif (culture_secondaire is None and rendement_culture_secondaire is not None) or (
+                                    culture_secondaire is not None and rendement_culture_secondaire is None):
+                                entree_invalide_liste.append(
+                                    (information_champs[champs_index]["nom_du_champs"],
+                                     "Zone gestion " + str(zone_index + 1),
+                                     "\"Rendement culture secondaire\" et \"Culture secondaire\" doivent être tout deux laissé vide s'il n'y a pas de culture secondaire",
+                                     "section Données réchauffement"))
+                            else:
+                                if rendement_culture_secondaire is not None:
+                                    rendement_culture_secondaire = float(rendement_culture_secondaire)
+                            culture_secondaire_dict = {"culture_secondaire": culture_secondaire,
+                                                       "rendement": rendement_culture_secondaire}
                         index_composante_amendement = 0
                         composante_amendement_liste = regie.grid_slaves(row=9, column=0)[0]
                         grid_size = composante_amendement_liste.grid_size()
+                        amendement_non_vide_compteur = 0
                         amendements = []
                         while index_composante_amendement < grid_size[1] - 1:
                             amendement = \
@@ -2434,14 +2291,24 @@ def run_gui(frame):
                             else:
                                 if apport is not None:
                                     apport = float(apport)
+                            if amendement is not None or apport is not None:
+                                amendement_non_vide_compteur += 1
+
                             amendements.append({"amendement": amendement,
                                                 "apport": apport})
                             index_composante_amendement += 2
-                        regie_dict = {"culture_principale": culture_principale_dict,
-                                      "culture_secondaire": culture_secondaire_dict,
-                                      "amendements": amendements,
-                                      "travail_du_sol": travail_du_sol_dict}
-                        zone_regies.append(regie_dict)
+                        if amendement_non_vide_compteur > 0:
+                            regie_vide["partie_amendement"] = False
+                        else:
+                            regie_vide["partie_amendement"] = True
+                        if regie_vide["partie_culture"] and regie_vide["partie_amendement"]:
+                            pass
+                        else:
+                            regie_dict = {"culture_principale": culture_principale_dict,
+                                          "culture_secondaire": culture_secondaire_dict,
+                                          "amendements": amendements,
+                                          "travail_du_sol": travail_du_sol_dict}
+                            zone_regies.append(regie_dict)
                         index_regie += 1
                     champs_regies_liste.append(zone_regies)
                     zone_index += 1
@@ -2501,9 +2368,9 @@ def run_gui(frame):
                     groupe_textural_label = ttk.Label(zone_label_frame, text="Groupe textural: ")
                     global groupes_texturaux_supportees
                     groupe_textural_combobox = ttk.Combobox(zone_label_frame, values=groupes_texturaux_supportees,
-                                                             postcommand=lambda: filter_combobox_values(
-                                                                 groupe_textural_combobox,
-                                                                 groupes_texturaux_supportees))
+                                                            postcommand=lambda: filter_combobox_values(
+                                                                groupe_textural_combobox,
+                                                                groupes_texturaux_supportees))
                     groupe_textural_combobox.set(information_zone_de_gestion["groupe_textural"])
                     classe_de_drainage_label = ttk.Label(zone_label_frame, text="Classe de drainage: ")
                     global classes_de_drainage_supportees
@@ -2753,7 +2620,7 @@ def run_gui(frame):
 
         simulation_notebook.grid(row=0, column=1, sticky="nw")
 
-        set_up_regies_rechauffement(donnees_de_rechauffement_label_frame, show_regie_historique, simulations)
+        set_up_regies_rechauffement(donnees_de_rechauffement_label_frame, simulations)
         donnees_de_rechauffement_label_frame.grid(row=0, column=0, pady=3)
         sauvegarder_plan_de_gestion_button = ttk.Button(rechauffement_frame, text="Sauvegarder le plan de gestion",
                                                         command=lambda: sauvegarder_plan_de_gestion_de_carbone(
@@ -2773,50 +2640,6 @@ def run_gui(frame):
                 index_simulation += 1
             global simulations_chargees
             simulations_chargees = False
-
-    def question_ajout_regie_historique(question_mainframe, simulations=None):
-        question_frame = ttk.Frame(question_mainframe)
-        question_label = ttk.Label(question_frame,
-                                   text="Voulez-vous utiliser une régie historique pour réchauffer le modèle?")
-        oui_button = ttk.Button(question_frame, text="Oui",
-                                command=lambda: set_up_annees_historiques(question_mainframe, simulations=simulations))
-        non_button = ttk.Button(question_frame, text="Non",
-                                command=lambda: show_creation_des_regies(question_mainframe,
-                                                                         show_regie_historique=False,
-                                                                         simulations=simulations))
-        question_label.grid(row=0, column=0, columnspan=2, padx=5, pady=3)
-        oui_button.grid(row=1, column=0, padx=5, pady=3)
-        non_button.grid(row=1, column=1, padx=5, pady=3)
-        question_frame.pack()
-
-    def set_up_annees_historiques(annee_historique_mainframe, simulations=None):
-        def get_annees_historiques():
-            global annees_historiques
-            annee_historique_initiale = annee_historique_initiale_entry.get()
-            annee_historique_finale = annee_historique_finale_entry.get()
-            annees_historiques = {"annee_historique_initiale": annee_historique_initiale,
-                                  "annee_historique_finale": annee_historique_finale}
-            show_creation_des_regies(annee_historique_mainframe, show_regie_historique=True, simulations=simulations)
-
-        for widget in annee_historique_mainframe.winfo_children():
-            widget.destroy()
-        annee_historique_frame = ttk.Frame(annee_historique_mainframe)
-        annee_historique_initiale_label = ttk.Label(annee_historique_frame,
-                                                    text="Année historique initiale: ")
-        annee_historique_initiale_entry = ttk.Entry(annee_historique_frame)
-        annee_historique_finale_label = ttk.Label(annee_historique_frame, text="Année historique finale: ")
-        annee_historique_finale_entry = ttk.Entry(annee_historique_frame)
-
-        annee_historique_initiale_label.grid(row=0, column=0, sticky="w", pady=3)
-        annee_historique_initiale_entry.grid(row=0, column=1, sticky="w", pady=3)
-        annee_historique_finale_label.grid(row=1, column=0, sticky="w", pady=3)
-        annee_historique_finale_entry.grid(row=1, column=1, sticky="w", pady=3)
-
-        get_annees_historiques_button = ttk.Button(annee_historique_frame, text="Confirmer",
-                                                   command=get_annees_historiques)
-        get_annees_historiques_button.grid(row=2, column=0, columnspan=2, pady=3)
-
-        annee_historique_frame.pack()
 
     def menu_initial_ogemos(menu_frame):
         def creation_nouvelle_entreprise():
@@ -2855,7 +2678,7 @@ def run_gui(frame):
                 menu_initial_ogemos(menu_frame)
 
             if no_error:
-                question_ajout_regie_historique(menu_frame)
+                show_creation_des_regies(menu_frame)
 
         def charger_plan_de_gestion_de_carbone():
             global simulations_chargees
@@ -2883,8 +2706,6 @@ def run_gui(frame):
                 global information_champs
                 global duree_simulation
                 global nombre_simulations
-                global annees_historiques
-                annees_historiques = data["annees_historiques"]
                 information_champs = []
                 duree_simulation = []
                 simulations = data["simulations"]
@@ -2924,8 +2745,7 @@ def run_gui(frame):
                 menu_initial_ogemos(menu_frame)
 
             if no_error:
-                show_creation_des_regies(menu_frame, show_regie_historique=data["presence_regie_historique"],
-                                         simulations=simulations)
+                show_creation_des_regies(menu_frame, simulations=simulations)
 
         bienvenue_label = ttk.Label(menu_frame, text="Bienvenue dans OGEMOS!")
         nouvelle_entreprise_button = ttk.Button(menu_frame, text="Créer une nouvelle entreprise",
@@ -3010,9 +2830,11 @@ def run_gui(frame):
 
     def creation_du_rapport(bilan_response):
         bilan_workbook = Workbook()
+
         def sauvegarder_rapport_des_resultats():
             root.withdraw()
-            filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer", filetypes=(("xlsx files", "*.xlsx"), ("all files","*.*")))
+            filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer",
+                                                    filetypes=(("xlsx files", "*.xlsx"), ("all files", "*.*")))
             if filename == "":
                 root.deiconify()
                 return (1, "")
@@ -3027,6 +2849,7 @@ def run_gui(frame):
                 message = (3, "La sauvegarde a échoué car le fichier était ouvert par une autre application!")
                 root.deiconify()
                 return message
+
         description_champs_worksheet = bilan_workbook.active
         description_champs_worksheet.title = "Zone"
         index_column_cell = 1
@@ -3160,77 +2983,76 @@ def run_gui(frame):
                 for zone in champ["bilans_des_zones"]:
                     index_annee = 0
                     for year in zone["bilan_des_regies_pour_la_duree_de_la_simulation"]:
-                        if index_annee > len(zone["bilan_des_regies_historiques"]):
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=simulation[
-                                                                              "nom_entreprise"]).alignment = alignment
-                            index_column_cell += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=champ[
-                                                                              "nom_champs"]).alignment = alignment
-                            index_column_cell += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=str(index_zone)).alignment = alignment
-                            index_column_cell += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=duree_simulation[index_simulation][
-                                                                              "nom_simulation"]).alignment = alignment
-                            index_column_cell += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=year[
-                                                                              "annee_culture"]).alignment = alignment
-                            index_column_cell += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=year["culture_principale"][
-                                                                              "culture_principale"]).alignment = alignment
-                            index_column_cell += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=year["culture_secondaire"][
-                                                                              "culture_secondaire"]).alignment = alignment
-                            index_column_cell += 1
-                            amendements = ""
-                            index_amendements = 0
-                            for amendement in year["amendements"]["amendements"]:
-                                if index_amendements < len(year["amendements"]["amendements"]) - 1:
-                                    amendements = amendements + amendement["amendement"] + " + "
-                                else:
-                                    amendements = amendements + amendement["amendement"]
-                                index_amendements += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=amendements).alignment = alignment
-                            index_column_cell += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=zone[
-                                                                              "bilan_apports_cultures_principales_racinaires"][
-                                                                              index_annee - len(zone[
-                                                                                                    "bilan_des_regies_historiques"])])
-                            index_column_cell += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=zone[
-                                                                              "bilan_apports_cultures_principales_aeriennes"][
-                                                                              index_annee - len(zone[
-                                                                                                    "bilan_des_regies_historiques"])]).alignment = alignment
-                            index_column_cell += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=zone[
-                                                                              "bilan_apports_cultures_secondaires_racinaires"][
-                                                                              index_annee - len(zone[
-                                                                                                    "bilan_des_regies_historiques"])]).alignment = alignment
-                            index_column_cell += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=zone[
-                                                                              "bilan_apports_cultures_secondaires_aeriennes"][
-                                                                              index_annee - len(zone[
-                                                                                                    "bilan_des_regies_historiques"])]).alignment = alignment
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=simulation[
+                                                                          "nom_entreprise"]).alignment = alignment
+                        index_column_cell += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=champ[
+                                                                          "nom_champs"]).alignment = alignment
+                        index_column_cell += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=str(index_zone)).alignment = alignment
+                        index_column_cell += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=duree_simulation[index_simulation][
+                                                                          "nom_simulation"]).alignment = alignment
+                        index_column_cell += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=year[
+                                                                          "annee_culture"]).alignment = alignment
+                        index_column_cell += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=year["culture_principale"][
+                                                                          "culture_principale"]).alignment = alignment
+                        index_column_cell += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=year["culture_secondaire"][
+                                                                          "culture_secondaire"]).alignment = alignment
+                        index_column_cell += 1
+                        amendements = ""
+                        index_amendements = 0
+                        for amendement in year["amendements"]["amendements"]:
+                            if index_amendements < len(year["amendements"]["amendements"]) - 1:
+                                amendements = amendements + amendement["amendement"] + " + "
+                            else:
+                                amendements = amendements + amendement["amendement"]
+                            index_amendements += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=amendements).alignment = alignment
+                        index_column_cell += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=zone[
+                                                                          "bilan_apports_cultures_principales_racinaires"][
+                                                                          index_annee - len(zone[
+                                                                                                "bilan_des_regies_historiques"])])
+                        index_column_cell += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=zone[
+                                                                          "bilan_apports_cultures_principales_aeriennes"][
+                                                                          index_annee - len(zone[
+                                                                                                "bilan_des_regies_historiques"])]).alignment = alignment
+                        index_column_cell += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=zone[
+                                                                          "bilan_apports_cultures_secondaires_racinaires"][
+                                                                          index_annee - len(zone[
+                                                                                                "bilan_des_regies_historiques"])]).alignment = alignment
+                        index_column_cell += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=zone[
+                                                                          "bilan_apports_cultures_secondaires_aeriennes"][
+                                                                          index_annee - len(zone[
+                                                                                                "bilan_des_regies_historiques"])]).alignment = alignment
 
-                            index_column_cell += 1
-                            description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=zone[
-                                                                              "bilan_apports_amendements"][
-                                                                              index_annee - len(zone[
-                                                                                                    "bilan_des_regies_historiques"])]).alignment = alignment
-                            index_column_cell = 1
-                            index_row_cell += 1
+                        index_column_cell += 1
+                        description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                      value=zone[
+                                                                          "bilan_apports_amendements"][
+                                                                          index_annee - len(zone[
+                                                                                                "bilan_des_regies_historiques"])]).alignment = alignment
+                        index_column_cell = 1
+                        index_row_cell += 1
                         index_annee += 1
                     index_zone += 1
             index_simulation += 1
@@ -3288,60 +3110,60 @@ def run_gui(frame):
                 for zone in champ["bilans_des_zones"]:
                     index_annee = 0
                     for year in zone["bilan_des_regies_pour_la_duree_de_la_simulation"]:
-                        if index_annee > len(zone["bilan_des_regies_historiques"]):
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=simulation[
-                                                                             "nom_entreprise"]).alignment = alignment
-                            index_column_cell += 1
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=champ[
-                                                                             "nom_champs"]).alignment = alignment
-                            index_column_cell += 1
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=str(index_zone)).alignment = alignment
-                            index_column_cell += 1
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=duree_simulation[index_simulation][
-                                                                             "nom_simulation"]).alignment = alignment
-                            index_column_cell += 1
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=year[
-                                                                             "annee_culture"]).alignment = alignment
-                            index_column_cell += 1
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=zone["bilan_etats_pool_jeune_aerien"][
-                                                                             index_annee]).alignment = alignment
-                            index_column_cell += 1
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=zone["bilan_etats_pool_jeune_racinaire"][
-                                                                             index_annee]).alignment = alignment
-                            index_column_cell += 1
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=zone["bilan_etats_pool_jeune_amendements"][
-                                                                             index_annee]).alignment = alignment
-                            index_column_cell += 1
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=
-                                                                         zone["bilan_etats_pool_jeune_total"][
-                                                                             index_annee]).alignment = alignment
-                            index_column_cell += 1
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=
-                                                                         zone["bilan_etats_pool_stable"][
-                                                                             index_annee]).alignment = alignment
-                            index_column_cell += 1
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=
-                                                                         zone["bilan_carbone_de_la_zone_pour_la_simulation"][
-                                                                             index_annee]).alignment = alignment
-                            index_column_cell += 1
-                            description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                         value=
-                                                                         zone[
-                                                                             "bilan_matiere_orgagnique_pour_la_simulation"][
-                                                                             index_annee]).alignment = alignment
-                            index_column_cell = 1
-                            index_row_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=simulation[
+                                                                         "nom_entreprise"]).alignment = alignment
+                        index_column_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=champ[
+                                                                         "nom_champs"]).alignment = alignment
+                        index_column_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=str(index_zone)).alignment = alignment
+                        index_column_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=duree_simulation[index_simulation][
+                                                                         "nom_simulation"]).alignment = alignment
+                        index_column_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=year[
+                                                                         "annee_culture"]).alignment = alignment
+                        index_column_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=zone["bilan_etats_pool_jeune_aerien"][
+                                                                         index_annee]).alignment = alignment
+                        index_column_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=zone["bilan_etats_pool_jeune_racinaire"][
+                                                                         index_annee]).alignment = alignment
+                        index_column_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=zone["bilan_etats_pool_jeune_amendements"][
+                                                                         index_annee]).alignment = alignment
+                        index_column_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=
+                                                                     zone["bilan_etats_pool_jeune_total"][
+                                                                         index_annee]).alignment = alignment
+                        index_column_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=
+                                                                     zone["bilan_etats_pool_stable"][
+                                                                         index_annee]).alignment = alignment
+                        index_column_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=
+                                                                     zone[
+                                                                         "bilan_carbone_de_la_zone_pour_la_simulation"][
+                                                                         index_annee]).alignment = alignment
+                        index_column_cell += 1
+                        description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                                     value=
+                                                                     zone[
+                                                                         "bilan_matiere_orgagnique_pour_la_simulation"][
+                                                                         index_annee]).alignment = alignment
+                        index_column_cell = 1
+                        index_row_cell += 1
                         index_annee += 1
                     index_zone += 1
             index_simulation += 1
@@ -3401,7 +3223,8 @@ def run_gui(frame):
                 index_zone = 1
                 for zone in champ["bilans_des_zones"]:
                     description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                  value=simulation["nom_entreprise"]).alignment = alignment
+                                                                  value=simulation[
+                                                                      "nom_entreprise"]).alignment = alignment
                     index_column_cell += 1
                     description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                                   value=champ["nom_champs"]).alignment = alignment
@@ -3411,28 +3234,35 @@ def run_gui(frame):
                     index_column_cell += 1
                     description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                                   value=duree_simulation[index_simulation][
-                                                                             "nom_simulation"]).alignment = alignment
+                                                                      "nom_simulation"]).alignment = alignment
                     index_column_cell += 1
                     description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                  value=len(zone["bilan_des_regies_projections"])).alignment = alignment
+                                                                  value=len(zone[
+                                                                                "bilan_des_regies_projections"])).alignment = alignment
                     index_column_cell += 1
                     description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                  value=zone["moyenne_apports_cultures_principales"]).alignment = alignment
+                                                                  value=zone[
+                                                                      "moyenne_apports_cultures_principales"]).alignment = alignment
                     index_column_cell += 1
                     description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                  value=zone["moyenne_apports_cultures_secondaires"]).alignment = alignment
+                                                                  value=zone[
+                                                                      "moyenne_apports_cultures_secondaires"]).alignment = alignment
                     index_column_cell += 1
                     description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                  value=zone["moyenne_apports_amendements"]).alignment = alignment
+                                                                  value=zone[
+                                                                      "moyenne_apports_amendements"]).alignment = alignment
                     index_column_cell += 1
                     description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                  value=zone["taux_de_matiere_organique_initial"]).alignment = alignment
+                                                                  value=zone[
+                                                                      "taux_de_matiere_organique_initial"]).alignment = alignment
                     index_column_cell += 1
                     description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                  value=zone["teneur_finale_projetee"]).alignment = alignment
+                                                                  value=zone[
+                                                                      "teneur_finale_projetee"]).alignment = alignment
                     index_column_cell += 1
                     description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                  value=zone["difference_entre_la_teneur_finale_et_la_zone"]).alignment = alignment
+                                                                  value=zone[
+                                                                      "difference_entre_la_teneur_finale_et_la_zone"]).alignment = alignment
                     index_column_cell += 1
                     description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                                   value=zone[

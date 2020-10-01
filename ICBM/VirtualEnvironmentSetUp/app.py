@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, abort
 from waitress import serve
 
 from ICBM.Simulations.gestion_de_simulation import *
+from ICBM.BaseDeDonnees.database_querying import *
 
 app = Flask(__name__)
 
@@ -11,6 +12,13 @@ def post_simulation():
     data_request = request.get_json()
     response = __launch_icbm_simulation(data_request)
     return jsonify(response)
+
+# TODO: Uncomment
+"""@app.route('/api/ajout-amendement', methods=['POST'])
+def ajout_amendement():
+    data_request = request.get_json()
+    response = __ajout_amendement(data_request)
+    return jsonify(response)"""
 
 
 @app.route('/api/get-municipalite', methods=['GET'])
@@ -65,6 +73,10 @@ def get_amendement():
 def __launch_icbm_simulation(data):
     gestion_simulation = __simulation_mapping(data["simulations"])
     return gestion_simulation.generer_les_bilans_pour_les_simulations_de_l_entreprise_agricole()
+
+
+def __ajout_amendement(data):
+    return add_amendment(data)
 
 
 def __simulation_mapping(data):
@@ -205,21 +217,24 @@ def __regie_sol_et_culture_mapping(data, municipalite):
     iterateur_annee = 0
     postion_derniere_annee_de_simulation = len(data) - 1
     while iterateur_annee < len(data):
-        if data[iterateur_annee]["culture_principale"] in cultures_fourrageres:
-            culture_annee_suivante = data[iterateur_annee + 1]["culture_principale"]
-            if iterateur_annee == postion_derniere_annee_de_simulation or culture_annee_suivante not in cultures_fourrageres:
-                culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], True,
-                                                                  municipalite)
+        if data[iterateur_annee] is None:
+            liste_regies.append(None)
+        else:
+            if data[iterateur_annee]["culture_principale"] in cultures_fourrageres:
+                culture_annee_suivante = data[iterateur_annee + 1]["culture_principale"]
+                if iterateur_annee == postion_derniere_annee_de_simulation or culture_annee_suivante not in cultures_fourrageres:
+                    culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], True,
+                                                                      municipalite)
+                else:
+                    culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], False,
+                                                                      municipalite)
             else:
                 culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], False,
                                                                   municipalite)
-        else:
-            culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], False,
-                                                              municipalite)
-        culture_secondaire = __culture_secondaire_mapping(data[iterateur_annee]["culture_secondaire"])
-        amendements = __amendements_mapping(data[iterateur_annee]["amendements"])
-        travail_du_sol = __travail_du_sol_mapping(data[iterateur_annee]["travail_du_sol"])
-        liste_regies.append(RegieDesSolsEtCultures(culture_principale, culture_secondaire, amendements, travail_du_sol))
+            culture_secondaire = __culture_secondaire_mapping(data[iterateur_annee]["culture_secondaire"])
+            amendements = __amendements_mapping(data[iterateur_annee]["amendements"])
+            travail_du_sol = __travail_du_sol_mapping(data[iterateur_annee]["travail_du_sol"])
+            liste_regies.append(RegieDesSolsEtCultures(culture_principale, culture_secondaire, amendements, travail_du_sol))
         iterateur_annee += 1
     return liste_regies
 

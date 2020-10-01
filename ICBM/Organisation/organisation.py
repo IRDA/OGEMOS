@@ -113,8 +113,6 @@ class ZoneDeGestion:
         self.__municipalite = municipalite
         self.__groupe_textural = groupe_textural
         self.__classe_de_drainage = classe_de_drainage
-        self.__coefficient_mineralisation_pool_jeune = self.__calculer_coefficient_mineralisation_pool_jeune()
-        self.__coefficient_mineralisation_pool_stable = self.__calculer_coefficient_mineralisation_pool_stable()
         self.__facteur_climatique = self.__calculer_facteur_climatique()
         self.__regies_sol_et_culture_projection = regies_sol_et_culture_projection
         if regies_sol_et_culture_historique is None:
@@ -124,6 +122,7 @@ class ZoneDeGestion:
         self.__regies_sol_et_culture_pour_la_duree_de_la_simulation = []
         self.__carbone_organique_initial_du_sol = self.__calculer_carbone_organique_initial_du_sol()
         self.__taille_de_la_zone_de_gestion = taille_de_la_zone
+        self.__regies_sol_et_culture_historique_pour_initialisation = []
 
     def appliquer_les_regies_pour_la_duree_de_la_simulation(self, annee_initiale, annee_finale):
         if len(self.__regies_sol_et_culture_historique) != 0:
@@ -132,7 +131,7 @@ class ZoneDeGestion:
             while annee_courante < annee_initiale:
                 regie_annee_courante = copy.deepcopy(self.__regies_sol_et_culture_historique[compteur_annee])
                 regie_annee_courante.set_annee_de_culture(annee_courante)
-                self.__regies_sol_et_culture_pour_la_duree_de_la_simulation.append(regie_annee_courante)
+                self.__regies_sol_et_culture_historique_pour_initialisation.append(regie_annee_courante)
                 annee_courante += 1
                 compteur_annee += 1
         if len(self.__regies_sol_et_culture_projection) != 0:
@@ -179,28 +178,16 @@ class ZoneDeGestion:
             for pool in pools_carbone_jeune_initiaux:
                 pool_jeune_initial += pool
             pool_carbone_stable_initial = self.__calculer_pool_carbone_stable_initial(pool_jeune_initial)
-            etats_pool_stable.append(pool_carbone_stable_initial)
-            etats_pool_jeune_amendements.append(pools_carbone_jeune_initiaux[0])
             pool_humification[0]["Amendements"]["etat_pool_annee_precedente"] = pools_carbone_jeune_initiaux[0]
-            etats_pool_jeune_aerien.append(pools_carbone_jeune_initiaux[1] + pools_carbone_jeune_initiaux[3])
-            etats_pool_jeune_racinnaire.append(pools_carbone_jeune_initiaux[2] + pools_carbone_jeune_initiaux[4])
-            etats_pool_jeune_total.append(pool_jeune_initial)
-            regie_annee_calcule, *regie_annee_simulation_restante = self.__regies_sol_et_culture_pour_la_duree_de_la_simulation
-            carbone_organique_du_sol_pour_la_duree_de_la_simulation.append(
-                pool_jeune_initial + pool_carbone_stable_initial)
-            matiere_organique_du_sol_pour_la_duree_de_la_simulation.append((
-                                                                                       pool_jeune_initial + pool_carbone_stable_initial) / self.FACTEUR_CONVERSION_MATIERE_ORGANIQUE_CARBONE_ORGANIQUE_SOL)
+            regie_annee_simulation = self.__regies_sol_et_culture_pour_la_duree_de_la_simulation
             carbone_total_annee_initiale = self.__regies_sol_et_culture_pour_la_duree_de_la_simulation[
                 0].calculer_apport_annuel_en_carbone_de_la_regie()
-            apport_carbone_culture_principale.append(carbone_total_annee_initiale[1])
-            apport_carbone_culture_secondaire.append(carbone_total_annee_initiale[2])
-            apport_carbone_amendements.append(carbone_total_annee_initiale[3])
             apports_carbone = (carbone_total_annee_initiale[3],
                                carbone_total_annee_initiale[4] + carbone_total_annee_initiale[6],
                                carbone_total_annee_initiale[5] + carbone_total_annee_initiale[7])
             pools_carbone_jeune = pools_carbone_jeune_initiaux
             pool_carbone_stable = pool_carbone_stable_initial
-            for regie_annee_de_simulation in regie_annee_simulation_restante:
+            for regie_annee_de_simulation in regie_annee_simulation:
                 amendements = regie_annee_de_simulation.generer_bilan_regie()["amendements"]["amendements"]
                 amendements_dict = {}
                 index = 0
@@ -216,11 +203,11 @@ class ZoneDeGestion:
                 apport_carbone_culture_secondaire_aerienne.append(apports_annuel_de_carbone[6])
                 apport_carbone_culture_secondaire_racinaire.append(apports_annuel_de_carbone[7])
                 pool_jeune_amendements = (apports_carbone[0] + pools_carbone_jeune[0]) * math.exp(
-                    -self.__coefficient_mineralisation_pool_jeune * self.__facteur_climatique)
+                    -self.COEFFICIENT_MINERALISATION_POOL_JEUNE * self.__facteur_climatique)
                 pool_jeune_aerien = (apports_carbone[1] + pools_carbone_jeune[1]) * math.exp(
-                    -self.__coefficient_mineralisation_pool_jeune * self.__facteur_climatique)
+                    -self.COEFFICIENT_MINERALISATION_POOL_JEUNE * self.__facteur_climatique)
                 pool_jeune_racinnaire = (apports_carbone[2] + pools_carbone_jeune[2]) * math.exp(
-                    -self.__coefficient_mineralisation_pool_jeune * self.__facteur_climatique)
+                    -self.COEFFICIENT_MINERALISATION_POOL_JEUNE * self.__facteur_climatique)
                 pool_jeune_total = (pool_jeune_amendements +
                                     pool_jeune_aerien +
                                     pool_jeune_racinnaire)
@@ -306,35 +293,65 @@ class ZoneDeGestion:
                     matiere_organique_du_sol_pour_la_duree_de_la_simulation)
 
     def __calculer_pool_carbone_jeune_initial(self):
-        if len(self.__regies_sol_et_culture_pour_la_duree_de_la_simulation):
-            regie_annee_initial_apports = self.__regies_sol_et_culture_pour_la_duree_de_la_simulation[
-                0].calculer_apport_annuel_en_carbone_de_la_regie()
-            pool_jeune_amendements_initial = regie_annee_initial_apports[3] / (
-                    self.__facteur_climatique * self.__coefficient_mineralisation_pool_jeune)
-            pool_jeune_aerien_culture_principale_initial = regie_annee_initial_apports[4] / (
-                    self.__facteur_climatique * self.__coefficient_mineralisation_pool_jeune)
-            pool_jeune_racinaire_culture_principale_initial = regie_annee_initial_apports[5] / (
-                    self.__facteur_climatique * self.__coefficient_mineralisation_pool_jeune)
-            pool_jeune_aerien_culture_secondaire_initial = regie_annee_initial_apports[6] / (
-                    self.__facteur_climatique * self.__coefficient_mineralisation_pool_jeune)
-            pool_jeune_racinaire_culture_secondaire_initial = regie_annee_initial_apports[7] / (
-                    self.__facteur_climatique * self.__coefficient_mineralisation_pool_jeune)
-            return (pool_jeune_amendements_initial,
-                    pool_jeune_aerien_culture_principale_initial,
-                    pool_jeune_racinaire_culture_principale_initial,
-                    pool_jeune_aerien_culture_secondaire_initial,
-                    pool_jeune_racinaire_culture_secondaire_initial)
+        if len(self.__regies_sol_et_culture_historique_pour_initialisation):
+            pool_jeune_amendements_initial = 0
+            pool_jeune_aerien_culture_principale_initial = 0
+            pool_jeune_racinaire_culture_principale_initial = 0
+            pool_jeune_aerien_culture_secondaire_initial = 0
+            pool_jeune_racinaire_culture_secondaire_initial = 0
+            nombre_de_regie_historique = len(self.__regies_sol_et_culture_historique_pour_initialisation)
+            for regie in self.__regies_sol_et_culture_historique_pour_initialisation:
+                regie_annee_initial_apports = regie.calculer_apport_annuel_en_carbone_de_la_regie()
+                pool_jeune_amendements_initial = pool_jeune_amendements_initial + (regie_annee_initial_apports[3] / (
+                        self.__facteur_climatique * self.COEFFICIENT_MINERALISATION_POOL_JEUNE))
+                pool_jeune_aerien_culture_principale_initial = pool_jeune_aerien_culture_principale_initial + (
+                        regie_annee_initial_apports[4] / (
+                        self.__facteur_climatique * self.COEFFICIENT_MINERALISATION_POOL_JEUNE))
+                pool_jeune_racinaire_culture_principale_initial = pool_jeune_racinaire_culture_principale_initial + (
+                        regie_annee_initial_apports[5] / (
+                        self.__facteur_climatique * self.COEFFICIENT_MINERALISATION_POOL_JEUNE))
+                pool_jeune_aerien_culture_secondaire_initial = pool_jeune_aerien_culture_secondaire_initial + (
+                        regie_annee_initial_apports[6] / (
+                        self.__facteur_climatique * self.COEFFICIENT_MINERALISATION_POOL_JEUNE))
+                pool_jeune_racinaire_culture_secondaire_initial = pool_jeune_racinaire_culture_secondaire_initial + (
+                        regie_annee_initial_apports[7] / (
+                        self.__facteur_climatique * self.COEFFICIENT_MINERALISATION_POOL_JEUNE))
+            return (pool_jeune_amendements_initial / nombre_de_regie_historique,
+                    pool_jeune_aerien_culture_principale_initial / nombre_de_regie_historique,
+                    pool_jeune_racinaire_culture_principale_initial / nombre_de_regie_historique,
+                    pool_jeune_aerien_culture_secondaire_initial / nombre_de_regie_historique,
+                    pool_jeune_racinaire_culture_secondaire_initial / nombre_de_regie_historique)
         else:
-            return 0, 0, 0, 0, 0
+            pool_jeune_amendements_initial = 0
+            pool_jeune_aerien_culture_principale_initial = 0
+            pool_jeune_racinaire_culture_principale_initial = 0
+            pool_jeune_aerien_culture_secondaire_initial = 0
+            pool_jeune_racinaire_culture_secondaire_initial = 0
+            nombre_de_regie_historique = len(self.__regies_sol_et_culture_projection)
+            for regie in self.__regies_sol_et_culture_projection:
+                regie_annee_initial_apports = regie.calculer_apport_annuel_en_carbone_de_la_regie()
+                pool_jeune_amendements_initial = pool_jeune_amendements_initial + (regie_annee_initial_apports[3] / (
+                        self.__facteur_climatique * self.COEFFICIENT_MINERALISATION_POOL_JEUNE))
+                pool_jeune_aerien_culture_principale_initial = pool_jeune_aerien_culture_principale_initial + (
+                        regie_annee_initial_apports[4] / (
+                        self.__facteur_climatique * self.COEFFICIENT_MINERALISATION_POOL_JEUNE))
+                pool_jeune_racinaire_culture_principale_initial = pool_jeune_racinaire_culture_principale_initial + (
+                        regie_annee_initial_apports[5] / (
+                        self.__facteur_climatique * self.COEFFICIENT_MINERALISATION_POOL_JEUNE))
+                pool_jeune_aerien_culture_secondaire_initial = pool_jeune_aerien_culture_secondaire_initial + (
+                        regie_annee_initial_apports[6] / (
+                        self.__facteur_climatique * self.COEFFICIENT_MINERALISATION_POOL_JEUNE))
+                pool_jeune_racinaire_culture_secondaire_initial = pool_jeune_racinaire_culture_secondaire_initial + (
+                        regie_annee_initial_apports[7] / (
+                        self.__facteur_climatique * self.COEFFICIENT_MINERALISATION_POOL_JEUNE))
+            return (pool_jeune_amendements_initial / nombre_de_regie_historique,
+                    pool_jeune_aerien_culture_principale_initial / nombre_de_regie_historique,
+                    pool_jeune_racinaire_culture_principale_initial / nombre_de_regie_historique,
+                    pool_jeune_aerien_culture_secondaire_initial / nombre_de_regie_historique,
+                    pool_jeune_racinaire_culture_secondaire_initial / nombre_de_regie_historique)
 
     def __calculer_pool_carbone_stable_initial(self, pool_carbone_jeune_initial):
         return self.__carbone_organique_initial_du_sol - pool_carbone_jeune_initial
-
-    def __calculer_coefficient_mineralisation_pool_jeune(self):
-        return get_facteur_groupe_textural(self.__groupe_textural).coefficient_mineralisation_pool_jeune
-
-    def __calculer_coefficient_mineralisation_pool_stable(self):
-        return get_facteur_groupe_textural(self.__groupe_textural).coefficient_mineralisation_pool_stable
 
     def __calculer_facteur_climatique(self):
         facteur_climatique = get_facteur_climatique(self.__municipalite)
@@ -380,19 +397,25 @@ class ZoneDeGestion:
 
         return moyenne_de_chaque_annee_de_rotation
 
-    def __calculer_moyenne_des_apports_des_cultures_principales_pour_la_simulation(self, apports_de_la_culture_principale_aerien, apports_de_la_culture_principale_racinnaire):
+    def __calculer_moyenne_des_apports_des_cultures_principales_pour_la_simulation(self,
+                                                                                   apports_de_la_culture_principale_aerien,
+                                                                                   apports_de_la_culture_principale_racinnaire):
         somme_apports_des_cultures_principales = 0
-        for index_annee in range(len(self.__regies_sol_et_culture_historique), len(apports_de_la_culture_principale_aerien)):
+        for index_annee in range(len(self.__regies_sol_et_culture_historique),
+                                 len(apports_de_la_culture_principale_aerien)):
             somme_apports_des_cultures_principales += apports_de_la_culture_principale_aerien[index_annee]
             somme_apports_des_cultures_principales += apports_de_la_culture_principale_racinnaire[index_annee]
-        return somme_apports_des_cultures_principales/len(self.__regies_sol_et_culture_projection)
+        return somme_apports_des_cultures_principales / len(self.__regies_sol_et_culture_projection)
 
-    def __calculer_moyenne_des_apports_des_cultures_secondaires_pour_la_simulation(self, apports_de_la_culture_secondaire_aerien, apports_de_la_culture_secondaire_racinnaire):
+    def __calculer_moyenne_des_apports_des_cultures_secondaires_pour_la_simulation(self,
+                                                                                   apports_de_la_culture_secondaire_aerien,
+                                                                                   apports_de_la_culture_secondaire_racinnaire):
         somme_apports_des_cultures_secondaires = 0
-        for index_annee in range(len(self.__regies_sol_et_culture_historique), len(apports_de_la_culture_secondaire_aerien)):
+        for index_annee in range(len(self.__regies_sol_et_culture_historique),
+                                 len(apports_de_la_culture_secondaire_aerien)):
             somme_apports_des_cultures_secondaires += apports_de_la_culture_secondaire_aerien[index_annee]
             somme_apports_des_cultures_secondaires += apports_de_la_culture_secondaire_racinnaire[index_annee]
-        return somme_apports_des_cultures_secondaires/len(self.__regies_sol_et_culture_projection)
+        return somme_apports_des_cultures_secondaires / len(self.__regies_sol_et_culture_projection)
 
     def __calculer_moyenne_des_apports_des_amendements_pour_la_simulation(self, apports_des_amendements):
         somme_apports_des_amendements = 0
@@ -425,9 +448,12 @@ class ZoneDeGestion:
             bilan_carbon_pour_la_simulation, teneur_finale_projetee)
         moyenne_de_chaque_annee_de_rotation = self.__calculer_moyenne_de_chaque_annee_de_rotation_dans_la_projection(
             bilan_carbon_pour_la_simulation)
-        moyenne_apports_cultures_principales = self.__calculer_moyenne_des_apports_des_cultures_principales_pour_la_simulation(bilan_apports_cultures_principales_aeriennes, bilan_apports_cultures_principales_racinaires)
-        moyenne_apports_cultures_secondaire = self.__calculer_moyenne_des_apports_des_cultures_secondaires_pour_la_simulation(bilan_apports_cultures_secondaires_aeriennes, bilan_apports_cultures_secondaires_racinaires)
-        moyenne_apports_amendements = self.__calculer_moyenne_des_apports_des_amendements_pour_la_simulation(bilan_apports_amendements)
+        moyenne_apports_cultures_principales = self.__calculer_moyenne_des_apports_des_cultures_principales_pour_la_simulation(
+            bilan_apports_cultures_principales_aeriennes, bilan_apports_cultures_principales_racinaires)
+        moyenne_apports_cultures_secondaire = self.__calculer_moyenne_des_apports_des_cultures_secondaires_pour_la_simulation(
+            bilan_apports_cultures_secondaires_aeriennes, bilan_apports_cultures_secondaires_racinaires)
+        moyenne_apports_amendements = self.__calculer_moyenne_des_apports_des_amendements_pour_la_simulation(
+            bilan_apports_amendements)
         bilan_des_regies_projections = []
         bilan_des_regies_historiques = []
         bilan_des_regies_simulation = []

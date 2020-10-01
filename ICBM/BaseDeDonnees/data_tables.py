@@ -41,7 +41,7 @@ class CoefficientAmendements(Base):
     matiere_seche = Column(Float)  # % sur base humide
     carbon_nitrogen = Column(Float)
     nitrogen_total = Column(Float)
-    coefficient_humification = Column(Float)
+    est_amendement_originel_ogemos = Column(Boolean)
 
 
 class FacteurTravailDuSol(Base):

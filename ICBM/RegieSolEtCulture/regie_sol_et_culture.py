@@ -87,9 +87,9 @@ class CulturePrincipale:
             quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_extra_racinaire / coefficient_de_calcul.ratio_partie_recolte)
             if self.__est_derniere_annee_rotation_plante_fourragere:
-                return proportion_tige_laissee_au_champs  #quantite_carbone_partie_recolte + quantite_carbone_partie_racinaire + quantite_carbone_partie_extra_racinaire
+                return quantite_carbone_partie_recolte + quantite_carbone_partie_racinaire + quantite_carbone_partie_extra_racinaire
             else:
-                return proportion_tige_laissee_au_champs  #quantite_carbone_partie_recolte + quantite_carbone_partie_extra_racinaire
+                return quantite_carbone_partie_recolte + quantite_carbone_partie_extra_racinaire
 
     def get_coefficient_calcul(self):
         return get_coefficients_des_residus_de_culture(self.__type_de_culture_principale)
