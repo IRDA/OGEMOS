@@ -153,10 +153,12 @@ def get_percentile90(utm, groupe_textural):
     session.close()
     return query_result
 
+
 def add_amendment(data):
     session = Session()
-    nouvel_amendement = CoefficientAmendements(amendment=data["amendement"], matiere_seche=data["matiere_seche"], carbon_nitrogen=data["carbon_nitrogen"], nitrogen_total=data["nitrogen_total"], coefficient_humification=data["coefficient_humification"])
-    try:
-        session.add(nouvel_amendement)
-    except:
-        return
+    nouvel_amendement = CoefficientAmendements(amendement=data["amendement"], matiere_seche=data["matiere_seche"],
+                                               carbon_nitrogen=data["carbon_nitrogen"],
+                                               nitrogen_total=data["nitrogen_total"],
+                                               est_amendement_originel_ogemos=False)
+    session.add(nouvel_amendement)
+    session.commit()

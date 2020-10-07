@@ -377,10 +377,8 @@ class ZoneDeGestion:
                                                                           carbone_organique_de_sol_pour_la_duree_de_la_simulation):
         moyenne_de_chaque_annee_de_rotation = []
         nombre_de_repetition_de_annee_de_rotation = []
-        for index_annee in range(len(self.__regies_sol_et_culture_historique),
-                                 len(carbone_organique_de_sol_pour_la_duree_de_la_simulation)):
-            if (index_annee - len(self.__regies_sol_et_culture_historique)) < len(
-                    self.__regies_sol_et_culture_projection):
+        for index_annee in range(len(self.__regies_sol_et_culture_projection)):
+            if index_annee < len(self.__regies_sol_et_culture_projection):
                 moyenne_de_chaque_annee_de_rotation.append(
                     carbone_organique_de_sol_pour_la_duree_de_la_simulation[index_annee])
                 nombre_de_repetition_de_annee_de_rotation.append(1)
@@ -401,8 +399,7 @@ class ZoneDeGestion:
                                                                                    apports_de_la_culture_principale_aerien,
                                                                                    apports_de_la_culture_principale_racinnaire):
         somme_apports_des_cultures_principales = 0
-        for index_annee in range(len(self.__regies_sol_et_culture_historique),
-                                 len(apports_de_la_culture_principale_aerien)):
+        for index_annee in range(len(self.__regies_sol_et_culture_projection)):
             somme_apports_des_cultures_principales += apports_de_la_culture_principale_aerien[index_annee]
             somme_apports_des_cultures_principales += apports_de_la_culture_principale_racinnaire[index_annee]
         return somme_apports_des_cultures_principales / len(self.__regies_sol_et_culture_projection)
@@ -411,15 +408,14 @@ class ZoneDeGestion:
                                                                                    apports_de_la_culture_secondaire_aerien,
                                                                                    apports_de_la_culture_secondaire_racinnaire):
         somme_apports_des_cultures_secondaires = 0
-        for index_annee in range(len(self.__regies_sol_et_culture_historique),
-                                 len(apports_de_la_culture_secondaire_aerien)):
+        for index_annee in range(len(self.__regies_sol_et_culture_projection)):
             somme_apports_des_cultures_secondaires += apports_de_la_culture_secondaire_aerien[index_annee]
             somme_apports_des_cultures_secondaires += apports_de_la_culture_secondaire_racinnaire[index_annee]
         return somme_apports_des_cultures_secondaires / len(self.__regies_sol_et_culture_projection)
 
     def __calculer_moyenne_des_apports_des_amendements_pour_la_simulation(self, apports_des_amendements):
         somme_apports_des_amendements = 0
-        for index_annee in range(len(self.__regies_sol_et_culture_historique), len(apports_des_amendements)):
+        for index_annee in range(len(self.__regies_sol_et_culture_projection)):
             somme_apports_des_amendements += apports_des_amendements[index_annee]
         return somme_apports_des_amendements
 

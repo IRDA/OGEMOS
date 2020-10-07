@@ -13,12 +13,11 @@ def post_simulation():
     response = __launch_icbm_simulation(data_request)
     return jsonify(response)
 
-# TODO: Uncomment
-"""@app.route('/api/ajout-amendement', methods=['POST'])
+@app.route('/api/ajout-amendement', methods=['POST'])
 def ajout_amendement():
     data_request = request.get_json()
     response = __ajout_amendement(data_request)
-    return jsonify(response)"""
+    return jsonify(response)
 
 
 @app.route('/api/get-municipalite', methods=['GET'])
@@ -70,12 +69,53 @@ def get_amendement():
     return jsonify(response)
 
 
+def is_decimal_number(string):
+    if "." not in string and string.isdigit():
+        return True
+    if "." in string:
+        decimal_parts = string.split(".")
+        if len(decimal_parts) == 2 and decimal_parts[0].isdigit() and (decimal_parts[1].isdigit() or decimal_parts[1] == ""):
+            return True
+        else:
+            return False
+    return False
+
+
 def __launch_icbm_simulation(data):
     gestion_simulation = __simulation_mapping(data["simulations"])
     return gestion_simulation.generer_les_bilans_pour_les_simulations_de_l_entreprise_agricole()
 
 
 def __ajout_amendement(data):
+    try:
+        assert data["amendement"].isalnum()
+    except AssertionError:
+        message_erreur = data["amendement"] + "n'est pas un amendement valide. Uniquement caractères alphanumériques acceptés."
+        abort(400, message_erreur)
+    try:
+        assert is_decimal_number(data["matiere_seche"])
+    except AssertionError:
+        message_erreur = data["matiere_seche"] + "n'est pas une matiere seche valide. Uniquement caractères numériques et le \".\" acceptés."
+        abort(400, message_erreur)
+    try:
+        if is_decimal_number(data["matiere_seche"]):
+            assert 0 <= float(data["matiere_seche"]) <= 100
+    except AssertionError:
+        message_erreur = data[
+                             "matiere_seche"] + "n'est pas une matiere seche valide. Doit être un réel dans l'intervalle [0-100]."
+        abort(400, message_erreur)
+    try:
+        assert is_decimal_number(data["carbon_nitrogen"])
+    except AssertionError:
+        message_erreur = data[
+                             "carbon_nitrogen"] + "n'est pas un rapport carbone sur azote valide. Uniquement caractères numériques et le \".\" acceptés."
+        abort(400, message_erreur)
+    try:
+        assert is_decimal_number(data["nitrogen_total"])
+    except AssertionError:
+        message_erreur = data[
+                             "nitrogen_total"] + "n'est pas un total d'azote valide. Uniquement caractères numériques et le \".\" acceptés."
+        abort(400, message_erreur)
     return add_amendment(data)
 
 
