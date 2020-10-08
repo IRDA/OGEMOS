@@ -30,9 +30,11 @@ class CoefficientDesResidusDeCulture(Base):
     ratio_partie_extra_racinaire = Column(Float)
     taux_carbone_chaque_partie = Column(Float)
     est_culture_fourragere = Column(Boolean)
-    proportion_des_tiges_exportees = Column(Float)
-    taux_matiere_seche = Column(Float)
+    pourcentage_des_tiges_exportees = Column(Float)
+    pourcentage_humidite = Column(Float)
     biomasse_aerienne_sur_racinaire = Column(Float)
+    travail_du_sol_defaut = Column(String, ForeignKey('FacteurTravailDuSol.facteur_travail_du_sol'))
+    travail_du_sol = relationship("FacteurTravailDuSol")
 
 
 class CoefficientAmendements(Base):
@@ -63,7 +65,7 @@ class CoefficientDesCulturesSecondaires(Base):
     ratio_partie_racinaire = Column(Float)
     ratio_partie_extra_racinaire = Column(Float)
     taux_carbone_chaque_partie = Column(Float)
-    proportion_des_tiges_exportees = Column(Float)
+    pourcentage_des_tiges_exportees = Column(Float)
     taux_matiere_seche = Column(Float)
     biomasse_aerienne_sur_racinaire = Column(Float)
 

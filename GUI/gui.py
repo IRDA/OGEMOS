@@ -375,32 +375,32 @@ def initialize_run_gui():
             canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
             canvas.configure(yscrollcommand=scrollbar.set)
 
-            def zone_frame_generation(zone_de_gestion_frame):
-                taux_matiere_organique_label = ttk.Label(zone_de_gestion_frame,
+            def zone_frame_generation(zone_gestion_frame):
+                taux_matiere_organique_label = ttk.Label(zone_gestion_frame,
                                                          text="Taux matière organique (en %): ")
-                taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
+                taux_matiere_organique_entry = ttk.Entry(zone_gestion_frame)
                 municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
                 global municipalites_supportees
-                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame, values=municipalites_supportees,
+                municipalite_combobox = ttk.Combobox(zone_gestion_frame, values=municipalites_supportees,
                                                      postcommand=lambda: filter_combobox_values(
                                                          municipalite_combobox,
                                                          municipalites_supportees))
                 groupe_textural_label = ttk.Label(zone_de_gestion_frame, text="Groupe textural: ")
                 global groupes_texturaux_supportees
-                groupe_textural_combobox = ttk.Combobox(zone_de_gestion_frame, values=groupes_texturaux_supportees,
+                groupe_textural_combobox = ttk.Combobox(zone_gestion_frame, values=groupes_texturaux_supportees,
                                                         postcommand=lambda: filter_combobox_values(
                                                             groupe_textural_combobox,
                                                             groupes_texturaux_supportees))
                 classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
                 global classes_de_drainage_supportees
-                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame,
+                classe_de_drainage_combobox = ttk.Combobox(zone_gestion_frame,
                                                            values=classes_de_drainage_supportees,
                                                            postcommand=lambda: filter_combobox_values(
                                                                classe_de_drainage_combobox,
                                                                classes_de_drainage_supportees))
-                masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
+                masse_volumique_apparente_label = ttk.Label(zone_gestion_frame,
                                                             text="Masse volumique apparente (g/cm3): ")
-                masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
+                masse_volumique_apparente_entry = ttk.Entry(zone_gestion_frame)
                 profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur (cm): ")
                 profondeur_entry = ttk.Entry(zone_de_gestion_frame)
                 superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame, text="Superficie de la zone (ha): ")
@@ -445,9 +445,6 @@ def initialize_run_gui():
                 superficie_de_la_zone_entry.grid(row=6, column=1, sticky="w", pady=3, padx=5)
 
                 zone_de_gestion_frame.pack()
-
-
-
 
             for index_champs in range(int(nombre_de_champs)):
                 global information_champs
@@ -793,6 +790,56 @@ def initialize_run_gui():
                 def creation_des_zone_de_gestion_du_nouveau_champs():
                     nom_du_champs = nom_du_champs_entry.get()
                     nombre_de_zone_de_gestion = nombre_de_zone_de_gestion_entry.get()
+
+                    def zone_frame_generation(zone_gestion_frame):
+                        taux_matiere_organique_label = ttk.Label(zone_gestion_frame,
+                                                                 text="Taux matière organique (en %): ")
+                        taux_matiere_organique_entry = ttk.Entry(zone_gestion_frame)
+                        municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
+                        global municipalites_supportees
+                        municipalite_combobox = ttk.Combobox(zone_gestion_frame, values=municipalites_supportees,
+                                                             postcommand=lambda: filter_combobox_values(
+                                                                 municipalite_combobox,
+                                                                 municipalites_supportees))
+                        groupe_textural_label = ttk.Label(zone_de_gestion_frame, text="Groupe textural: ")
+                        global groupes_texturaux_supportees
+                        groupe_textural_combobox = ttk.Combobox(zone_gestion_frame, values=groupes_texturaux_supportees,
+                                                                postcommand=lambda: filter_combobox_values(
+                                                                    groupe_textural_combobox,
+                                                                    groupes_texturaux_supportees))
+                        classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
+                        global classes_de_drainage_supportees
+                        classe_de_drainage_combobox = ttk.Combobox(zone_gestion_frame,
+                                                                   values=classes_de_drainage_supportees,
+                                                                   postcommand=lambda: filter_combobox_values(
+                                                                       classe_de_drainage_combobox,
+                                                                       classes_de_drainage_supportees))
+                        masse_volumique_apparente_label = ttk.Label(zone_gestion_frame,
+                                                                    text="Masse volumique apparente (g/cm3): ")
+                        masse_volumique_apparente_entry = ttk.Entry(zone_gestion_frame)
+                        profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur (cm): ")
+                        profondeur_entry = ttk.Entry(zone_de_gestion_frame)
+                        superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
+                                                                text="Superficie de la zone (ha): ")
+                        superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
+
+                        taux_matiere_organique_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
+                        taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
+                        municipalite_label.grid(row=1, column=0, sticky="w", pady=3, padx=5)
+                        municipalite_combobox.grid(row=1, column=1, sticky="w", pady=3, padx=5)
+                        groupe_textural_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
+                        groupe_textural_combobox.grid(row=2, column=1, sticky="w", pady=3, padx=5)
+                        classe_de_drainage_label.grid(row=3, column=0, sticky="w", pady=3, padx=5)
+                        classe_de_drainage_combobox.grid(row=3, column=1, sticky="w", pady=3, padx=5)
+                        masse_volumique_apparente_label.grid(row=4, column=0, sticky="w", pady=3, padx=5)
+                        masse_volumique_apparente_entry.grid(row=4, column=1, sticky="w", pady=3, padx=5)
+                        profondeur_label.grid(row=5, column=0, sticky="w", pady=3, padx=5)
+                        profondeur_entry.grid(row=5, column=1, sticky="w", pady=3, padx=5)
+                        superficie_de_la_zone_label.grid(row=6, column=0, sticky="w", pady=3, padx=5)
+                        superficie_de_la_zone_entry.grid(row=6, column=1, sticky="w", pady=3, padx=5)
+
+                        zone_de_gestion_frame.pack()
+
                     if nombre_de_zone_de_gestion.isdigit() and int(nombre_de_zone_de_gestion) > 0:
                         if len(nom_du_champs) < 13:
                             global information_champs
@@ -821,54 +868,7 @@ def initialize_run_gui():
                                 zone_de_gestion_frame = ttk.LabelFrame(scrollable_frame,
                                                                        text="Zone gestion " + str(
                                                                            index_zone_de_gestion_nouveau_champs + 1))
-                                taux_matiere_organique_label = ttk.Label(zone_de_gestion_frame,
-                                                                         text="Taux matière organique (en %): ")
-                                taux_matiere_organique_entry = ttk.Entry(zone_de_gestion_frame)
-                                municipalite_label = ttk.Label(zone_de_gestion_frame, text="Municipalité: ")
-                                global municipalites_supportees
-                                municipalite_combobox = ttk.Combobox(zone_de_gestion_frame,
-                                                                     values=municipalites_supportees,
-                                                                     postcommand=lambda: filter_combobox_values(
-                                                                         municipalite_combobox,
-                                                                         municipalites_supportees))
-                                groupe_textural_label = ttk.Label(zone_de_gestion_frame, text="Groupe textural: ")
-                                global groupes_texturaux_supportees
-                                groupe_textural_combobox = ttk.Combobox(zone_de_gestion_frame,
-                                                                        values=groupes_texturaux_supportees,
-                                                                        postcommand=lambda: filter_combobox_values(
-                                                                            groupe_textural_combobox,
-                                                                            groupes_texturaux_supportees))
-                                classe_de_drainage_label = ttk.Label(zone_de_gestion_frame, text="Classe de drainage: ")
-                                global classes_de_drainage_supportees
-                                classe_de_drainage_combobox = ttk.Combobox(zone_de_gestion_frame,
-                                                                           values=classes_de_drainage_supportees,
-                                                                           postcommand=lambda: filter_combobox_values(
-                                                                               classe_de_drainage_combobox,
-                                                                               classes_de_drainage_supportees))
-                                masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
-                                                                            text="Masse volumique apparente (g/cm3): ")
-                                masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
-                                profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur (cm): ")
-                                profondeur_entry = ttk.Entry(zone_de_gestion_frame)
-                                superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
-                                                                        text="Superficie de la zone (ha): ")
-                                superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
-                                taux_matiere_organique_label.grid(row=0, column=0, sticky="w", pady=3, padx=5)
-                                taux_matiere_organique_entry.grid(row=0, column=1, sticky="w", pady=3, padx=5)
-                                municipalite_label.grid(row=1, column=0, sticky="w", pady=3, padx=5)
-                                municipalite_combobox.grid(row=1, column=1, sticky="w", pady=3, padx=5)
-                                groupe_textural_label.grid(row=2, column=0, sticky="w", pady=3, padx=5)
-                                groupe_textural_combobox.grid(row=2, column=1, sticky="w", pady=3, padx=5)
-                                classe_de_drainage_label.grid(row=3, column=0, sticky="w", pady=3, padx=5)
-                                classe_de_drainage_combobox.grid(row=3, column=1, sticky="w", pady=3, padx=5)
-                                masse_volumique_apparente_label.grid(row=4, column=0, sticky="w", pady=3, padx=5)
-                                masse_volumique_apparente_entry.grid(row=4, column=1, sticky="w", pady=3, padx=5)
-                                profondeur_label.grid(row=5, column=0, sticky="w", pady=3, padx=5)
-                                profondeur_entry.grid(row=5, column=1, sticky="w", pady=3, padx=5)
-                                superficie_de_la_zone_label.grid(row=6, column=0, sticky="w", pady=3, padx=5)
-                                superficie_de_la_zone_entry.grid(row=6, column=1, sticky="w", pady=3, padx=5)
-
-                                zone_de_gestion_frame.pack()
+                                zone_frame_generation(zone_de_gestion_frame)
 
                             creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame, text="Créer",
                                                                          command=lambda: add_new_zone_tab())
@@ -1543,7 +1543,6 @@ def initialize_run_gui():
             def ajouter_amendement_regie(amendement_frame):
                 grid_size = amendement_frame.grid_size()
                 amendement_frame.grid_slaves(grid_size[1] - 1, grid_size[0] - 1)[0].destroy()
-                amendement_frame.grid_slaves(grid_size[1] - 1, grid_size[0] - 2)[0].destroy()
                 amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
                 global amendements_supportees
                 amendement_combobox = ttk.Combobox(amendement_frame, values=amendements_supportees,
@@ -1569,22 +1568,20 @@ def initialize_run_gui():
                                                                cultures_principales_supportees))
                 rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
                 rendement_entry = ttk.Entry(annee_courante_frame)
-                proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Proportion tige exporté [0-1]: ")
+                proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Pourcentage paille ou tige exporté [0-100]: ")
                 proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
-                production_non_recolte_label = ttk.Label(annee_courante_frame, text="Production non récoltée: ")
-                production_non_recolte_combobox = ttk.Combobox(annee_courante_frame, values=["Oui", "Non"],
+                production_recolte_label = ttk.Label(annee_courante_frame, text="Production récoltée: ")
+                production_recolte_combobox = ttk.Combobox(annee_courante_frame, values=["Oui", "Non"],
                                                                postcommand=lambda: filter_combobox_values(
-                                                                   production_non_recolte_combobox, ["Oui", "Non"]))
-                taux_matiere_seche_label = ttk.Label(annee_courante_frame, text="Taux de matière sèche [0-1]: ")
-                taux_matiere_seche_entry = ttk.Entry(annee_courante_frame)
+                                                                   production_recolte_combobox, ["Oui", "Non"]))
+                pourcentage_humidite_label = ttk.Label(annee_courante_frame, text="Pourcentage d'humidité [0-100]: ")
+                pourcentage_humidite_entry = ttk.Entry(annee_courante_frame)
                 travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
                 global types_travail_du_sol_supportes
                 travail_du_sol_combobox = ttk.Combobox(annee_courante_frame, values=types_travail_du_sol_supportes,
                                                        postcommand=lambda: filter_combobox_values(
                                                            travail_du_sol_combobox,
                                                            types_travail_du_sol_supportes))
-                profondeur_maximale_label = ttk.Label(annee_courante_frame, text="Profondeur maxiamle (cm): ")
-                profondeur_maximale_entry = ttk.Entry(annee_courante_frame)
                 culture_secondaire_label = ttk.Label(annee_courante_frame, text="Culture secondaire: ")
                 global cultures_secondaires_supportees
                 culture_secondaire_combobox = ttk.Combobox(annee_courante_frame, values=cultures_secondaires_supportees,
@@ -1600,18 +1597,16 @@ def initialize_run_gui():
                     if regie["culture_principale"]["rendement"] is not None:
                         rendement_entry.insert(0, str(regie["culture_principale"]["rendement"]))
 
-                    if regie["culture_principale"]["proportion_tige_exporte"] is not None:
+                    if regie["culture_principale"]["pourcentage_tige_exporte"] is not None:
                         proportion_tige_exporte_entry.insert(0, str(
-                            regie["culture_principale"]["proportion_tige_exporte"]))
+                            regie["culture_principale"]["pourcentage_tige_exporte"]))
                     if regie["culture_principale"]["produit_non_recolte"]:
-                        production_non_recolte_combobox.set("Oui")
+                        production_recolte_combobox.set("Oui")
                     else:
-                        production_non_recolte_combobox.set("Non")
-                    if regie["culture_principale"]["taux_matiere_seche"] is not None:
-                        taux_matiere_seche_entry.insert(0, str(regie["culture_principale"]["taux_matiere_seche"]))
+                        production_recolte_combobox.set("Non")
+                    if regie["culture_principale"]["pourcentage_humidite"] is not None:
+                        pourcentage_humidite_entry.insert(0, str(regie["culture_principale"]["pourcentage_humidite"]))
                     travail_du_sol_combobox.set(regie["travail_du_sol"]["travail_du_sol"])
-                    if regie["travail_du_sol"]["profondeur_du_travail"] is not None:
-                        profondeur_maximale_entry.insert(0, str(regie["travail_du_sol"]["profondeur_du_travail"]))
                     if regie["culture_secondaire"]["culture_secondaire"] is not None:
                         culture_secondaire_combobox.set(regie["culture_secondaire"]["culture_secondaire"])
                     if regie["culture_secondaire"]["rendement"]:
@@ -1629,14 +1624,12 @@ def initialize_run_gui():
                 rendement_entry.grid(row=1, column=1, sticky="w", pady=3)
                 proportion_tige_exporte_label.grid(row=2, column=0, sticky="w", pady=3)
                 proportion_tige_exporte_entry.grid(row=2, column=1, sticky="w", pady=3)
-                production_non_recolte_label.grid(row=3, column=0, sticky="w", pady=3)
-                production_non_recolte_combobox.grid(row=3, column=1, sticky="w", pady=3)
-                taux_matiere_seche_label.grid(row=4, column=0, sticky="w", pady=3)
-                taux_matiere_seche_entry.grid(row=4, column=1, sticky="w", pady=3)
+                production_recolte_label.grid(row=3, column=0, sticky="w", pady=3)
+                production_recolte_combobox.grid(row=3, column=1, sticky="w", pady=3)
+                pourcentage_humidite_label.grid(row=4, column=0, sticky="w", pady=3)
+                pourcentage_humidite_entry.grid(row=4, column=1, sticky="w", pady=3)
                 travail_du_sol_label.grid(row=5, column=0, sticky="w", pady=3)
                 travail_du_sol_combobox.grid(row=5, column=1, sticky="w", pady=3)
-                profondeur_maximale_label.grid(row=6, column=0, sticky="w", pady=3)
-                profondeur_maximale_entry.grid(row=6, column=1, sticky="w", pady=3)
                 culture_secondaire_label.grid(row=7, column=0, sticky="w", pady=3)
                 culture_secondaire_combobox.grid(row=7, column=1, sticky="w", pady=3)
                 rendement_culture_secondaire_label.grid(row=8, column=0, sticky="w", pady=3)
@@ -1662,7 +1655,6 @@ def initialize_run_gui():
                 if len(entree_invalide_liste) == 0:
                     response = requests.post('http://localhost:5000/api/icbm-bilan', json={"simulations": simulations})
                     print(response.text)
-                    # TODO: Ajouter la suite avec la generation du rapport
                     creation_du_rapport(response.json())
                 else:
                     message = ""
@@ -1799,51 +1791,51 @@ def initialize_run_gui():
                             rendement = None
                         if rendement is not None and util.is_decimal_number(rendement) and float(rendement) >= 0:
                             rendement = float(rendement)
-                        proportion_tige_exporte = regie.grid_slaves(row=2, column=1)[0].get()
+                        pourcentage_tige_exporte = regie.grid_slaves(row=2, column=1)[0].get()
                         if (not util.is_decimal_number(
-                                proportion_tige_exporte) and proportion_tige_exporte != "") or (
-                                util.is_decimal_number(proportion_tige_exporte) and (
-                                float(proportion_tige_exporte) < 0 or float(proportion_tige_exporte) > 1)):
+                                pourcentage_tige_exporte) and pourcentage_tige_exporte != "") or (
+                                util.is_decimal_number(pourcentage_tige_exporte) and (
+                                float(pourcentage_tige_exporte) < 0 or float(pourcentage_tige_exporte) > 100)):
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone gestion " + str(zone_index + 1),
-                                 "\"Proportion tige exportée\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
+                                 "\"Pourcentage paille ou tige exportée\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
                                  "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
-                        if proportion_tige_exporte == "":
-                            proportion_tige_exporte = None
-                        if proportion_tige_exporte is not None and util.is_decimal_number(proportion_tige_exporte):
-                            proportion_tige_exporte = float(proportion_tige_exporte)
-                        production_non_recolte = regie.grid_slaves(row=3, column=1)[0].get()
-                        if production_non_recolte not in ["Oui", "Non"]:
+                        if pourcentage_tige_exporte == "":
+                            pourcentage_tige_exporte = None
+                        if pourcentage_tige_exporte is not None and util.is_decimal_number(pourcentage_tige_exporte):
+                            pourcentage_tige_exporte = float(pourcentage_tige_exporte)
+                        production_recolte = regie.grid_slaves(row=3, column=1)[0].get()
+                        if production_recolte not in ["Oui", "Non"]:
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone gestion " + str(zone_index + 1),
-                                 "\"Production non récolté\" doit être l'une des options de la combobox",
+                                 "\"Production récolté\" doit être l'une des options de la combobox",
                                  "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
                         else:
-                            if production_non_recolte == "Oui":
-                                production_non_recolte = True
+                            if production_recolte == "Oui":
+                                production_recolte = True
                             else:
-                                production_non_recolte = False
-                        taux_matiere_seche = regie.grid_slaves(row=4, column=1)[0].get()
+                                production_recolte = False
+                        pourcentage_humidite = regie.grid_slaves(row=4, column=1)[0].get()
                         if (not util.is_decimal_number(
-                                taux_matiere_seche) and taux_matiere_seche != "") or (
-                                util.is_decimal_number(taux_matiere_seche) and (
-                                float(taux_matiere_seche) < 0 or float(taux_matiere_seche) > 1)):
+                                pourcentage_humidite) and pourcentage_humidite != "") or (
+                                util.is_decimal_number(pourcentage_humidite) and (
+                                float(pourcentage_humidite) < 0 or float(pourcentage_humidite) > 100)):
                             entree_invalide_liste.append(
                                 (information_champs[champs_index]["nom_du_champs"],
                                  "Zone gestion " + str(zone_index + 1),
-                                 "\"Taux matière sèche\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
+                                 "\"Pourcentage d'humidité\" doit être un réel positif dans l'intervalle [0,100] ou le champs peut être vide pour aller chercher une proportion par défaut",
                                  "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
-                        if taux_matiere_seche == "":
-                            taux_matiere_seche = None
-                        if taux_matiere_seche is not None and util.is_decimal_number(taux_matiere_seche):
-                            taux_matiere_seche = float(taux_matiere_seche)
+                        if pourcentage_humidite == "":
+                            pourcentage_humidite = None
+                        if pourcentage_humidite is not None and util.is_decimal_number(pourcentage_humidite):
+                            pourcentage_humidite = float(pourcentage_humidite)
                         culture_principale_dict = {"culture_principale": culture_principale,
                                                    "rendement": rendement,
-                                                   "proportion_tige_exporte": proportion_tige_exporte,
-                                                   "produit_non_recolte": production_non_recolte,
-                                                   "taux_matiere_seche": taux_matiere_seche}
+                                                   "pourcentage_tige_exporte": pourcentage_tige_exporte,
+                                                   "produit_non_recolte": production_recolte,
+                                                   "pourcentage_humidite": pourcentage_humidite}
                         travail_du_sol = regie.grid_slaves(row=5, column=1)[0].get()
                         global types_travail_du_sol_supportes
                         if travail_du_sol not in types_travail_du_sol_supportes:
@@ -1852,20 +1844,7 @@ def initialize_run_gui():
                                  "Zone gestion " + str(zone_index + 1),
                                  "\"Travail du sol\" doit être parmis les choix disponibles",
                                  "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
-                        profondeur = regie.grid_slaves(row=6, column=1)[0].get()
-                        if not util.is_decimal_number(profondeur) or float(
-                                profondeur) < 0:
-                            entree_invalide_liste.append(
-                                (information_champs[champs_index]["nom_du_champs"],
-                                 "Zone gestion " + str(zone_index + 1),
-                                 "\"Profondeur\" doit être un réel positif",
-                                 "Régie projection Simulation " + duree_simulation[simulation_index]["nom_simulation"]))
-                        if profondeur == "":
-                            profondeur = None
-                        if profondeur is not None and util.is_decimal_number(profondeur):
-                            profondeur = float(profondeur)
-                        travail_du_sol_dict = {"travail_du_sol": travail_du_sol,
-                                               "profondeur_du_travail": profondeur}
+                        travail_du_sol_dict = {"travail_du_sol": travail_du_sol}
                         culture_secondaire = regie.grid_slaves(row=7, column=1)[0].get()
                         global cultures_secondaires_supportees
                         if culture_secondaire == "":
@@ -2149,15 +2128,14 @@ def initialize_run_gui():
                             regie = regies_de_rechauffement[index_regie]
                             culture_principale = regie.grid_slaves(row=0, column=1)[0].get()
                             rendement = regie.grid_slaves(row=1, column=1)[0].get()
-                            proportion_tige_exporte = regie.grid_slaves(row=2, column=1)[0].get()
-                            production_non_recolte = regie.grid_slaves(row=3, column=1)[0].get()
-                            taux_matiere_seche = regie.grid_slaves(row=4, column=1)[0].get()
+                            pourcentage_tige_exporte = regie.grid_slaves(row=2, column=1)[0].get()
+                            production_recolte = regie.grid_slaves(row=3, column=1)[0].get()
+                            pourcentage_humidite = regie.grid_slaves(row=4, column=1)[0].get()
                             travail_du_sol = regie.grid_slaves(row=5, column=1)[0].get()
-                            profondeur = regie.grid_slaves(row=6, column=1)[0].get()
                             culture_secondaire = regie.grid_slaves(row=7, column=1)[0].get()
                             rendement_culture_secondaire = regie.grid_slaves(row=8, column=1)[0].get()
                             regie_vide = {"partie_culture": False, "partie_amendement": False}
-                            if culture_principale == "" and rendement == "" and proportion_tige_exporte == "" and production_non_recolte == "" and taux_matiere_seche == "" and travail_du_sol == "" and profondeur == "" and culture_secondaire == "" and rendement_culture_secondaire == "":
+                            if culture_principale == "" and rendement == "" and pourcentage_tige_exporte == "" and production_recolte == "" and pourcentage_humidite == "" and travail_du_sol == "" and culture_secondaire == "" and rendement_culture_secondaire == "":
                                 regie_vide["partie_culture"] = True
                             else:
                                 global cultures_principales_supportees
@@ -2178,48 +2156,48 @@ def initialize_run_gui():
                                 if rendement is not None and util.is_decimal_number(rendement):
                                     rendement = float(rendement)
                                 if (not util.is_decimal_number(
-                                        proportion_tige_exporte) and proportion_tige_exporte != "") or (
-                                        util.is_decimal_number(proportion_tige_exporte) and (
-                                        float(proportion_tige_exporte) < 0 or float(proportion_tige_exporte) > 1)):
+                                        pourcentage_tige_exporte) and pourcentage_tige_exporte != "") or (
+                                        util.is_decimal_number(pourcentage_tige_exporte) and (
+                                        float(pourcentage_tige_exporte) < 0 or float(pourcentage_tige_exporte) > 100)):
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
                                          "Zone gestion " + str(zone_index + 1),
                                          "\"Proportion tige exportée\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
                                          "section Données réchauffement"))
-                                if proportion_tige_exporte == "":
-                                    proportion_tige_exporte = None
-                                if proportion_tige_exporte is not None and util.is_decimal_number(
-                                        proportion_tige_exporte):
-                                    proportion_tige_exporte = float(proportion_tige_exporte)
-                                if production_non_recolte not in ["Oui", "Non"]:
+                                if pourcentage_tige_exporte == "":
+                                    pourcentage_tige_exporte = None
+                                if pourcentage_tige_exporte is not None and util.is_decimal_number(
+                                        pourcentage_tige_exporte):
+                                    pourcentage_tige_exporte = float(pourcentage_tige_exporte)
+                                if production_recolte not in ["Oui", "Non"]:
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
                                          "Zone gestion " + str(zone_index + 1),
-                                         "\"Production non récolté\" doit être parmis les choix disponibles",
+                                         "\"Production récolté\" doit être parmis les choix disponibles",
                                          "sectionDonnées réchauffement"))
                                 else:
-                                    if production_non_recolte == "Oui":
-                                        production_non_recolte = True
+                                    if production_recolte == "Oui":
+                                        production_recolte = True
                                     else:
-                                        production_non_recolte = False
+                                        production_recolte = False
                                 if (not util.is_decimal_number(
-                                        taux_matiere_seche) and taux_matiere_seche != "") or (
-                                        util.is_decimal_number(taux_matiere_seche) and (
-                                        float(taux_matiere_seche) < 0 or float(taux_matiere_seche) > 1)):
+                                        pourcentage_humidite) and pourcentage_humidite != "") or (
+                                        util.is_decimal_number(pourcentage_humidite) and (
+                                        float(pourcentage_humidite) < 0 or float(pourcentage_humidite) > 100)):
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
                                          "Zone gestion " + str(zone_index + 1),
-                                         "\"Taux matière sèche\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut",
+                                         "\"Pourcentage d'humidité\" doit être un réel positif dans l'intervalle [0,100] ou le champs peut être vide pour aller chercher une proportion par défaut",
                                          "section Données réchauffement"))
-                                if taux_matiere_seche == "":
-                                    taux_matiere_seche = None
-                                if taux_matiere_seche is not None and util.is_decimal_number(taux_matiere_seche):
-                                    taux_matiere_seche = float(taux_matiere_seche)
+                                if pourcentage_humidite == "":
+                                    pourcentage_humidite = None
+                                if pourcentage_humidite is not None and util.is_decimal_number(pourcentage_humidite):
+                                    pourcentage_humidite = float(pourcentage_humidite)
                                 culture_principale_dict = {"culture_principale": culture_principale,
                                                            "rendement": rendement,
-                                                           "proportion_tige_exporte": proportion_tige_exporte,
-                                                           "produit_non_recolte": production_non_recolte,
-                                                           "taux_matiere_seche": taux_matiere_seche}
+                                                           "pourcentage_tige_exporte": pourcentage_tige_exporte,
+                                                           "produit_non_recolte": production_recolte,
+                                                           "pourcentage_humidite": pourcentage_humidite}
                                 global types_travail_du_sol_supportes
                                 if travail_du_sol not in types_travail_du_sol_supportes:
                                     entree_invalide_liste.append(
@@ -2227,19 +2205,7 @@ def initialize_run_gui():
                                          "Zone gestion " + str(zone_index + 1),
                                          "\"Travail du sol\" doit être parmis les choix disponibles",
                                          " section Données réchauffement"))
-                                if not util.is_decimal_number(profondeur) or float(
-                                        profondeur) < 0:
-                                    entree_invalide_liste.append(
-                                        (information_champs[champs_index]["nom_du_champs"],
-                                         "Zone gestion " + str(zone_index + 1),
-                                         "\"Profondeur\" doit être un réel positif",
-                                         "section Données réchauffement"))
-                                if profondeur == "":
-                                    profondeur = None
-                                if profondeur is not None and util.is_decimal_number(profondeur):
-                                    profondeur = float(profondeur)
-                                travail_du_sol_dict = {"travail_du_sol": travail_du_sol,
-                                                       "profondeur_du_travail": profondeur}
+                                travail_du_sol_dict = {"travail_du_sol": travail_du_sol}
                                 global cultures_secondaires_supportees
                                 if culture_secondaire == "":
                                     culture_secondaire = None
@@ -2786,10 +2752,11 @@ def initialize_run_gui():
 
                 root.withdraw()
 
+                #TODO: s'assurer que cette partie fonction de la bonne façon
                 def get_nouvel_amendement():
                     entree_invalide_liste = []
                     amendement = amendement_entry.get()
-                    matiere_seche = matiere_seche_entry.get()
+                    pourcentage_humidite = pourcentage_humidite_entry.get()
                     rapport_carbone_sur_azote = rapport_carbone_sur_azote_entry.get()
                     azote_total = azote_total_entry.get()
                     if not amendement.isalnum():
@@ -2799,12 +2766,12 @@ def initialize_run_gui():
                     if amendement.isalnum() and amendement in amendements_supportees:
                         entree_invalide_liste.append(
                             "Un amendement avec un tel nom existe déjà.")
-                    if not util.is_decimal_number(matiere_seche):
+                    if not util.is_decimal_number(pourcentage_humidite):
                         entree_invalide_liste.append(
-                            "La matière sèche doit être un réel positif dans l'intervalle [0-100].")
-                    if util.is_decimal_number(matiere_seche) and 0 <= float(matiere_seche) <= 100:
+                            "Le pourcentage d'humidité doit être un réel positif dans l'intervalle [0-100].")
+                    if util.is_decimal_number(pourcentage_humidite) and 0 <= float(pourcentage_humidite) <= 100:
                         entree_invalide_liste.append(
-                            "La matière sèche doit être un réel positif dans l'intervalle [0-100].")
+                            "Le pourcentage d'humidité doit être un réel positif dans l'intervalle [0-100].")
                     if not util.is_decimal_number(rapport_carbone_sur_azote):
                         entree_invalide_liste.append("Le rapport de carbone sur azote doit être un réel positif.")
                     if not util.is_decimal_number(azote_total):
@@ -2817,7 +2784,7 @@ def initialize_run_gui():
                     else:
                         response = requests.post('http://localhost:5000/api/ajout-amendement',
                                                  json={"amendement": amendement,
-                                                       "matiere_seche": matiere_seche,
+                                                       "pourcentage_humidite": pourcentage_humidite,
                                                        "carbon_nitrogen": rapport_carbone_sur_azote,
                                                        "nitrogen_total": azote_total})
                         if response.status_code == 200:
@@ -2827,7 +2794,7 @@ def initialize_run_gui():
                         else:
                             messagebox.showinfo("Ajout amendement", "L'ajout d'amendement a échoué")
                             ajouter_un_nouvel_amendement({"amendement": amendement,
-                                                          "matiere_seche": matiere_seche,
+                                                          "pourcentage_humidite": pourcentage_humidite,
                                                           "carbon_nitrogen": rapport_carbone_sur_azote,
                                                           "nitrogen_total": azote_total})
 
@@ -2836,22 +2803,23 @@ def initialize_run_gui():
                 nouvel_amendement_window.protocol("WM_DELETE_WINDOW", fenetre_nouvel_amendement_ferme)
                 amendement_label = ttk.Label(nouvel_amendement_frame, text="Amendement: ")
                 amendement_entry = ttk.Entry(nouvel_amendement_frame)
-                matiere_seche_label = ttk.Label(nouvel_amendement_frame, text="Matière sèche (% sur base humide): ")
-                matiere_seche_entry = ttk.Entry(nouvel_amendement_frame)
+                pourcentage_humidite_label = ttk.Label(nouvel_amendement_frame, text="Pourcentage d'humidité [0-100]: ")
+                pourcentage_humidite_entry = ttk.Entry(nouvel_amendement_frame)
                 rapport_carbone_sur_azote_label = ttk.Label(nouvel_amendement_frame, text="Rapport C/N:")
                 rapport_carbone_sur_azote_entry = ttk.Entry(nouvel_amendement_frame)
                 azote_total_label = ttk.Label(nouvel_amendement_frame, text="Azote total: ")
                 azote_total_entry = ttk.Entry(nouvel_amendement_frame)
-                ajout_amendement_button = ttk.Button(nouvel_amendement_frame, text="Ajouter l'amendement", command=get_nouvel_amendement)
+                ajout_amendement_button = ttk.Button(nouvel_amendement_frame, text="Ajouter l'amendement",
+                                                     command=get_nouvel_amendement)
                 if data is not None:
                     amendement_entry.insert(0, data["amendement"])
-                    matiere_seche_entry.insert(0, data["matiere_seche"])
+                    pourcentage_humidite_entry.insert(0, data["pourcentage_humidite"])
                     rapport_carbone_sur_azote_entry.insert(0, data["carbon_nitrogen"])
                     azote_total_entry.insert(0, data["nitrogen_total"])
                 amendement_label.grid(row=0, column=0, pady=3, padx=5)
                 amendement_entry.grid(row=0, column=1, pady=3, padx=5)
-                matiere_seche_label.grid(row=1, column=0, pady=3, padx=5)
-                matiere_seche_entry.grid(row=1, column=1, pady=3, padx=5)
+                pourcentage_humidite_label.grid(row=1, column=0, pady=3, padx=5)
+                pourcentage_humidite_entry.grid(row=1, column=1, pady=3, padx=5)
                 rapport_carbone_sur_azote_label.grid(row=2, column=0, pady=3, padx=5)
                 rapport_carbone_sur_azote_entry.grid(row=2, column=1, pady=3, padx=5)
                 azote_total_label.grid(row=3, column=0, pady=3, padx=5)
@@ -2960,7 +2928,7 @@ def initialize_run_gui():
                                                         filetypes=(("xlsx files", "*.xlsx"), ("all files", "*.*")))
                 if filename == "":
                     root.deiconify()
-                    return (1, "")
+                    return 1, ""
                 if ".xlsx" not in filename:
                     filename = filename + ".xlsx"
                 try:

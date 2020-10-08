@@ -11,27 +11,43 @@ class RegieDesSolsEtCultures:
 
     def calculer_apport_annuel_en_carbone_de_la_regie(self):
         culture_principale = self.__culture_principale.get_coefficient_calcul()
-        culture_secondaire = self.__culture_secondaire.get_coefficient_calcul()
         apport_culture_principale = self.__culture_principale.calculer_apport_en_carbone_culture_principale()
-        apport_culture_secondaire = self.__culture_secondaire.calculer_apport_en_carbone_culture_secondaire()
         apport_amendements = self.__amendements.calculer_apport_en_carbone_amendements()
         apport_culture_principale_racinaire = apport_culture_principale / (
                 culture_principale.biomasse_aerienne_sur_racinaire + 1)
         apport_culture_principale_aerienne = apport_culture_principale_racinaire * culture_principale.biomasse_aerienne_sur_racinaire
-        apport_culture_secondaire_racinaire = apport_culture_secondaire / (
-                culture_secondaire.biomasse_aerienne_sur_racinaire + 1)
-        apport_culture_secondaire_aerienne = apport_culture_secondaire_racinaire * culture_secondaire.biomasse_aerienne_sur_racinaire
-        return ((apport_culture_principale
-                 + apport_culture_secondaire
-                 + apport_amendements)
-                * self.__travail_du_sol.calculer_facteur_apport_en_carbone_travail_du_sol(),
-                apport_culture_principale,
-                apport_culture_secondaire,
-                apport_amendements,
-                apport_culture_principale_aerienne,
-                apport_culture_principale_racinaire,
-                apport_culture_secondaire_aerienne,
-                apport_culture_secondaire_racinaire)
+        if self.__culture_secondaire.est_non_null():
+            culture_secondaire = self.__culture_secondaire.get_coefficient_calcul()
+            apport_culture_secondaire = self.__culture_secondaire.calculer_apport_en_carbone_culture_secondaire()
+            apport_culture_secondaire_racinaire = apport_culture_secondaire / (
+                    culture_secondaire.biomasse_aerienne_sur_racinaire + 1)
+            apport_culture_secondaire_aerienne = apport_culture_secondaire_racinaire * culture_secondaire.biomasse_aerienne_sur_racinaire
+            return ((apport_culture_principale
+                     + apport_culture_secondaire
+                     + apport_amendements)
+                    * self.__travail_du_sol.calculer_facteur_apport_en_carbone_travail_du_sol(),
+                    apport_culture_principale,
+                    apport_culture_secondaire,
+                    apport_amendements,
+                    apport_culture_principale_aerienne,
+                    apport_culture_principale_racinaire,
+                    apport_culture_secondaire_aerienne,
+                    apport_culture_secondaire_racinaire)
+        else:
+            apport_culture_secondaire = 0
+            apport_culture_secondaire_racinaire = 0
+            apport_culture_secondaire_aerienne = 0
+            return ((apport_culture_principale
+                     + apport_culture_secondaire
+                     + apport_amendements)
+                    * self.__travail_du_sol.calculer_facteur_apport_en_carbone_travail_du_sol(),
+                    apport_culture_principale,
+                    apport_culture_secondaire,
+                    apport_amendements,
+                    apport_culture_principale_aerienne,
+                    apport_culture_principale_racinaire,
+                    apport_culture_secondaire_aerienne,
+                    apport_culture_secondaire_racinaire)
 
     def set_annee_de_culture(self, annee_de_culture):
         self.__annee_de_culture = annee_de_culture
@@ -48,40 +64,40 @@ class RegieDesSolsEtCultures:
 
 class CulturePrincipale:
 
-    def __init__(self, type_de_culture_principale, rendement, proportion_tige_exporte, produit_non_recolte,
-                 est_derniere_annee_rotation_plante_fourragere, taux_matiere_seche=None):
+    def __init__(self, type_de_culture_principale, rendement, pourcentage_tige_exporte, produit_non_recolte,
+                 est_derniere_annee_rotation_plante_fourragere, pourcentage_humidite=None):
         self.__coefficient_des_residus_de_culture = get_coefficients_des_residus_de_culture(type_de_culture_principale)
         self.__type_de_culture_principale = type_de_culture_principale
         self.__rendement = rendement
-        if proportion_tige_exporte is not None:
-            self.__proportion_tige_exporte = proportion_tige_exporte
+        if pourcentage_tige_exporte is not None:
+            self.__pourcentage_tige_exporte = pourcentage_tige_exporte
         else:
-            self.__proportion_tige_exporte = self.__coefficient_des_residus_de_culture.proportion_des_tiges_exportees
-        self.__produit_non_recolte = produit_non_recolte
+            self.__pourcentage_tige_exporte = self.__coefficient_des_residus_de_culture.pourcentage_des_tiges_exportees
+        self.__produit_recolte = produit_non_recolte
         self.__est_derniere_annee_rotation_plante_fourragere = est_derniere_annee_rotation_plante_fourragere
-        if taux_matiere_seche is not None:
-            self.__taux_matiere_seche = taux_matiere_seche
+        if pourcentage_humidite is not None:
+            self.__pourcentage_humidite = pourcentage_humidite
         else:
-            self.__taux_matiere_seche = self.__coefficient_des_residus_de_culture.taux_matiere_seche
+            self.__pourcentage_humidite = self.__coefficient_des_residus_de_culture.pourcentage_humidite
 
     def calculer_apport_en_carbone_culture_principale(self):
         conversion_de_ton_ha_a_kg_m2 = 1000 / 10000
-        proportion_tige_laissee_au_champs = (1 - self.__proportion_tige_exporte)
+        proportion_tige_laissee_au_champs = (1 - (self.__pourcentage_tige_exporte/100))
         coefficient_de_calcul = get_coefficients_des_residus_de_culture(self.__type_de_culture_principale)
         if self.__type_de_culture_principale not in get_cultures_fourrageres():
-            quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * self.__taux_matiere_seche
+            quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * (1-(self.__pourcentage_humidite/100))
             quantite_carbone_partie_tige_non_recolte = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_tige_non_recolte / coefficient_de_calcul.ratio_partie_recolte) * proportion_tige_laissee_au_champs
             quantite_carbone_partie_racinaire = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_racinaire / coefficient_de_calcul.ratio_partie_recolte)
             quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_extra_racinaire / coefficient_de_calcul.ratio_partie_recolte)
-            if self.__produit_non_recolte:
-                return quantite_carbone_partie_recolte + quantite_carbone_partie_tige_non_recolte + quantite_carbone_partie_racinaire + quantite_carbone_partie_extra_racinaire
-            else:
+            if self.__produit_recolte:
                 return quantite_carbone_partie_tige_non_recolte + quantite_carbone_partie_racinaire + quantite_carbone_partie_extra_racinaire
+            else:
+                return quantite_carbone_partie_recolte + quantite_carbone_partie_tige_non_recolte + quantite_carbone_partie_racinaire + quantite_carbone_partie_extra_racinaire
         else:
-            quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * self.__taux_matiere_seche * proportion_tige_laissee_au_champs
+            quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * (1-(self.__pourcentage_humidite/100)) * proportion_tige_laissee_au_champs
             quantite_carbone_partie_racinaire = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_racinaire / coefficient_de_calcul.ratio_partie_recolte)
             quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
@@ -108,7 +124,7 @@ class CultureSecondaire:
             return 0
         conversion_de_ton_ha_a_kg_m2 = 1000 / 10000
         coefficient_de_calcul = get_coefficients_culture_secondaire(self.__type_de_culture_secondaire)
-        proportion_tige_laissee_au_champs = (1 - coefficient_de_calcul.proportion_des_tiges_exportees)
+        proportion_tige_laissee_au_champs = (1 - (coefficient_de_calcul.pourcentage_des_tiges_exportees/100))
         quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * coefficient_de_calcul.taux_matiere_seche
         quantite_carbone_partie_tige_non_recolte = quantite_carbone_partie_recolte * (
                 coefficient_de_calcul.ratio_partie_tige_non_recolte / coefficient_de_calcul.ratio_partie_recolte) * proportion_tige_laissee_au_champs
@@ -120,6 +136,12 @@ class CultureSecondaire:
 
     def get_coefficient_calcul(self):
         return get_coefficients_culture_secondaire(self.__type_de_culture_secondaire)
+
+    def est_non_null(self):
+        if self.__type_de_culture_secondaire is not None:
+            return True
+        else:
+            return False
 
     def generer_bilan_culture_secondaire(self):
         return {"culture_secondaire": self.__type_de_culture_secondaire}
@@ -161,9 +183,8 @@ class Amendement:
 
 
 class TravailDuSol:
-    def __init__(self, type_de_travail_du_sol, profondeur_maximale_du_travail):
+    def __init__(self, type_de_travail_du_sol):
         self.__type_de_travail_du_sol = type_de_travail_du_sol
-        self.__profondeur_maximale_du_travail = profondeur_maximale_du_travail
 
     def calculer_facteur_apport_en_carbone_travail_du_sol(self):
         return get_facteur_travail_du_sol(self.__type_de_travail_du_sol).facteur_travail_du_sol

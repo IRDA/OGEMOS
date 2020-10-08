@@ -281,7 +281,6 @@ def __regie_sol_et_culture_mapping(data, municipalite):
 
 def __travail_du_sol_mapping(data):
     travail_du_sol = data["travail_du_sol"]
-    profondeur_du_travail = data["profondeur_du_travail"]
     types_travail_du_sol_supportee = get_types_travail_du_sol_supportes()
 
     try:
@@ -290,13 +289,7 @@ def __travail_du_sol_mapping(data):
         message_erreur = str(travail_du_sol) + " n'est pas un travail du sol supporté."
         abort(400, message_erreur)
 
-    try:
-        assert isinstance(profondeur_du_travail, (float, int))
-    except AssertionError:
-        message_erreur = str(travail_du_sol) + " n'est pas une profondeur du travail valide. Voir documentation API."
-        abort(400, message_erreur)
-
-    return TravailDuSol(travail_du_sol, profondeur_du_travail)
+    return TravailDuSol(travail_du_sol)
 
 
 def __amendements_mapping(data):
@@ -357,8 +350,8 @@ def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourr
     else:
         rendement = data["rendement"]
     produit_non_recolte = data["produit_non_recolte"]
-    proportion_tige_exporte = data["proportion_tige_exporte"]
-    taux_matiere_seche = data["taux_matiere_seche"]
+    pourcentage_tige_exporte = data["pourcentage_tige_exporte"]
+    pourcentage_humidite = data["pourcentage_humidite"]
     cultures_supportees = get_cultures_principales_supportees()
 
     try:
@@ -380,27 +373,27 @@ def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourr
         abort(400, message_erreur)
 
     try:
-        assert (isinstance(proportion_tige_exporte,
-                           (float, int)) and proportion_tige_exporte >= 0) or proportion_tige_exporte is None
+        assert (isinstance(pourcentage_tige_exporte,
+                           (float, int)) and 0 <= pourcentage_tige_exporte <= 100) or pourcentage_tige_exporte is None
     except AssertionError:
         message_erreur = str(
-            proportion_tige_exporte) + " n'est pas une proportion tige exporte valide. Voir documentation API."
+            pourcentage_tige_exporte) + " n'est pas une pourcentage tige exporte valide. Voir documentation API."
         abort(400, message_erreur)
 
     try:
-        assert isinstance(taux_matiere_seche, (float, int)) or taux_matiere_seche is None
-        if taux_matiere_seche is not None:
-            assert taux_matiere_seche > 0
+        assert isinstance(pourcentage_humidite, (float, int)) or pourcentage_humidite is None
+        if pourcentage_humidite is not None:
+            assert pourcentage_humidite > 0
     except AssertionError:
-        message_erreur = str(taux_matiere_seche) + " n'est pas un taux de matière sèche valide. Voir documentation API."
+        message_erreur = str(pourcentage_humidite) + " n'est pas un pourcentage d'humidité valide. Voir documentation API."
         abort(400, message_erreur)
 
-    if taux_matiere_seche is None:
-        return CulturePrincipale(culture_principale, rendement, proportion_tige_exporte, produit_non_recolte,
+    if pourcentage_humidite is None:
+        return CulturePrincipale(culture_principale, rendement, pourcentage_tige_exporte, produit_non_recolte,
                                  est_derniere_annee_rotation_culture_fourragere)
     else:
-        return CulturePrincipale(culture_principale, rendement, proportion_tige_exporte, produit_non_recolte,
-                                 est_derniere_annee_rotation_culture_fourragere, taux_matiere_seche)
+        return CulturePrincipale(culture_principale, rendement, pourcentage_tige_exporte, produit_non_recolte,
+                                 est_derniere_annee_rotation_culture_fourragere, pourcentage_humidite)
 
 
 def __culture_secondaire_mapping(data):
@@ -408,7 +401,7 @@ def __culture_secondaire_mapping(data):
     rendement = data["rendement"]
 
     if culture_secondaire is None and rendement is None:
-        return CultureSecondaire(culture_secondaire, rendement)
+        return CultureSecondaire(culture_secondaire, 0)
 
     try:
         assert culture_secondaire in get_cultures_secondaires_supportees()
@@ -420,7 +413,7 @@ def __culture_secondaire_mapping(data):
         assert isinstance(rendement, float)
     except AssertionError:
         message_erreur = str(
-            rendement) + " n'est pas une periode d'implantation valide. Voir documentation API."
+            rendement) + " n'est pas une période d'implantation valide. Voir documentation API."
         abort(400, message_erreur)
 
     return CultureSecondaire(culture_secondaire, rendement)
