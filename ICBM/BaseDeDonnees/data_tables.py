@@ -41,8 +41,7 @@ class CoefficientAmendements(Base):
     __tablename__ = 'CoefficientAmendements'
     amendement = Column(String, primary_key=True)
     matiere_seche = Column(Float)  # % sur base humide
-    carbon_nitrogen = Column(Float)
-    nitrogen_total = Column(Float)
+    carbon_total = Column(Float)
     est_amendement_originel_ogemos = Column(Boolean)
 
 
