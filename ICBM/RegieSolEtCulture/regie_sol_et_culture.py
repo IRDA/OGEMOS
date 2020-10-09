@@ -175,7 +175,7 @@ class Amendement:
         if self.__type_amendement is None:
             return 0
         coefficient_de_calcul = get_coefficient_des_amendements(self.__type_amendement)
-        quantite_carbone_amendement = self.__apport * coefficient_de_calcul.nitrogen_total * coefficient_de_calcul.carbon_nitrogen * ha_to_m2
+        quantite_carbone_amendement = self.__apport * coefficient_de_calcul.carbon_total * ha_to_m2
         return quantite_carbone_amendement
 
     def generer_bilan_amendement(self):

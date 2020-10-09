@@ -105,16 +105,10 @@ def __ajout_amendement(data):
                              "matiere_seche"] + "n'est pas une matiere seche valide. Doit être un réel dans l'intervalle [0-100]."
         abort(400, message_erreur)
     try:
-        assert is_decimal_number(data["carbon_nitrogen"])
+        assert is_decimal_number(data["carbon_total"])
     except AssertionError:
         message_erreur = data[
-                             "carbon_nitrogen"] + "n'est pas un rapport carbone sur azote valide. Uniquement caractères numériques et le \".\" acceptés."
-        abort(400, message_erreur)
-    try:
-        assert is_decimal_number(data["nitrogen_total"])
-    except AssertionError:
-        message_erreur = data[
-                             "nitrogen_total"] + "n'est pas un total d'azote valide. Uniquement caractères numériques et le \".\" acceptés."
+                             "carbon_total"] + "n'est pas un total d'azote valide. Uniquement caractères numériques et le \".\" acceptés."
         abort(400, message_erreur)
     return add_amendment(data)
 
