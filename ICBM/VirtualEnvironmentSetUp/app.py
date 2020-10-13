@@ -13,6 +13,7 @@ def post_simulation():
     response = __launch_icbm_simulation(data_request)
     return jsonify(response)
 
+
 @app.route('/api/ajout-amendement', methods=['POST'])
 def ajout_amendement():
     data_request = request.get_json()
@@ -69,12 +70,32 @@ def get_amendement():
     return jsonify(response)
 
 
+@app.route('/api/get-amendement-ajoute', methods=['GET'])
+def get_amendement_ajoutes():
+    response = get_added_amendment()
+    amendements = []
+    for amendement in response:
+        amendements.append(
+            {"amendement": amendement.amendement, "pourcentage_humidite": (100 - amendement.matiere_seche),
+             "carbon_total": amendement.carbon_total})
+    response = {"amendements_ajoutes": amendements}
+    return jsonify(response)
+
+
+@app.route('/api/post-amendement-ajoute', methods=['POST'])
+def post_amendement():
+    data_request = request.get_json()
+    response = __ajout_amendements(data_request)
+    return jsonify(response)
+
+
 def is_decimal_number(string):
     if "." not in string and string.isdigit():
         return True
     if "." in string:
         decimal_parts = string.split(".")
-        if len(decimal_parts) == 2 and decimal_parts[0].isdigit() and (decimal_parts[1].isdigit() or decimal_parts[1] == ""):
+        if len(decimal_parts) == 2 and decimal_parts[0].isdigit() and (
+                decimal_parts[1].isdigit() or decimal_parts[1] == ""):
             return True
         else:
             return False
@@ -90,19 +111,21 @@ def __ajout_amendement(data):
     try:
         assert data["amendement"].isalnum()
     except AssertionError:
-        message_erreur = data["amendement"] + "n'est pas un amendement valide. Uniquement caractères alphanumériques acceptés."
+        message_erreur = data[
+                             "amendement"] + "n'est pas un amendement valide. Uniquement caractères alphanumériques acceptés."
         abort(400, message_erreur)
     try:
-        assert is_decimal_number(data["matiere_seche"])
-    except AssertionError:
-        message_erreur = data["matiere_seche"] + "n'est pas une matiere seche valide. Uniquement caractères numériques et le \".\" acceptés."
-        abort(400, message_erreur)
-    try:
-        if is_decimal_number(data["matiere_seche"]):
-            assert 0 <= float(data["matiere_seche"]) <= 100
+        assert is_decimal_number(data["pourcentage_humidite"])
     except AssertionError:
         message_erreur = data[
-                             "matiere_seche"] + "n'est pas une matiere seche valide. Doit être un réel dans l'intervalle [0-100]."
+                             "pourcentage_humidite"] + "n'est pas un pourcentage d'humidité valide. Uniquement caractères numériques et le \".\" acceptés."
+        abort(400, message_erreur)
+    try:
+        if is_decimal_number(data["pourcentage_humidite"]):
+            assert 0 <= float(data["pourcentage_humidite"]) <= 100
+    except AssertionError:
+        message_erreur = data[
+                             "pourcentage_humidite"] + "n'est pas un pourcentage d'humidité valide. Doit être un réel dans l'intervalle [0-100]."
         abort(400, message_erreur)
     try:
         assert is_decimal_number(data["carbon_total"])
@@ -110,7 +133,30 @@ def __ajout_amendement(data):
         message_erreur = data[
                              "carbon_total"] + "n'est pas un total d'azote valide. Uniquement caractères numériques et le \".\" acceptés."
         abort(400, message_erreur)
-    return add_amendment(data)
+    add_amendment(data)
+
+
+def __ajout_amendements(data):
+    for amendement in data["amendements_ajoutes"]:
+        try:
+            assert amendement["amendement"].isalnum()
+        except AssertionError:
+            message_erreur = amendement[
+                                 "amendement"] + "n'est pas un amendement valide. Uniquement caractères alphanumériques acceptés."
+            abort(400, message_erreur)
+        try:
+            assert isinstance(amendement["pourcentage_humidite"], float) and 0 <= float(amendement["pourcentage_humidite"]) <= 100
+        except AssertionError:
+            message_erreur = amendement[
+                                 "pourcentage_humidite"] + "n'est pas un pourcentage d'humidité valide. Doit être un réel dans l'intervalle [0-100]."
+            abort(400, message_erreur)
+        try:
+            assert isinstance(amendement["carbon_total"], float)
+        except AssertionError:
+            message_erreur = amendement[
+                                 "carbon_total"] + "n'est pas un total d'azote valide. Uniquement caractères numériques et le \".\" acceptés."
+            abort(400, message_erreur)
+        add_amendment(amendement)
 
 
 def __simulation_mapping(data):
@@ -260,7 +306,8 @@ def __regie_sol_et_culture_mapping(data, municipalite):
                     culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], True,
                                                                       municipalite)
                 else:
-                    culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], False,
+                    culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"],
+                                                                      False,
                                                                       municipalite)
             else:
                 culture_principale = __culture_principale_mapping(data[iterateur_annee]["culture_principale"], False,
@@ -268,7 +315,8 @@ def __regie_sol_et_culture_mapping(data, municipalite):
             culture_secondaire = __culture_secondaire_mapping(data[iterateur_annee]["culture_secondaire"])
             amendements = __amendements_mapping(data[iterateur_annee]["amendements"])
             travail_du_sol = __travail_du_sol_mapping(data[iterateur_annee]["travail_du_sol"])
-            liste_regies.append(RegieDesSolsEtCultures(culture_principale, culture_secondaire, amendements, travail_du_sol))
+            liste_regies.append(
+                RegieDesSolsEtCultures(culture_principale, culture_secondaire, amendements, travail_du_sol))
         iterateur_annee += 1
     return liste_regies
 
@@ -379,7 +427,8 @@ def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourr
         if pourcentage_humidite is not None:
             assert pourcentage_humidite > 0
     except AssertionError:
-        message_erreur = str(pourcentage_humidite) + " n'est pas un pourcentage d'humidité valide. Voir documentation API."
+        message_erreur = str(
+            pourcentage_humidite) + " n'est pas un pourcentage d'humidité valide. Voir documentation API."
         abort(400, message_erreur)
 
     if pourcentage_humidite is None:

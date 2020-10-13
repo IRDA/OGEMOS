@@ -1568,12 +1568,13 @@ def initialize_run_gui():
                                                                cultures_principales_supportees))
                 rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
                 rendement_entry = ttk.Entry(annee_courante_frame)
-                proportion_tige_exporte_label = ttk.Label(annee_courante_frame, text="Pourcentage paille ou tige exporté [0-100]: ")
+                proportion_tige_exporte_label = ttk.Label(annee_courante_frame,
+                                                          text="Pourcentage paille ou tige exporté [0-100]: ")
                 proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
                 production_recolte_label = ttk.Label(annee_courante_frame, text="Production récoltée: ")
                 production_recolte_combobox = ttk.Combobox(annee_courante_frame, values=["Oui", "Non"],
-                                                               postcommand=lambda: filter_combobox_values(
-                                                                   production_recolte_combobox, ["Oui", "Non"]))
+                                                           postcommand=lambda: filter_combobox_values(
+                                                               production_recolte_combobox, ["Oui", "Non"]))
                 pourcentage_humidite_label = ttk.Label(annee_courante_frame, text="Pourcentage d'humidité [0-100]: ")
                 pourcentage_humidite_entry = ttk.Entry(annee_courante_frame)
                 travail_du_sol_label = ttk.Label(annee_courante_frame, text="Travail du sol: ")
@@ -2752,13 +2753,11 @@ def initialize_run_gui():
 
                 root.withdraw()
 
-                #TODO: s'assurer que cette partie fonction de la bonne façon
                 def get_nouvel_amendement():
                     entree_invalide_liste = []
                     amendement = amendement_entry.get()
                     pourcentage_humidite = pourcentage_humidite_entry.get()
-                    rapport_carbone_sur_azote = rapport_carbone_sur_azote_entry.get()
-                    azote_total = azote_total_entry.get()
+                    carbon_total = carbon_total_entry.get()
                     if not amendement.isalnum():
                         entree_invalide_liste.append(
                             "L'amendement doit être composé uniquement de caractères alphanumérique.")
@@ -2769,12 +2768,11 @@ def initialize_run_gui():
                     if not util.is_decimal_number(pourcentage_humidite):
                         entree_invalide_liste.append(
                             "Le pourcentage d'humidité doit être un réel positif dans l'intervalle [0-100].")
-                    if util.is_decimal_number(pourcentage_humidite) and 0 <= float(pourcentage_humidite) <= 100:
-                        entree_invalide_liste.append(
-                            "Le pourcentage d'humidité doit être un réel positif dans l'intervalle [0-100].")
-                    if not util.is_decimal_number(rapport_carbone_sur_azote):
-                        entree_invalide_liste.append("Le rapport de carbone sur azote doit être un réel positif.")
-                    if not util.is_decimal_number(azote_total):
+                    else:
+                        if not (0 <= float(pourcentage_humidite) <= 100):
+                            entree_invalide_liste.append(
+                                "Le pourcentage d'humidité doit être un réel positif dans l'intervalle [0-100].")
+                    if not util.is_decimal_number(carbon_total):
                         entree_invalide_liste.append("Le total d'azote doit être un réel positif.")
                     if len(entree_invalide_liste) > 0:
                         message = ""
@@ -2785,18 +2783,19 @@ def initialize_run_gui():
                         response = requests.post('http://localhost:5000/api/ajout-amendement',
                                                  json={"amendement": amendement,
                                                        "pourcentage_humidite": pourcentage_humidite,
-                                                       "carbon_nitrogen": rapport_carbone_sur_azote,
-                                                       "nitrogen_total": azote_total})
+                                                       "carbon_total": carbon_total})
                         if response.status_code == 200:
                             messagebox.showinfo("Ajout amendement", "L'ajout d'un amendement a été un succès.")
+                            amendements_supportees_temp = requests.get("http://localhost:5000/api/get-amendement")
+                            amendements_supportees = amendements_supportees_temp.json()["amendements_supportees"]
+                            amendements_supportees.sort()
                             nouvel_amendement_window.destroy()
                             root.deiconify()
                         else:
                             messagebox.showinfo("Ajout amendement", "L'ajout d'amendement a échoué")
                             ajouter_un_nouvel_amendement({"amendement": amendement,
                                                           "pourcentage_humidite": pourcentage_humidite,
-                                                          "carbon_nitrogen": rapport_carbone_sur_azote,
-                                                          "nitrogen_total": azote_total})
+                                                          "carbon_total": carbon_total})
 
                 nouvel_amendement_window = tk.Toplevel()
                 nouvel_amendement_frame = ttk.Frame(nouvel_amendement_window)
@@ -2805,27 +2804,92 @@ def initialize_run_gui():
                 amendement_entry = ttk.Entry(nouvel_amendement_frame)
                 pourcentage_humidite_label = ttk.Label(nouvel_amendement_frame, text="Pourcentage d'humidité [0-100]: ")
                 pourcentage_humidite_entry = ttk.Entry(nouvel_amendement_frame)
-                rapport_carbone_sur_azote_label = ttk.Label(nouvel_amendement_frame, text="Rapport C/N:")
-                rapport_carbone_sur_azote_entry = ttk.Entry(nouvel_amendement_frame)
-                azote_total_label = ttk.Label(nouvel_amendement_frame, text="Azote total: ")
-                azote_total_entry = ttk.Entry(nouvel_amendement_frame)
+                carbon_total_label = ttk.Label(nouvel_amendement_frame, text="Carbon total: ")
+                carbon_total_entry = ttk.Entry(nouvel_amendement_frame)
                 ajout_amendement_button = ttk.Button(nouvel_amendement_frame, text="Ajouter l'amendement",
                                                      command=get_nouvel_amendement)
                 if data is not None:
                     amendement_entry.insert(0, data["amendement"])
                     pourcentage_humidite_entry.insert(0, data["pourcentage_humidite"])
-                    rapport_carbone_sur_azote_entry.insert(0, data["carbon_nitrogen"])
-                    azote_total_entry.insert(0, data["nitrogen_total"])
+                    carbon_total_entry.insert(0, data["carbon_total"])
                 amendement_label.grid(row=0, column=0, pady=3, padx=5)
                 amendement_entry.grid(row=0, column=1, pady=3, padx=5)
                 pourcentage_humidite_label.grid(row=1, column=0, pady=3, padx=5)
                 pourcentage_humidite_entry.grid(row=1, column=1, pady=3, padx=5)
-                rapport_carbone_sur_azote_label.grid(row=2, column=0, pady=3, padx=5)
-                rapport_carbone_sur_azote_entry.grid(row=2, column=1, pady=3, padx=5)
-                azote_total_label.grid(row=3, column=0, pady=3, padx=5)
-                azote_total_entry.grid(row=3, column=1, pady=3, padx=5)
-                ajout_amendement_button.grid(row=4, column=0, columnspan=2, pady=3, padx=5)
+                carbon_total_label.grid(row=2, column=0, pady=3, padx=5)
+                carbon_total_entry.grid(row=2, column=1, pady=3, padx=5)
+                ajout_amendement_button.grid(row=3, column=0, columnspan=2, pady=3, padx=5)
                 nouvel_amendement_frame.pack()
+
+            def menu_transfert_version():
+
+                def fenetre_menu_transfert_ferme():
+                    root.deiconify()
+                    menu_transfert_window.destroy()
+
+                def sauvegarder_amendement_dans_un_fichier():
+                    menu_transfert_window.withdraw()
+                    amendements_ajoutes_filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer",
+                                                                                filetypes=(("json files", "*.json"),
+                                                                                           ("all files", "*.*")))
+                    if amendements_ajoutes_filename == "":
+                        menu_transfert_window.deiconify()
+                        return
+                    if ".json" not in amendements_ajoutes_filename:
+                        amendements_ajoutes_filename = amendements_ajoutes_filename + ".json"
+                    amendements_ajoutes = requests.get("http://localhost:5000/api/get-amendement-ajoute").json()
+                    with open(amendements_ajoutes_filename, 'w') as json_file:
+                        json.dump(amendements_ajoutes, json_file)
+                    menu_transfert_window.deiconify()
+
+                def charger_amendement_a_partir_de_fichier():
+                    menu_transfert_window.withdraw()
+                    amendements_ajoutes_filename = filedialog.askopenfilename(initialdir="/", title="Select file",
+                                                                              filetypes=(
+                                                                                  ("json files", "*.json"),
+                                                                                  ("all files", "*.*")))
+                    if amendements_ajoutes_filename == "":
+                        menu_transfert_window.deiconify()
+                        return
+
+                    with open(amendements_ajoutes_filename) as file:
+                        data = json.load(file)
+
+                    amendements_non_present = []
+                    for amendement in data["amendements_ajoutes"]:
+                        if amendement["amendement"] not in amendements_supportees:
+                            amendements_non_present.append(amendement)
+
+                    data = {"amendements_ajoutes": amendements_non_present}
+
+                    response = requests.post('http://localhost:5000/api/post-amendement-ajoute', json=data)
+
+                    if response.status_code == 200:
+                        messagebox.showinfo(title="Chargement des amendements",
+                                            message="Le chargement a été un succès!")
+                        menu_transfert_window.deiconify()
+                    else:
+                        messagebox.showinfo(title="Chargement des amendements",
+                                            message="Le fichier de sauvegarde a été corrompu!")
+                        menu_transfert_window.deiconify()
+
+                root.withdraw()
+                menu_transfert_window = tk.Toplevel()
+                menu_transfert_window.protocol("WM_DELETE_WINDOW", fenetre_menu_transfert_ferme)
+                menu_transfert_frame = ttk.Frame(menu_transfert_window)
+                menu_transfert_label = ttk.Label(menu_transfert_frame, text="Menu de transfert des amendements")
+                sauvegarder_fichier_transfert_button = ttk.Button(menu_transfert_frame,
+                                                                  text="Sauvegarder amendements ajoutés",
+                                                                  command=sauvegarder_amendement_dans_un_fichier)
+                charger_fichier_transfert_button = ttk.Button(menu_transfert_frame, text="Charger amendements ajoutés",
+                                                              command=charger_amendement_a_partir_de_fichier)
+                retour_menu_principal_button = ttk.Button(menu_transfert_frame, text="Retour au menu principal",
+                                                          command=fenetre_menu_transfert_ferme)
+                menu_transfert_label.grid(row=0, column=0, pady=3, padx=10)
+                sauvegarder_fichier_transfert_button.grid(row=1, column=0,pady=3, padx=10)
+                charger_fichier_transfert_button.grid(row=2, column=0, pady=3, padx=10)
+                retour_menu_principal_button.grid(row=3, column=0, pady=3, padx=10)
+                menu_transfert_frame.pack()
 
             bienvenue_label = ttk.Label(menu_frame, text="Bienvenue dans OGEMOS!")
             nouvelle_entreprise_button = ttk.Button(menu_frame, text="Créer une nouvelle entreprise",
@@ -2837,12 +2901,14 @@ def initialize_run_gui():
                                                                    command=charger_plan_de_gestion_de_carbone)
             ajouter_nouvel_amendement_button = ttk.Button(menu_frame, text="Ajouter un nouvel amendement",
                                                           command=ajouter_un_nouvel_amendement)
-
+            menu_transfert_amendements_button = ttk.Button(menu_frame, text="Menu de transfert de version",
+                                                           command=menu_transfert_version)
             bienvenue_label.pack(pady=5, padx=10)
             nouvelle_entreprise_button.pack(pady=5, padx=10)
             charger_entreprise_button.pack(pady=5, padx=10)
             charger_plan_de_gestion_de_carbone_button.pack(pady=5, padx=10)
             ajouter_nouvel_amendement_button.pack(pady=5, padx=10)
+            menu_transfert_amendements_button.pack(pady=5, padx=10)
 
         def sauvegarder_attributs_entreprise_apres_creation():
             root.withdraw()
