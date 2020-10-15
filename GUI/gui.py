@@ -448,10 +448,10 @@ def initialize_run_gui():
 
             for index_champs in range(int(nombre_de_champs)):
                 global information_champs
-                champs_frame = ttk.LabelFrame(scrollable_frame, text=information_champs[index_champs]["nom_du_champs"])
+                champs_frame = ttk.LabelFrame(scrollable_frame, text=information_champs[index_champs]["nom_du_champs"], name="champ"+str(index_champs))
                 for index_zone_de_gestion in range(int(information_champs[index_champs]["nombre_de_zone_de_gestion"])):
                     zone_de_gestion_frame = ttk.LabelFrame(champs_frame,
-                                                           text="Zone  gestion " + str(index_zone_de_gestion + 1))
+                                                           text="Zone  gestion " + str(index_zone_de_gestion + 1), name="zonegestion"+str(index_zone_de_gestion))
                     zone_frame_generation(zone_de_gestion_frame)
                 champs_frame.pack(fill="both", padx=10, pady=5, ipadx=10, ipady=5)
 
@@ -741,7 +741,7 @@ def initialize_run_gui():
                 global furthest_left_tab_index_champs
                 index_champs = 0
                 for champs in information_champs:
-                    tab = ttk.Frame(champs_notebook)
+                    tab = ttk.Frame(champs_notebook, name="champ" + str(len(champs_notebook.winfo_children())))
 
                     if simulation_en_tete_de_liste:
                         max_index_champs += 1
@@ -867,7 +867,7 @@ def initialize_run_gui():
                                     int(nombre_de_zone_de_gestion)):
                                 zone_de_gestion_frame = ttk.LabelFrame(scrollable_frame,
                                                                        text="Zone gestion " + str(
-                                                                           index_zone_de_gestion_nouveau_champs + 1))
+                                                                           index_zone_de_gestion_nouveau_champs + 1), name="zonegestion"+str(index_zone_de_gestion_nouveau_champs))
                                 zone_frame_generation(zone_de_gestion_frame)
 
                             creation_zone_de_gestion_bouton = ttk.Button(scrollable_frame, text="Créer",
@@ -984,6 +984,7 @@ def initialize_run_gui():
                             global furthest_left_tab_index_champs
                             global max_index_champs
                             global furthest_right_tab_index_champs
+                            index_champ = ""
                             for simulation_frame in simulation_notebook.winfo_children():
                                 if len(simulation_frame.winfo_children()) == 0:
                                     pass
@@ -994,7 +995,8 @@ def initialize_run_gui():
                                             champs_frame.destroy()
                                         else:
                                             pass
-                                    tab = ttk.Frame(notebook)
+                                    index_champ = str(len(notebook.winfo_children()))
+                                    tab = ttk.Frame(notebook, name="champ" + str(len(notebook.winfo_children())))
                                     notebook.add(tab, text=nom_du_champs)
                                     zone_notebook = ttk.Notebook(tab)
                                     set_up_champs(zone_notebook, nombre_de_zone_de_gestion, notebook)
@@ -1010,13 +1012,14 @@ def initialize_run_gui():
                                 scroll_left_button_champs.configure(state="normal")
                             rechauffement_champs_label_frame = ttk.LabelFrame(
                                 donnees_de_rechauffement_label_frame.winfo_children()[0].winfo_children()[0],
-                                text=nom_du_champs)
+                                text=nom_du_champs, name="champ"+index_champ)
                             rechauffement_champs_label_frame.pack()
                             index_zone = 0
                             while index_zone < int(nombre_de_zone_de_gestion):
                                 rechauffement_zone_label_frame = ttk.LabelFrame(rechauffement_champs_label_frame,
                                                                                 text="Zone gestion " + str(
-                                                                                    index_zone + 1))
+                                                                                    index_zone + 1),
+                                                                                name="zonegestion" + str(index_zone))
                                 rechauffement_zone_label_frame.pack()
                                 ajouter_une_annee_a_la_rotation(rechauffement_zone_label_frame)
                                 index_zone += 1
@@ -1310,7 +1313,9 @@ def initialize_run_gui():
                                     champs_index]
                             rechauffement_champs_new_zone_label_frame = ttk.LabelFrame(rechauffement_champs_label_frame,
                                                                                        text="Zone gestion " + str(len(
-                                                                                           rechauffement_champs_label_frame.winfo_children()) + 1))
+                                                                                           rechauffement_champs_label_frame.winfo_children()) + 1),
+                                                                                       name="zonegestion" + str(len(
+                                                                                           rechauffement_champs_label_frame.winfo_children())))
                             rechauffement_champs_new_zone_label_frame.pack()
                             ajouter_une_annee_a_la_rotation(rechauffement_champs_new_zone_label_frame)
                             new_zone_window.destroy()
@@ -1330,7 +1335,8 @@ def initialize_run_gui():
                                         len(champs_courant_zone_notebook.winfo_children()) - 1].destroy()
                                     if furthest_right_tab_index_zone >= 3:
                                         champs_courant_zone_notebook.tab(furthest_left_tab_index_zone, state="hidden")
-                                    tab = ttk.Frame(champs_courant_zone_notebook)
+                                    tab = ttk.Frame(champs_courant_zone_notebook, name="zonegestion" + str(
+                                        len(champs_courant_zone_notebook.winfo_children())))
                                     champs_courant_zone_notebook.add(tab, text="Zone gestion " + str(
                                         len(champs_courant_zone_notebook.winfo_children())))
                                     set_up_regies_projections(tab)
@@ -1364,7 +1370,7 @@ def initialize_run_gui():
 
                 global duree_simulation
                 for zone in range(int(nombre_de_zone)):
-                    zone_tab = ttk.Frame(zone_notebook)
+                    zone_tab = ttk.Frame(zone_notebook, name="zonegestion" + str(zone))
                     zone_notebook.add(zone_tab, text="Zone gestion " + str(zone + 1))
                     set_up_regies_projections(zone_tab, champs, zone)
 
@@ -1501,6 +1507,11 @@ def initialize_run_gui():
                 rechauffement_frame.grid(row=1, column=0, columnspan=2, pady=3)
 
             def ajouter_des_amendements(amendement_frame, amendements=None):
+
+                def on_amendment_selected(event):
+                    if amendement_combobox.get() != "" and apport_amendement_entry.get() == "":
+                        apport_amendement_entry.insert(0, "1.0")
+
                 global amendements_supportees
                 if amendements is not None:
                     index = 0
@@ -1520,6 +1531,7 @@ def initialize_run_gui():
                         amendement_combobox.grid(row=index, column=1, sticky="w", pady=3)
                         apport_amendement_label.grid(row=index + 1, column=0, sticky="w", pady=3)
                         apport_amendement_entry.grid(row=index + 1, column=1, sticky="w", pady=3)
+                        amendement_combobox.bind("<<ComboboxSelected>>", on_amendment_selected)
                         index += 2
                 else:
                     index = 0
@@ -1533,6 +1545,7 @@ def initialize_run_gui():
                     amendement_combobox.grid(row=0, column=1, sticky="w", pady=3)
                     apport_amendement_label.grid(row=1, column=0, sticky="w", pady=3)
                     apport_amendement_entry.grid(row=1, column=1, sticky="w", pady=3)
+                    amendement_combobox.bind("<<ComboboxSelected>>", on_amendment_selected)
                     index += 2
 
                 ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
@@ -1541,6 +1554,11 @@ def initialize_run_gui():
                 ajout_a_la_regie_button.grid(row=index, column=0, columnspan=2, pady=3)
 
             def ajouter_amendement_regie(amendement_frame):
+
+                def on_amendment_selected(event):
+                    if amendement_combobox.get() != "" and apport_amendement_entry.get() == "":
+                        apport_amendement_entry.insert(0, "1.0")
+
                 grid_size = amendement_frame.grid_size()
                 amendement_frame.grid_slaves(grid_size[1] - 1, grid_size[0] - 1)[0].destroy()
                 amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
@@ -1557,8 +1575,76 @@ def initialize_run_gui():
                 apport_amendement_label.grid(row=grid_size[1], column=grid_size[0] - 2, sticky="w", pady=3)
                 apport_amendement_entry.grid(row=grid_size[1], column=grid_size[0] - 1, sticky="w", pady=3)
                 ajout_a_la_regie_button.grid(row=grid_size[1] + 1, column=grid_size[0] - 2, pady=3, columnspan=2)
+                amendement_combobox.bind("<<ComboboxSelected>>", on_amendment_selected)
 
             def add_regies_projection(scrollable_frame, index, regie=None):
+
+                def on_culture_principal_selected(event):
+                    widget_parent = culture_principale_combobox.winfo_parent()
+                    if "notebook" in widget_parent:
+                        widget_parent_split_parts = widget_parent.split(".")
+                        champ = widget_parent_split_parts[6]
+                        zone = widget_parent_split_parts[8]
+                        if champ[len(champ) - 1].isdigit():
+                            index_champ = ""
+                            for caractere in champ:
+                                if caractere.isdigit():
+                                    index_champ = index_champ + caractere
+                            index_champ = int(index_champ)
+                        else:
+                            index_champ = 0
+                        if zone[len(zone) - 1].isdigit():
+                            index_zone = ""
+                            for caractere in zone:
+                                if caractere.isdigit():
+                                    index_zone = index_zone + caractere
+                            index_zone = int(index_zone)
+                        else:
+                            index_zone = 0
+                    else:
+                        widget_parent_split_parts = widget_parent.split(".")
+                        champ = widget_parent_split_parts[6]
+                        zone = widget_parent_split_parts[7]
+                        if champ[len(champ) - 1].isdigit():
+                            index_champ = ""
+                            for caractere in champ:
+                                if caractere.isdigit():
+                                    index_champ = index_champ + caractere
+                            index_champ = int(index_champ)
+                        else:
+                            index_champ = 0
+                        if zone[len(zone) - 1].isdigit():
+                            index_zone = ""
+                            for caractere in zone:
+                                if caractere.isdigit():
+                                    index_zone = index_zone + caractere
+                            index_zone = int(index_zone)
+                        else:
+                            index_zone = 0
+
+                    global information_champs
+                    municipalite = information_champs[index_champ]["information_zone_de_gestion"][index_zone][
+                        "municipalite"]
+                    if culture_principale_combobox.get() != "":
+                        request_json = {"culture_principale": culture_principale_combobox.get(),
+                                        "municipalite": municipalite}
+                        response = requests.post('http://localhost:5000/api/get-parametres-defauts-culture_principale',
+                                                 json=request_json)
+                        if rendement_entry.get() == "":
+                            rendement_entry.insert(0, response.json()["rendement"])
+                        if pourcentage_tige_exporte_entry.get() == "":
+                            pourcentage_tige_exporte_entry.insert(0, response.json()["pourcentage_tige_exportee"])
+                        if production_recolte_combobox.get() == "":
+                            production_recolte_combobox.insert(0, "Oui")
+                        if pourcentage_humidite_entry.get() == "":
+                            pourcentage_humidite_entry.insert(0, response.json()["pourcentage_humidite"])
+                        if travail_du_sol_combobox.get() == "":
+                            travail_du_sol_combobox.insert(0, response.json()["travail_du_sol_defaut"])
+
+                def on_culture_secondaire_selected(event):
+                    if culture_secondaire_combobox.get() != "" and rendement_culture_secondaire_entry.get() == "":
+                        rendement_culture_secondaire_entry.insert(0, "1.0")
+
                 annee_courante_frame = ttk.LabelFrame(scrollable_frame, text=str(index))
                 culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
                 global cultures_principales_supportees
@@ -1568,9 +1654,9 @@ def initialize_run_gui():
                                                                cultures_principales_supportees))
                 rendement_label = ttk.Label(annee_courante_frame, text="Rendement (t/ha): ")
                 rendement_entry = ttk.Entry(annee_courante_frame)
-                proportion_tige_exporte_label = ttk.Label(annee_courante_frame,
-                                                          text="Pourcentage paille ou tige exporté [0-100]: ")
-                proportion_tige_exporte_entry = ttk.Entry(annee_courante_frame)
+                pourcentage_tige_exporte_label = ttk.Label(annee_courante_frame,
+                                                           text="Pourcentage paille ou tige exporté [0-100]: ")
+                pourcentage_tige_exporte_entry = ttk.Entry(annee_courante_frame)
                 production_recolte_label = ttk.Label(annee_courante_frame, text="Production récoltée: ")
                 production_recolte_combobox = ttk.Combobox(annee_courante_frame, values=["Oui", "Non"],
                                                            postcommand=lambda: filter_combobox_values(
@@ -1599,7 +1685,7 @@ def initialize_run_gui():
                         rendement_entry.insert(0, str(regie["culture_principale"]["rendement"]))
 
                     if regie["culture_principale"]["pourcentage_tige_exporte"] is not None:
-                        proportion_tige_exporte_entry.insert(0, str(
+                        pourcentage_tige_exporte_entry.insert(0, str(
                             regie["culture_principale"]["pourcentage_tige_exporte"]))
                     if regie["culture_principale"]["produit_non_recolte"]:
                         production_recolte_combobox.set("Oui")
@@ -1623,8 +1709,8 @@ def initialize_run_gui():
                 culture_principale_combobox.grid(row=0, column=1, sticky="w", pady=3)
                 rendement_label.grid(row=1, column=0, sticky="w", pady=3)
                 rendement_entry.grid(row=1, column=1, sticky="w", pady=3)
-                proportion_tige_exporte_label.grid(row=2, column=0, sticky="w", pady=3)
-                proportion_tige_exporte_entry.grid(row=2, column=1, sticky="w", pady=3)
+                pourcentage_tige_exporte_label.grid(row=2, column=0, sticky="w", pady=3)
+                pourcentage_tige_exporte_entry.grid(row=2, column=1, sticky="w", pady=3)
                 production_recolte_label.grid(row=3, column=0, sticky="w", pady=3)
                 production_recolte_combobox.grid(row=3, column=1, sticky="w", pady=3)
                 pourcentage_humidite_label.grid(row=4, column=0, sticky="w", pady=3)
@@ -1636,6 +1722,8 @@ def initialize_run_gui():
                 rendement_culture_secondaire_label.grid(row=8, column=0, sticky="w", pady=3)
                 rendement_culture_secondaire_entry.grid(row=8, column=1, sticky="w", pady=3)
                 amendement_frame.grid(row=9, column=0, columnspan=2, pady=3)
+                culture_principale_combobox.bind("<<ComboboxSelected>>", on_culture_principal_selected)
+                culture_secondaire_combobox.bind("<<ComboboxSelected>>", on_culture_secondaire_selected)
                 annee_courante_frame.pack()
 
             def get_information_toutes_les_simulations():
@@ -2332,7 +2420,8 @@ def initialize_run_gui():
                 champs_row_index = 1
                 global nombre_de_champs
                 for champs_index in range(nombre_de_champs):
-                    champs_label_frame = ttk.LabelFrame(entreprise_label_frame, text="Champs " + str(champs_index + 1))
+                    champs_label_frame = ttk.LabelFrame(entreprise_label_frame, text="Champs " + str(champs_index + 1),
+                                                        name="champ" + str(champs_index))
                     global information_champs
                     nom_champs_label = ttk.Label(champs_label_frame, text="Nom du champ: ")
                     nom_champs_entry = ttk.Entry(champs_label_frame)
@@ -2345,7 +2434,8 @@ def initialize_run_gui():
                     for zone_index in range(int(information_champs[champs_index]["nombre_de_zone_de_gestion"])):
                         information_zone_de_gestion = information_zones_de_gestion[zone_index]
                         zone_label_frame = ttk.LabelFrame(champs_label_frame,
-                                                          text="Zone gestion " + str(zone_index + 1))
+                                                          text="Zone gestion " + str(zone_index + 1),
+                                                          name="zonegestion" + str(zone_index))
                         taux_matiere_organique_label = ttk.Label(zone_label_frame,
                                                                  text="Taux matière organique (en %): ")
                         taux_matiere_organique_entry = ttk.Entry(zone_label_frame)
@@ -2886,7 +2976,7 @@ def initialize_run_gui():
                 retour_menu_principal_button = ttk.Button(menu_transfert_frame, text="Retour au menu principal",
                                                           command=fenetre_menu_transfert_ferme)
                 menu_transfert_label.grid(row=0, column=0, pady=3, padx=10)
-                sauvegarder_fichier_transfert_button.grid(row=1, column=0,pady=3, padx=10)
+                sauvegarder_fichier_transfert_button.grid(row=1, column=0, pady=3, padx=10)
                 charger_fichier_transfert_button.grid(row=2, column=0, pady=3, padx=10)
                 retour_menu_principal_button.grid(row=3, column=0, pady=3, padx=10)
                 menu_transfert_frame.pack()

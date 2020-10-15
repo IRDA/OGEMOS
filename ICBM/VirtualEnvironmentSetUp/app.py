@@ -21,6 +21,22 @@ def ajout_amendement():
     return jsonify(response)
 
 
+@app.route('/api/post-amendement-ajoute', methods=['POST'])
+def post_amendement():
+    data_request = request.get_json()
+    response = __ajout_amendements(data_request)
+    return jsonify(response)
+
+
+@app.route('/api/get-parametres-defauts-culture_principale', methods=['POST'])
+def get_parametres_defauts_culture_principale():
+    data_request = request.get_json()
+    rendement = __get_rendement_defaut_municipalite(data_request["culture_principale"], data_request["municipalite"])
+    coefficient_culture_principale = get_coefficients_des_residus_de_culture(data_request["culture_principale"])
+    response = {"rendement": rendement, "pourcentage_tige_exportee": coefficient_culture_principale.pourcentage_des_tiges_exportees, "pourcentage_humidite": coefficient_culture_principale.pourcentage_humidite, "travail_du_sol_defaut": coefficient_culture_principale.travail_du_sol_defaut}
+    return jsonify(response)
+
+
 @app.route('/api/get-municipalite', methods=['GET'])
 def get_municipalite():
     response = get_municipalites_supportees()
@@ -82,13 +98,6 @@ def get_amendement_ajoutes():
     return jsonify(response)
 
 
-@app.route('/api/post-amendement-ajoute', methods=['POST'])
-def post_amendement():
-    data_request = request.get_json()
-    response = __ajout_amendements(data_request)
-    return jsonify(response)
-
-
 def is_decimal_number(string):
     if "." not in string and string.isdigit():
         return True
@@ -145,7 +154,8 @@ def __ajout_amendements(data):
                                  "amendement"] + "n'est pas un amendement valide. Uniquement caractères alphanumériques acceptés."
             abort(400, message_erreur)
         try:
-            assert isinstance(amendement["pourcentage_humidite"], float) and 0 <= float(amendement["pourcentage_humidite"]) <= 100
+            assert isinstance(amendement["pourcentage_humidite"], float) and 0 <= float(
+                amendement["pourcentage_humidite"]) <= 100
         except AssertionError:
             message_erreur = amendement[
                                  "pourcentage_humidite"] + "n'est pas un pourcentage d'humidité valide. Doit être un réel dans l'intervalle [0-100]."
@@ -359,35 +369,7 @@ def __amendements_mapping(data):
 def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourragere, municipalite):
     culture_principale = data["culture_principale"]
     if data["rendement"] is None:
-        rendements = get_rendement_et_propriete_municipalite(municipalite)
-        if culture_principale == "Avoine":
-            rendement = rendements.rendement_avoine
-        elif culture_principale == "Blé":
-            rendement = rendements.rendement_ble
-        elif culture_principale == "Maïs fourrager":
-            rendement = rendements.rendement_mais_fourrager
-        elif culture_principale == "Orge":
-            rendement = rendements.rendement_orge
-        elif culture_principale == "Maïs grain":
-            rendement = rendements.rendement_mais_grain
-        elif culture_principale == "Soya":
-            rendement = rendements.rendement_soya
-        elif culture_principale == "Haricot":
-            rendement = rendements.rendement_haricot
-        elif culture_principale == "Pommes de terre - semence":
-            rendement = rendements.rendement_pomme_de_terre_de_semence
-        elif culture_principale == "Pommes de terre - table":
-            rendement = rendements.rendement_pomme_de_terre_de_table
-        elif culture_principale == "Pommes de terre - transformation":
-            rendement = rendements.rendement_pomme_de_terre_de_transformation
-        elif culture_principale == "Seigle":
-            rendement = rendements.rendement_seigle
-        elif culture_principale == "Triticale":
-            rendement = rendements.rendement_triticale
-        elif culture_principale == "Canola":
-            rendement = rendements.rendement_canola
-        else:
-            rendement = rendements.rendement_foin
+        rendement = __get_rendement_defaut_municipalite(culture_principale, municipalite)
 
     else:
         rendement = data["rendement"]
@@ -437,6 +419,39 @@ def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourr
     else:
         return CulturePrincipale(culture_principale, rendement, pourcentage_tige_exporte, produit_non_recolte,
                                  est_derniere_annee_rotation_culture_fourragere, pourcentage_humidite)
+
+
+def __get_rendement_defaut_municipalite(culture_principale, municipalite):
+    rendements = get_rendement_et_propriete_municipalite(municipalite)
+    if culture_principale == "Avoine":
+        rendement = rendements.rendement_avoine
+    elif culture_principale == "Blé":
+        rendement = rendements.rendement_ble
+    elif culture_principale == "Maïs fourrager":
+        rendement = rendements.rendement_mais_fourrager
+    elif culture_principale == "Orge":
+        rendement = rendements.rendement_orge
+    elif culture_principale == "Maïs grain":
+        rendement = rendements.rendement_mais_grain
+    elif culture_principale == "Soya":
+        rendement = rendements.rendement_soya
+    elif culture_principale == "Haricot":
+        rendement = rendements.rendement_haricot
+    elif culture_principale == "Pommes de terre - semence":
+        rendement = rendements.rendement_pomme_de_terre_de_semence
+    elif culture_principale == "Pommes de terre - table":
+        rendement = rendements.rendement_pomme_de_terre_de_table
+    elif culture_principale == "Pommes de terre - transformation":
+        rendement = rendements.rendement_pomme_de_terre_de_transformation
+    elif culture_principale == "Seigle":
+        rendement = rendements.rendement_seigle
+    elif culture_principale == "Triticale":
+        rendement = rendements.rendement_triticale
+    elif culture_principale == "Canola":
+        rendement = rendements.rendement_canola
+    else:
+        rendement = rendements.rendement_foin
+    return rendement
 
 
 def __culture_secondaire_mapping(data):
