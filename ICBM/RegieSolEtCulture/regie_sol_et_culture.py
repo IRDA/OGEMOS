@@ -64,7 +64,7 @@ class RegieDesSolsEtCultures:
 
 class CulturePrincipale:
 
-    def __init__(self, type_de_culture_principale, rendement, pourcentage_tige_exporte, produit_non_recolte,
+    def __init__(self, type_de_culture_principale, rendement, pourcentage_tige_exporte, produit_recolte,
                  est_derniere_annee_rotation_plante_fourragere, pourcentage_humidite=None):
         self.__coefficient_des_residus_de_culture = get_coefficients_des_residus_de_culture(type_de_culture_principale)
         self.__type_de_culture_principale = type_de_culture_principale
@@ -73,7 +73,7 @@ class CulturePrincipale:
             self.__pourcentage_tige_exporte = pourcentage_tige_exporte
         else:
             self.__pourcentage_tige_exporte = self.__coefficient_des_residus_de_culture.pourcentage_des_tiges_exportees
-        self.__produit_recolte = produit_non_recolte
+        self.__produit_recolte = produit_recolte
         self.__est_derniere_annee_rotation_plante_fourragere = est_derniere_annee_rotation_plante_fourragere
         if pourcentage_humidite is not None:
             self.__pourcentage_humidite = pourcentage_humidite
@@ -82,12 +82,12 @@ class CulturePrincipale:
 
     def calculer_apport_en_carbone_culture_principale(self):
         conversion_de_ton_ha_a_kg_m2 = 1000 / 10000
-        proportion_tige_laissee_au_champs = (1 - (self.__pourcentage_tige_exporte/100))
+        pourcentage_tige_laissee_au_champs = (1 - (self.__pourcentage_tige_exporte/100))
         coefficient_de_calcul = get_coefficients_des_residus_de_culture(self.__type_de_culture_principale)
         if self.__type_de_culture_principale not in get_cultures_fourrageres():
             quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * (1-(self.__pourcentage_humidite/100))
             quantite_carbone_partie_tige_non_recolte = quantite_carbone_partie_recolte * (
-                    coefficient_de_calcul.ratio_partie_tige_non_recolte / coefficient_de_calcul.ratio_partie_recolte) * proportion_tige_laissee_au_champs
+                    coefficient_de_calcul.ratio_partie_tige_non_recolte / coefficient_de_calcul.ratio_partie_recolte) * pourcentage_tige_laissee_au_champs
             quantite_carbone_partie_racinaire = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_racinaire / coefficient_de_calcul.ratio_partie_recolte)
             quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (
@@ -97,7 +97,7 @@ class CulturePrincipale:
             else:
                 return quantite_carbone_partie_recolte + quantite_carbone_partie_tige_non_recolte + quantite_carbone_partie_racinaire + quantite_carbone_partie_extra_racinaire
         else:
-            quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * (1-(self.__pourcentage_humidite/100)) * proportion_tige_laissee_au_champs
+            quantite_carbone_partie_recolte = self.__rendement * conversion_de_ton_ha_a_kg_m2 * coefficient_de_calcul.taux_carbone_chaque_partie * (1-(self.__pourcentage_humidite/100)) * pourcentage_tige_laissee_au_champs
             quantite_carbone_partie_racinaire = quantite_carbone_partie_recolte * (
                     coefficient_de_calcul.ratio_partie_racinaire / coefficient_de_calcul.ratio_partie_recolte)
             quantite_carbone_partie_extra_racinaire = quantite_carbone_partie_recolte * (

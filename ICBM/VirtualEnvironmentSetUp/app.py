@@ -157,14 +157,14 @@ def __ajout_amendements(data):
             assert isinstance(amendement["pourcentage_humidite"], float) and 0 <= float(
                 amendement["pourcentage_humidite"]) <= 100
         except AssertionError:
-            message_erreur = amendement[
-                                 "pourcentage_humidite"] + "n'est pas un pourcentage d'humidité valide. Doit être un réel dans l'intervalle [0-100]."
+            message_erreur = str(amendement[
+                                 "pourcentage_humidite"]) + "n'est pas un pourcentage d'humidité valide. Doit être un réel dans l'intervalle [0-100]."
             abort(400, message_erreur)
         try:
             assert isinstance(amendement["carbon_total"], float)
         except AssertionError:
-            message_erreur = amendement[
-                                 "carbon_total"] + "n'est pas un total d'azote valide. Uniquement caractères numériques et le \".\" acceptés."
+            message_erreur = str(amendement[
+                                 "carbon_total"]) + "n'est pas un total d'azote valide. Uniquement caractères numériques et le \".\" acceptés."
             abort(400, message_erreur)
         add_amendment(amendement)
 
@@ -373,7 +373,7 @@ def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourr
 
     else:
         rendement = data["rendement"]
-    produit_non_recolte = data["produit_non_recolte"]
+    produit_non_recolte = data["produit_recolte"]
     pourcentage_tige_exporte = data["pourcentage_tige_exporte"]
     pourcentage_humidite = data["pourcentage_humidite"]
     cultures_supportees = get_cultures_principales_supportees()

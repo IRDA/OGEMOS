@@ -116,22 +116,22 @@ class ZoneDeGestion:
         self.__facteur_climatique = self.__calculer_facteur_climatique()
         self.__regies_sol_et_culture_projection = regies_sol_et_culture_projection
         if regies_sol_et_culture_historique is None:
-            self.__regies_sol_et_culture_historique = []
+            self.__regies_sol_et_culture_rechauffement = []
         else:
-            self.__regies_sol_et_culture_historique = regies_sol_et_culture_historique
+            self.__regies_sol_et_culture_rechauffement = regies_sol_et_culture_historique
         self.__regies_sol_et_culture_pour_la_duree_de_la_simulation = []
         self.__carbone_organique_initial_du_sol = self.__calculer_carbone_organique_initial_du_sol()
         self.__taille_de_la_zone_de_gestion = taille_de_la_zone
-        self.__regies_sol_et_culture_historique_pour_initialisation = []
+        self.__regies_sol_et_culture_rechauffement_pour_initialisation = []
 
     def appliquer_les_regies_pour_la_duree_de_la_simulation(self, annee_initiale, annee_finale):
-        if len(self.__regies_sol_et_culture_historique) != 0:
-            annee_courante = annee_initiale - len(self.__regies_sol_et_culture_historique)
+        if len(self.__regies_sol_et_culture_rechauffement) != 0:
+            annee_courante = annee_initiale - len(self.__regies_sol_et_culture_rechauffement)
             compteur_annee = 0
             while annee_courante < annee_initiale:
-                regie_annee_courante = copy.deepcopy(self.__regies_sol_et_culture_historique[compteur_annee])
+                regie_annee_courante = copy.deepcopy(self.__regies_sol_et_culture_rechauffement[compteur_annee])
                 regie_annee_courante.set_annee_de_culture(annee_courante)
-                self.__regies_sol_et_culture_historique_pour_initialisation.append(regie_annee_courante)
+                self.__regies_sol_et_culture_rechauffement_pour_initialisation.append(regie_annee_courante)
                 annee_courante += 1
                 compteur_annee += 1
         if len(self.__regies_sol_et_culture_projection) != 0:
@@ -146,7 +146,7 @@ class ZoneDeGestion:
                 compteur_annee += 1
 
     def __calculer_carbone_organique_initial_du_sol(self):
-        facteur_conversion_de_g_cm2_a_kg_m2 = 1000 / 100 ** 2
+        facteur_conversion_de_g_cm2_a_kg_m2 = 100 ** 2 / 1000
         conversion_pourcentage_taux_matiere_organique = 100
         facteur_conversion_de_matiere_organique_a_carbone_organique_du_sol = 1 / self.FACTEUR_CONVERSION_MATIERE_ORGANIQUE_CARBONE_ORGANIQUE_SOL
         return self.__masse_volumique_apparente * self.__profondeur * \
@@ -154,6 +154,7 @@ class ZoneDeGestion:
                        self.__taux_matiere_organique / conversion_pourcentage_taux_matiere_organique) * facteur_conversion_de_matiere_organique_a_carbone_organique_du_sol * facteur_conversion_de_g_cm2_a_kg_m2
 
     def __calculer_carbone_organique_du_sol_pour_la_duree_de_la_simulation(self):
+        facteur_conversion_kg_m2_a_t_ha = 100 ** 2 / 1000
         carbone_organique_du_sol_pour_la_duree_de_la_simulation = []
         matiere_organique_du_sol_pour_la_duree_de_la_simulation = []
         apport_carbone_culture_principale = []
@@ -173,19 +174,19 @@ class ZoneDeGestion:
                              self.COEFFICIENT_HUMIFICATION_AERIEN,
                              self.COEFFICIENT_HUMIFICATION_RACINNAIRE)
         if len(self.__regies_sol_et_culture_pour_la_duree_de_la_simulation) != 0:
-            pools_carbone_jeune_initiaux = self.__calculer_pool_carbone_jeune_initial()
+            pools_carbone_jeunes_initiaux = self.__calculer_pools_carbone_jeunes_initiaux()
             pool_jeune_initial = 0
-            for pool in pools_carbone_jeune_initiaux:
+            for pool in pools_carbone_jeunes_initiaux:
                 pool_jeune_initial += pool
             pool_carbone_stable_initial = self.__calculer_pool_carbone_stable_initial(pool_jeune_initial)
-            pool_humification[0]["Amendements"]["etat_pool_annee_precedente"] = pools_carbone_jeune_initiaux[0]
+            pool_humification[0]["Amendements"]["etat_pool_annee_precedente"] = pools_carbone_jeunes_initiaux[0]
             regie_annee_simulation = self.__regies_sol_et_culture_pour_la_duree_de_la_simulation
             carbone_total_annee_initiale = self.__regies_sol_et_culture_pour_la_duree_de_la_simulation[
                 0].calculer_apport_annuel_en_carbone_de_la_regie()
             apports_carbone = (carbone_total_annee_initiale[3],
                                carbone_total_annee_initiale[4] + carbone_total_annee_initiale[6],
                                carbone_total_annee_initiale[5] + carbone_total_annee_initiale[7])
-            pools_carbone_jeune = pools_carbone_jeune_initiaux
+            pools_carbone_jeune = pools_carbone_jeunes_initiaux
             pool_carbone_stable = pool_carbone_stable_initial
             for regie_annee_de_simulation in regie_annee_simulation:
                 amendements = regie_annee_de_simulation.generer_bilan_regie()["amendements"]["amendements"]
@@ -214,7 +215,7 @@ class ZoneDeGestion:
                 etats_pool_jeune_amendements.append(pool_jeune_amendements)
                 etats_pool_jeune_aerien.append(pool_jeune_aerien)
                 etats_pool_jeune_racinnaire.append(pool_jeune_racinnaire)
-                etats_pool_jeune_total.append(pool_jeune_total)
+                etats_pool_jeune_total.append(pool_jeune_total * facteur_conversion_kg_m2_a_t_ha)
                 index_pools = 0
                 for coefficient in pool_humification:
                     if index_pools == 0:
@@ -267,10 +268,13 @@ class ZoneDeGestion:
                                                    index_pools]) * math.exp(
                             -self.COEFFICIENT_MINERALISATION_POOL_JEUNE * self.__facteur_climatique)
                     index_pools += 1
-                etats_pool_stable.append(pool_carbone_stable)
-                carbone_organique_du_sol_pour_la_duree_de_la_simulation.append(pool_carbone_stable + pool_jeune_total)
+                etats_pool_stable.append(pool_carbone_stable * facteur_conversion_kg_m2_a_t_ha)
+                carbone_organique_du_sol_pour_la_duree_de_la_simulation.append(
+                    (pool_carbone_stable + pool_jeune_total) * facteur_conversion_kg_m2_a_t_ha)
                 matiere_organique_du_sol_pour_la_duree_de_la_simulation.append((
-                                                                                       pool_carbone_stable + pool_jeune_total) / self.FACTEUR_CONVERSION_MATIERE_ORGANIQUE_CARBONE_ORGANIQUE_SOL)
+                                                                                       pool_carbone_stable + pool_jeune_total) * facteur_conversion_kg_m2_a_t_ha / (
+                                                                                           1 / self.FACTEUR_CONVERSION_MATIERE_ORGANIQUE_CARBONE_ORGANIQUE_SOL))
+
                 apports_carbone = (apports_annuel_de_carbone[3],
                                    apports_annuel_de_carbone[4] + apports_annuel_de_carbone[6],
                                    apports_annuel_de_carbone[5] + apports_annuel_de_carbone[7])
@@ -292,15 +296,15 @@ class ZoneDeGestion:
                     etats_pool_stable,
                     matiere_organique_du_sol_pour_la_duree_de_la_simulation)
 
-    def __calculer_pool_carbone_jeune_initial(self):
-        if len(self.__regies_sol_et_culture_historique_pour_initialisation):
+    def __calculer_pools_carbone_jeunes_initiaux(self):
+        if len(self.__regies_sol_et_culture_rechauffement_pour_initialisation):
             pool_jeune_amendements_initial = 0
             pool_jeune_aerien_culture_principale_initial = 0
             pool_jeune_racinaire_culture_principale_initial = 0
             pool_jeune_aerien_culture_secondaire_initial = 0
             pool_jeune_racinaire_culture_secondaire_initial = 0
-            nombre_de_regie_historique = len(self.__regies_sol_et_culture_historique_pour_initialisation)
-            for regie in self.__regies_sol_et_culture_historique_pour_initialisation:
+            nombre_de_regie_historique = len(self.__regies_sol_et_culture_rechauffement_pour_initialisation)
+            for regie in self.__regies_sol_et_culture_rechauffement_pour_initialisation:
                 regie_annee_initial_apports = regie.calculer_apport_annuel_en_carbone_de_la_regie()
                 pool_jeune_amendements_initial = pool_jeune_amendements_initial + (regie_annee_initial_apports[3] / (
                         self.__facteur_climatique * self.COEFFICIENT_MINERALISATION_POOL_JEUNE))
@@ -364,14 +368,16 @@ class ZoneDeGestion:
         if len(carbone_organique_du_sol_pour_la_duree_de_la_simulation) > 0:
             return somme_des_bilan_annuel / len(carbone_organique_du_sol_pour_la_duree_de_la_simulation)
 
-    def __calculer_teneur_finale_projetee(self, carbone_organique_du_sol_pour_la_duree_de_la_simulation):
-        return carbone_organique_du_sol_pour_la_duree_de_la_simulation[
-            len(carbone_organique_du_sol_pour_la_duree_de_la_simulation) - 1]
+    def __calculer_teneur_initiale_apres_rechauffement(self, matiere_organique_du_sol_pour_la_duree_de_la_simulation):
+        return matiere_organique_du_sol_pour_la_duree_de_la_simulation[0] / (self.__profondeur * self.__masse_volumique_apparente)
 
-    def __calculer_difference_entre_teneur_initiale_et_finale(self,
-                                                              carbone_organique_du_sol_pour_la_duree_de_la_simulation,
+    def __calculer_teneur_finale_projetee(self, matiere_organique_du_sol_pour_la_duree_de_la_simulation):
+        return (matiere_organique_du_sol_pour_la_duree_de_la_simulation[
+            len(matiere_organique_du_sol_pour_la_duree_de_la_simulation) - 1] / (self.__profondeur * self.__masse_volumique_apparente))
+
+    def __calculer_difference_entre_teneur_initiale_et_finale(self, teneur_initiale_apres_rechauffement,
                                                               teneur_finale_projetee):
-        return teneur_finale_projetee - carbone_organique_du_sol_pour_la_duree_de_la_simulation[0]
+        return teneur_finale_projetee - teneur_initiale_apres_rechauffement
 
     def __calculer_moyenne_de_chaque_annee_de_rotation_dans_la_projection(self,
                                                                           carbone_organique_de_sol_pour_la_duree_de_la_simulation):
@@ -383,11 +389,11 @@ class ZoneDeGestion:
                     carbone_organique_de_sol_pour_la_duree_de_la_simulation[index_annee])
                 nombre_de_repetition_de_annee_de_rotation.append(1)
             else:
-                moyenne_de_chaque_annee_de_rotation[(index_annee - len(self.__regies_sol_et_culture_historique)) % len(
+                moyenne_de_chaque_annee_de_rotation[(index_annee - len(self.__regies_sol_et_culture_rechauffement)) % len(
                     self.__regies_sol_et_culture_projection)] += \
                     carbone_organique_de_sol_pour_la_duree_de_la_simulation[index_annee]
                 nombre_de_repetition_de_annee_de_rotation[
-                    (index_annee - len(self.__regies_sol_et_culture_historique)) % len(
+                    (index_annee - len(self.__regies_sol_et_culture_rechauffement)) % len(
                         self.__regies_sol_et_culture_projection)] += 1
         for index_annee in range(len(moyenne_de_chaque_annee_de_rotation)):
             moyenne_de_chaque_annee_de_rotation[index_annee] = moyenne_de_chaque_annee_de_rotation[index_annee] / \
@@ -439,9 +445,11 @@ class ZoneDeGestion:
         bilan_etats_pool_stable = bilan_carbon_pour_la_simulation_et_apport[12]
         bilan_matiere_orgagnique_pour_la_simulation = bilan_carbon_pour_la_simulation_et_apport[13]
         bilan_annuel_moyen = self.__calculer_bilan_annuel_moyen(bilan_carbon_pour_la_simulation)
-        teneur_finale_projetee = self.__calculer_teneur_finale_projetee(bilan_carbon_pour_la_simulation)
+        teneur_initiale_apres_rechauffement = self.__calculer_teneur_initiale_apres_rechauffement(
+            bilan_matiere_orgagnique_pour_la_simulation)
+        teneur_finale_projetee = self.__calculer_teneur_finale_projetee(bilan_matiere_orgagnique_pour_la_simulation)
         difference_entre_teneur_initiale_et_finale = self.__calculer_difference_entre_teneur_initiale_et_finale(
-            bilan_carbon_pour_la_simulation, teneur_finale_projetee)
+            teneur_initiale_apres_rechauffement, teneur_finale_projetee)
         moyenne_de_chaque_annee_de_rotation = self.__calculer_moyenne_de_chaque_annee_de_rotation_dans_la_projection(
             bilan_carbon_pour_la_simulation)
         moyenne_apports_cultures_principales = self.__calculer_moyenne_des_apports_des_cultures_principales_pour_la_simulation(
@@ -455,7 +463,7 @@ class ZoneDeGestion:
         bilan_des_regies_simulation = []
         for regie_projection in self.__regies_sol_et_culture_projection:
             bilan_des_regies_projections.append(regie_projection.generer_bilan_regie())
-        for regie_historique in self.__regies_sol_et_culture_historique:
+        for regie_historique in self.__regies_sol_et_culture_rechauffement:
             bilan_des_regies_historiques.append(regie_historique.generer_bilan_regie())
         for regie_simulation in self.__regies_sol_et_culture_pour_la_duree_de_la_simulation:
             bilan_des_regies_simulation.append(regie_simulation.generer_bilan_regie())
