@@ -497,7 +497,7 @@ class ZoneDeGestion:
             "moyenne_apports_cultures_secondaires": moyenne_apports_cultures_secondaire,
             "moyenne_apports_amendements": moyenne_apports_amendements,
             "taille_de_la_zone": self.__taille_de_la_zone_de_gestion,
-            "taux_de_matiere_organique_initial": self.__taux_matiere_organique,
+            "taux_de_matiere_organique_initial": teneur_initiale_apres_rechauffement,
             "groupe_textural": self.__groupe_textural,
             "classe_de_drainage": self.__classe_de_drainage,
             "bilan_des_regies_projections": bilan_des_regies_projections,

@@ -1754,7 +1754,6 @@ def initialize_globals():
                                 entree_invalide_liste.append(entree)
                             simulations.append(simulation)
                         index_simualtion += 1
-
                     if len(entree_invalide_liste) == 0:
                         response = requests.post('http://localhost:5000/api/icbm-bilan', json={"simulations": simulations})
                         print(response.text)
@@ -2903,9 +2902,11 @@ def initialize_globals():
                                 root.deiconify()
                             else:
                                 messagebox.showinfo("Ajout amendement", "L'ajout d'amendement a échoué")
+                                nouvel_amendement_window.destroy()
                                 ajouter_un_nouvel_amendement({"amendement": amendement,
                                                               "pourcentage_humidite": pourcentage_humidite,
                                                               "carbon_total": carbon_total})
+
 
                     nouvel_amendement_window = tk.Toplevel()
                     nouvel_amendement_frame = ttk.Frame(nouvel_amendement_window)
@@ -3292,6 +3293,8 @@ def initialize_globals():
                                 amendements = ""
                                 index_amendements = 0
                                 for amendement in year["amendements"]["amendements"]:
+                                    print(index_amendements < len(year["amendements"]["amendements"]) - 1)
+                                    print(str(index_amendements)+ " " + str(len(year["amendements"]["amendements"]) - 1))
                                     if index_amendements < len(year["amendements"]["amendements"]) - 1:
                                         amendements = amendements + amendement["amendement"] + " + "
                                     else:
@@ -3306,33 +3309,28 @@ def initialize_globals():
                                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                                               value=zone[
                                                                                   "bilan_apports_cultures_principales_racinaires"][
-                                                                                  index_annee - len(zone[
-                                                                                                        "bilan_des_regies_historiques"])])
+                                                                                  index_annee])
                                 index_column_cell += 1
                                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                                               value=zone[
                                                                                   "bilan_apports_cultures_principales_aeriennes"][
-                                                                                  index_annee - len(zone[
-                                                                                                        "bilan_des_regies_historiques"])]).alignment = alignment
+                                                                                  index_annee]).alignment = alignment
                                 index_column_cell += 1
                                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                                               value=zone[
                                                                                   "bilan_apports_cultures_secondaires_racinaires"][
-                                                                                  index_annee - len(zone[
-                                                                                                        "bilan_des_regies_historiques"])]).alignment = alignment
+                                                                                  index_annee]).alignment = alignment
                                 index_column_cell += 1
                                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                                               value=zone[
                                                                                   "bilan_apports_cultures_secondaires_aeriennes"][
-                                                                                  index_annee - len(zone[
-                                                                                                        "bilan_des_regies_historiques"])]).alignment = alignment
+                                                                                  index_annee]).alignment = alignment
 
                                 index_column_cell += 1
                                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                                               value=zone[
                                                                                   "bilan_apports_amendements"][
-                                                                                  index_annee - len(zone[
-                                                                                                        "bilan_des_regies_historiques"])]).alignment = alignment
+                                                                                  index_annee]).alignment = alignment
                                 index_column_cell = 1
                                 index_row_cell += 1
                                 index_annee += 1

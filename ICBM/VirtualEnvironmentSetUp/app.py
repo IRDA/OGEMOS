@@ -33,7 +33,10 @@ def get_parametres_defauts_culture_principale():
     data_request = request.get_json()
     rendement = __get_rendement_defaut_municipalite(data_request["culture_principale"], data_request["municipalite"])
     coefficient_culture_principale = get_coefficients_des_residus_de_culture(data_request["culture_principale"])
-    response = {"rendement": rendement, "pourcentage_tige_exportee": coefficient_culture_principale.pourcentage_des_tiges_exportees, "pourcentage_humidite": coefficient_culture_principale.pourcentage_humidite, "travail_du_sol_defaut": coefficient_culture_principale.travail_du_sol_defaut}
+    response = {"rendement": rendement,
+                "pourcentage_tige_exportee": coefficient_culture_principale.pourcentage_des_tiges_exportees,
+                "pourcentage_humidite": coefficient_culture_principale.pourcentage_humidite,
+                "travail_du_sol_defaut": coefficient_culture_principale.travail_du_sol_defaut}
     return jsonify(response)
 
 
@@ -118,29 +121,32 @@ def __launch_icbm_simulation(data):
 
 def __ajout_amendement(data):
     try:
-        assert data["amendement"].isalnum()
+        amendement = data["amendement"]
+        amendement = amendement.split(" ")
+        for amendement_parts in amendement:
+            assert amendement_parts.isalnum()
     except AssertionError:
         message_erreur = data[
-                             "amendement"] + "n'est pas un amendement valide. Uniquement caractères alphanumériques acceptés."
+                             "amendement"] + " n'est pas un amendement valide. Uniquement caractères alphanumériques acceptés."
         abort(400, message_erreur)
     try:
         assert is_decimal_number(data["pourcentage_humidite"])
     except AssertionError:
         message_erreur = data[
-                             "pourcentage_humidite"] + "n'est pas un pourcentage d'humidité valide. Uniquement caractères numériques et le \".\" acceptés."
+                             "pourcentage_humidite"] + " n'est pas un pourcentage d'humidité valide. Uniquement caractères numériques et le \".\" acceptés."
         abort(400, message_erreur)
     try:
         if is_decimal_number(data["pourcentage_humidite"]):
             assert 0 <= float(data["pourcentage_humidite"]) <= 100
     except AssertionError:
         message_erreur = data[
-                             "pourcentage_humidite"] + "n'est pas un pourcentage d'humidité valide. Doit être un réel dans l'intervalle [0-100]."
+                             "pourcentage_humidite"] + " n'est pas un pourcentage d'humidité valide. Doit être un réel dans l'intervalle [0-100]."
         abort(400, message_erreur)
     try:
         assert is_decimal_number(data["carbon_total"])
     except AssertionError:
         message_erreur = data[
-                             "carbon_total"] + "n'est pas un total d'azote valide. Uniquement caractères numériques et le \".\" acceptés."
+                             "carbon_total"] + " n'est pas un total d'azote valide. Uniquement caractères numériques et le \".\" acceptés."
         abort(400, message_erreur)
     add_amendment(data)
 
@@ -151,20 +157,20 @@ def __ajout_amendements(data):
             assert amendement["amendement"].isalnum()
         except AssertionError:
             message_erreur = amendement[
-                                 "amendement"] + "n'est pas un amendement valide. Uniquement caractères alphanumériques acceptés."
+                                 "amendement"] + " n'est pas un amendement valide. Uniquement caractères alphanumériques acceptés."
             abort(400, message_erreur)
         try:
             assert isinstance(amendement["pourcentage_humidite"], float) and 0 <= float(
                 amendement["pourcentage_humidite"]) <= 100
         except AssertionError:
             message_erreur = str(amendement[
-                                 "pourcentage_humidite"]) + "n'est pas un pourcentage d'humidité valide. Doit être un réel dans l'intervalle [0-100]."
+                                     "pourcentage_humidite"]) + " n'est pas un pourcentage d'humidité valide. Doit être un réel dans l'intervalle [0-100]."
             abort(400, message_erreur)
         try:
             assert isinstance(amendement["carbon_total"], float)
         except AssertionError:
             message_erreur = str(amendement[
-                                 "carbon_total"]) + "n'est pas un total d'azote valide. Uniquement caractères numériques et le \".\" acceptés."
+                                     "carbon_total"]) + " n'est pas un total d'azote valide. Uniquement caractères numériques et le \".\" acceptés."
             abort(400, message_erreur)
         add_amendment(amendement)
 
@@ -368,6 +374,13 @@ def __amendements_mapping(data):
 
 def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourragere, municipalite):
     culture_principale = data["culture_principale"]
+    cultures_supportees = get_cultures_principales_supportees()
+    try:
+        assert culture_principale in cultures_supportees
+    except AssertionError:
+        message_erreur = str(culture_principale) + " n'est pas une culture principale supportée."
+        abort(400, message_erreur)
+
     if data["rendement"] is None:
         rendement = __get_rendement_defaut_municipalite(culture_principale, municipalite)
 
@@ -376,13 +389,6 @@ def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourr
     produit_non_recolte = data["produit_recolte"]
     pourcentage_tige_exporte = data["pourcentage_tige_exporte"]
     pourcentage_humidite = data["pourcentage_humidite"]
-    cultures_supportees = get_cultures_principales_supportees()
-
-    try:
-        assert culture_principale in cultures_supportees
-    except AssertionError:
-        message_erreur = str(culture_principale) + " n'est pas une culture principale supportée."
-        abort(400, message_erreur)
 
     try:
         assert isinstance(rendement, (float, int)) and rendement >= 0
