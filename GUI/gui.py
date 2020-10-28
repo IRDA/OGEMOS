@@ -3232,19 +3232,19 @@ def initialize_globals():
                                                               value="Amendements")
                 index_column_cell += 1
                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Apport Cult. Princ. Racinaire (kg/m2)")
+                                                              value="Apport Cult. Princ. Racinaire (t/ha)")
                 index_column_cell += 1
                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Apport Cult. Princ. Aérien (kg/m2)")
+                                                              value="Apport Cult. Princ. Aérien (t/ha)")
                 index_column_cell += 1
                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Apport Cult. Sec. Racinaire (kg/m2)")
+                                                              value="Apport Cult. Sec. Racinaire (t/ha)")
                 index_column_cell += 1
                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Apport Cult. Sec. Aérien (kg/m2)")
+                                                              value="Apport Cult. Sec. Aérien (t/ha)")
                 index_column_cell += 1
                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Amendements (kg/m2)")
+                                                              value="Amendements (t/ha)")
                 font = Font(bold=True)
                 alignment = Alignment(wrap_text=True)
                 for cell_name in ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1', 'K1', 'L1', 'M1']:
@@ -3355,13 +3355,13 @@ def initialize_globals():
                                                              value="Année de projection")
                 index_column_cell += 1
                 description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                             value="Y aérien C (kg/m2)")
+                                                             value="Y aérien C (t/ha)")
                 index_column_cell += 1
                 description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                             value="Y racinaire C (kg/m2)")
+                                                             value="Y racinaire C (t/ha)")
                 index_column_cell += 1
                 description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                             value="Y amendements C (kg/m2)")
+                                                             value="Y amendements C (t/ha)")
                 index_column_cell += 1
                 description_resultats_annuels_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                              value="C jeune total (t/ha)")
@@ -3469,22 +3469,22 @@ def initialize_globals():
                                                               value="Nombre d'années projetées")
                 index_column_cell += 1
                 description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Apport moyen culture principale (kg/m2)")
+                                                              value="Apport moyen culture principale (t/ha)")
                 index_column_cell += 1
                 description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Apport moyen culture secondaire (kg/m2)")
+                                                              value="Apport moyen culture secondaire (t/ha)")
                 index_column_cell += 1
                 description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Apport moyen amendement (kg/m2)")
+                                                              value="Apport moyen amendement (t/ha)")
                 index_column_cell += 1
                 description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Teneur initiale en MOS")
+                                                              value="Teneur initiale en MOS (%)")
                 index_column_cell += 1
                 description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Teneur finale en MOS")
+                                                              value="Teneur finale en MOS (%)")
                 index_column_cell += 1
                 description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Évolution du taux de MOS")
+                                                              value="Évolution du taux de MOS (%)")
                 index_column_cell += 1
                 description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                               value="Comparaison 50ème percentile")

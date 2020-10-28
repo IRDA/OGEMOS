@@ -196,13 +196,13 @@ class ZoneDeGestion:
                     amendements_dict[amendement]: index
                     index += 1
                 apports_annuel_de_carbone = regie_annee_de_simulation.calculer_apport_annuel_en_carbone_de_la_regie()
-                apport_carbone_culture_principale.append(apports_annuel_de_carbone[1])
-                apport_carbone_culture_secondaire.append(apports_annuel_de_carbone[2])
-                apport_carbone_amendements.append(apports_annuel_de_carbone[3])
-                apport_carbone_culture_principale_aerienne.append(apports_annuel_de_carbone[4])
-                apport_carbone_culture_principale_racinaire.append(apports_annuel_de_carbone[5])
-                apport_carbone_culture_secondaire_aerienne.append(apports_annuel_de_carbone[6])
-                apport_carbone_culture_secondaire_racinaire.append(apports_annuel_de_carbone[7])
+                apport_carbone_culture_principale.append(apports_annuel_de_carbone[1]*facteur_conversion_kg_m2_a_t_ha)
+                apport_carbone_culture_secondaire.append(apports_annuel_de_carbone[2]*facteur_conversion_kg_m2_a_t_ha)
+                apport_carbone_amendements.append(apports_annuel_de_carbone[3]*facteur_conversion_kg_m2_a_t_ha)
+                apport_carbone_culture_principale_aerienne.append(apports_annuel_de_carbone[4]*facteur_conversion_kg_m2_a_t_ha)
+                apport_carbone_culture_principale_racinaire.append(apports_annuel_de_carbone[5]*facteur_conversion_kg_m2_a_t_ha)
+                apport_carbone_culture_secondaire_aerienne.append(apports_annuel_de_carbone[6]*facteur_conversion_kg_m2_a_t_ha)
+                apport_carbone_culture_secondaire_racinaire.append(apports_annuel_de_carbone[7]*facteur_conversion_kg_m2_a_t_ha)
                 pool_jeune_amendements = (apports_carbone[0] + pools_carbone_jeune[0]) * math.exp(
                     -self.COEFFICIENT_MINERALISATION_POOL_JEUNE * self.__facteur_climatique)
                 pool_jeune_aerien = (apports_carbone[1] + pools_carbone_jeune[1]) * math.exp(
@@ -212,9 +212,9 @@ class ZoneDeGestion:
                 pool_jeune_total = (pool_jeune_amendements +
                                     pool_jeune_aerien +
                                     pool_jeune_racinnaire)
-                etats_pool_jeune_amendements.append(pool_jeune_amendements)
-                etats_pool_jeune_aerien.append(pool_jeune_aerien)
-                etats_pool_jeune_racinnaire.append(pool_jeune_racinnaire)
+                etats_pool_jeune_amendements.append(pool_jeune_amendements*facteur_conversion_kg_m2_a_t_ha)
+                etats_pool_jeune_aerien.append(pool_jeune_aerien*facteur_conversion_kg_m2_a_t_ha)
+                etats_pool_jeune_racinnaire.append(pool_jeune_racinnaire*facteur_conversion_kg_m2_a_t_ha)
                 etats_pool_jeune_total.append(pool_jeune_total * facteur_conversion_kg_m2_a_t_ha)
                 index_pools = 0
                 for coefficient in pool_humification:
