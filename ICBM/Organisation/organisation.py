@@ -368,16 +368,13 @@ class ZoneDeGestion:
         if len(carbone_organique_du_sol_pour_la_duree_de_la_simulation) > 0:
             return somme_des_bilan_annuel / len(carbone_organique_du_sol_pour_la_duree_de_la_simulation)
 
-    def __calculer_teneur_initiale_apres_rechauffement(self, matiere_organique_du_sol_pour_la_duree_de_la_simulation):
-        return matiere_organique_du_sol_pour_la_duree_de_la_simulation[0] / (self.__profondeur * self.__masse_volumique_apparente)
 
     def __calculer_teneur_finale_projetee(self, matiere_organique_du_sol_pour_la_duree_de_la_simulation):
         return (matiere_organique_du_sol_pour_la_duree_de_la_simulation[
             len(matiere_organique_du_sol_pour_la_duree_de_la_simulation) - 1] / (self.__profondeur * self.__masse_volumique_apparente))
 
-    def __calculer_difference_entre_teneur_initiale_et_finale(self, teneur_initiale_apres_rechauffement,
-                                                              teneur_finale_projetee):
-        return teneur_finale_projetee - teneur_initiale_apres_rechauffement
+    def __calculer_difference_entre_teneur_initiale_et_finale(self, teneur_finale_projetee):
+        return teneur_finale_projetee - self.__taux_matiere_organique
 
     def __calculer_moyenne_de_chaque_annee_de_rotation_dans_la_projection(self,
                                                                           carbone_organique_de_sol_pour_la_duree_de_la_simulation):
@@ -445,11 +442,9 @@ class ZoneDeGestion:
         bilan_etats_pool_stable = bilan_carbon_pour_la_simulation_et_apport[12]
         bilan_matiere_orgagnique_pour_la_simulation = bilan_carbon_pour_la_simulation_et_apport[13]
         bilan_annuel_moyen = self.__calculer_bilan_annuel_moyen(bilan_carbon_pour_la_simulation)
-        teneur_initiale_apres_rechauffement = self.__calculer_teneur_initiale_apres_rechauffement(
-            bilan_matiere_orgagnique_pour_la_simulation)
         teneur_finale_projetee = self.__calculer_teneur_finale_projetee(bilan_matiere_orgagnique_pour_la_simulation)
         difference_entre_teneur_initiale_et_finale = self.__calculer_difference_entre_teneur_initiale_et_finale(
-            teneur_initiale_apres_rechauffement, teneur_finale_projetee)
+            teneur_finale_projetee)
         moyenne_de_chaque_annee_de_rotation = self.__calculer_moyenne_de_chaque_annee_de_rotation_dans_la_projection(
             bilan_carbon_pour_la_simulation)
         moyenne_apports_cultures_principales = self.__calculer_moyenne_des_apports_des_cultures_principales_pour_la_simulation(
@@ -497,7 +492,7 @@ class ZoneDeGestion:
             "moyenne_apports_cultures_secondaires": moyenne_apports_cultures_secondaire,
             "moyenne_apports_amendements": moyenne_apports_amendements,
             "taille_de_la_zone": self.__taille_de_la_zone_de_gestion,
-            "taux_de_matiere_organique_initial": teneur_initiale_apres_rechauffement,
+            "taux_de_matiere_organique_initial": self.__taux_matiere_organique,
             "groupe_textural": self.__groupe_textural,
             "classe_de_drainage": self.__classe_de_drainage,
             "bilan_des_regies_projections": bilan_des_regies_projections,
