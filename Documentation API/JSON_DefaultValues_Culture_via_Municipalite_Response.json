@@ -1,0 +1,4 @@
+{"rendement": string,
+ "pourcentage_tige_exportee": float,
+ "pourcentage_humidite": float,
+ "travail_du_sol_defaut": string}

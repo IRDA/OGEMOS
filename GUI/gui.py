@@ -1,16 +1,17 @@
+import copy
+import json
+import subprocess
 import tkinter as tk
-from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment
-from openpyxl.utils import get_column_letter
-import json
-import copy
-import GUI.fonction_utilitaire as util
-import subprocess
+from tkinter import ttk
+
 import psutil
 import requests
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment
+
+import GUI.fonction_utilitaire as util
 
 sp = subprocess.Popen(
     "cd ../ICBM/VirtualEnvironmentSetUp & py \"app.py\"",
@@ -1426,7 +1427,7 @@ def initialize_globals():
                         zone = champs["zones_de_gestion"][zone_index]
                     else:
                         zone = None
-                    projection_frame = ttk.LabelFrame(zone_tab, text="Régies de la projection")
+                    projection_frame = ttk.LabelFrame(zone_tab, text="Régies des sols et cultures projetées")
                     canvas_projection = tk.Canvas(projection_frame)
                     scrollbar_projection = ttk.Scrollbar(projection_frame, orient="vertical",
                                                          command=canvas_projection.yview)
@@ -1862,7 +1863,7 @@ def initialize_globals():
                         if culture_secondaire_combobox.get() != "" and rendement_culture_secondaire_entry.get() == "":
                             rendement_culture_secondaire_entry.insert(0, "1.0")
 
-                    annee_courante_frame = ttk.LabelFrame(zone_label_frame, text=str(index))
+                    annee_courante_frame = ttk.LabelFrame(zone_label_frame, text="Année " + str(index))
                     culture_principale_label = ttk.Label(annee_courante_frame, text="Culture principale: ")
                     global cultures_principales_supportees
                     culture_principale_combobox = ttk.Combobox(annee_courante_frame,
@@ -2929,7 +2930,7 @@ def initialize_globals():
                 projection_frame.grid_propagate(True)
 
                 donnees_de_rechauffement_label_frame = ttk.LabelFrame(rechauffement_frame,
-                                                                      text="Données de réchauffement")
+                                                                      text="Régies des sols et cultures historiques (Facultatif)")
                 simulation_notebook = ttk.Notebook(projection_frame)
 
                 global nombre_simulations
@@ -3496,7 +3497,7 @@ def initialize_globals():
                                                               value="Simulation")
                 index_column_cell += 1
                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                              value="Année")
+                                                              value="Année de rotation")
                 index_column_cell += 1
                 description_regies_simulations_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                               value="Culture principale")
@@ -3539,6 +3540,8 @@ def initialize_globals():
                         for zone in champ["bilans_des_zones"]:
                             index_annee = 0
                             for year in zone["bilan_des_regies_pour_la_duree_de_la_simulation"]:
+                                if index_annee == len(zone["bilan_des_regies_projections"]):
+                                    break
                                 description_regies_simulations_worksheet.cell(row=index_row_cell,
                                                                               column=index_column_cell,
                                                                               value=simulation[
@@ -3561,8 +3564,7 @@ def initialize_globals():
                                 index_column_cell += 1
                                 description_regies_simulations_worksheet.cell(row=index_row_cell,
                                                                               column=index_column_cell,
-                                                                              value=year[
-                                                                                  "annee_culture"]).alignment = alignment
+                                                                              value=str(index_annee+1)).alignment = alignment
                                 index_column_cell += 1
                                 description_regies_simulations_worksheet.cell(row=index_row_cell,
                                                                               column=index_column_cell,
