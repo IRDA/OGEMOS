@@ -2,6 +2,8 @@ import copy
 import json
 import subprocess
 import tkinter as tk
+import os
+import sys
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import ttk
@@ -13,8 +15,9 @@ from openpyxl.styles import Font, Alignment
 
 import GUI.fonction_utilitaire as util
 
+os.chdir(sys._MEIPASS)
 sp = subprocess.Popen(
-    "cd ../ICBM/VirtualEnvironmentSetUp & py \"app.py\"",
+    "cd GUI & app.exe",
     shell=True)
 
 
@@ -202,7 +205,9 @@ def initialize_globals():
                 frame_entreprise.grid_rowconfigure(2, minsize=30)
 
                 creer_bouton = ttk.Button(frame_entreprise, text="Créer", command=get_information_entreprise)
-                creer_bouton.grid(columnspan=2, row=2, column=0, pady=3)
+                creer_bouton.grid(row=2, columnspan=2, column=0, pady=3)
+                retour_menu_principal_button = ttk.Button(frame_entreprise, text="Retour au menu principal", command=retour_au_menu_principal)
+                retour_menu_principal_button.grid(columnspan=2, row=3, column=0, pady=3)
 
             def show_creation_champs(frame_champs_list):
                 def get_information_champs(scrollable_frame):
@@ -265,10 +270,13 @@ def initialize_globals():
 
                 canvas.pack(side="left", ipadx=10)
                 scrollbar.pack(side="right", fill="y")
-
-                creation_champs_bouton = ttk.Button(scrollable_frame, text="Créer",
+                frame_bouton = ttk.Frame(scrollable_frame)
+                creation_champs_bouton = ttk.Button(frame_bouton, text="Créer",
                                                     command=lambda: get_information_champs(scrollable_frame))
-                creation_champs_bouton.pack()
+                creation_champs_bouton.grid(row=0, column=0, pady=3)
+                retour_menu_principal_button = ttk.Button(frame_bouton, text="Retour au menu principal", command=retour_au_menu_principal)
+                retour_menu_principal_button.grid(row=1, column=0, pady=3)
+                frame_bouton.pack()
 
             def show_creation_zone_de_gestion(zone_de_gestion_mainframe, fill_fields=False):
                 def get_information_zone_de_gestion(scrollable_frame):
@@ -3381,8 +3389,10 @@ def initialize_globals():
                 root.deiconify()
 
             def retour_au_menu_principal():
-                root.destroy()
-                initialize_run_gui()
+                response = messagebox.askyesno(title="Retour menu principal", message= "Lors d'un retour au menu principal toutes les données non sauvegardées seront perdues. Souhaitez-vous retourner au menu principal?")
+                if response:
+                    root.destroy()
+                    initialize_run_gui()
 
             def creation_du_rapport(bilan_response):
                 bilan_workbook = Workbook()
