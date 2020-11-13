@@ -207,7 +207,8 @@ def initialize_globals():
 
                 creer_bouton = ttk.Button(frame_entreprise, text="Créer", command=get_information_entreprise)
                 creer_bouton.grid(row=2, columnspan=2, column=0, pady=3)
-                retour_menu_principal_button = ttk.Button(frame_entreprise, text="Retour au menu principal", command=retour_au_menu_principal)
+                retour_menu_principal_button = ttk.Button(frame_entreprise, text="Retour au menu principal",
+                                                          command=retour_au_menu_principal)
                 retour_menu_principal_button.grid(columnspan=2, row=3, column=0, pady=3)
 
             def show_creation_champs(frame_champs_list):
@@ -275,7 +276,8 @@ def initialize_globals():
                 creation_champs_bouton = ttk.Button(frame_bouton, text="Créer",
                                                     command=lambda: get_information_champs(scrollable_frame))
                 creation_champs_bouton.grid(row=0, column=0, pady=3)
-                retour_menu_principal_button = ttk.Button(frame_bouton, text="Retour au menu principal", command=retour_au_menu_principal)
+                retour_menu_principal_button = ttk.Button(frame_bouton, text="Retour au menu principal",
+                                                          command=retour_au_menu_principal)
                 retour_menu_principal_button.grid(row=1, column=0, pady=3)
                 frame_bouton.pack()
 
@@ -809,7 +811,7 @@ def initialize_globals():
 
                 def set_up_new_champs():
                     new_champs_window = tk.Toplevel()
-                    new_champs_window.resizable(0,0)
+                    new_champs_window.resizable(0, 0)
                     global nombre_de_champs_modifie
                     nombre_de_champs_modifie = False
                     global information_champs_modifie
@@ -859,7 +861,8 @@ def initialize_globals():
                             masse_volumique_apparente_label = ttk.Label(zone_gestion_frame,
                                                                         text="Masse volumique apparente (g/cm3): ")
                             masse_volumique_apparente_entry = ttk.Entry(zone_gestion_frame)
-                            profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur de la couche arable(cm): ")
+                            profondeur_label = ttk.Label(zone_de_gestion_frame,
+                                                         text="Profondeur de la couche arable(cm): ")
                             profondeur_entry = ttk.Entry(zone_de_gestion_frame)
                             superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
                                                                     text="Superficie de la zone (ha): ")
@@ -1232,7 +1235,8 @@ def initialize_globals():
                         masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                                     text="Masse volumique apparente (g/cm3): ")
                         masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
-                        profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur de la couche arable (cm): ")
+                        profondeur_label = ttk.Label(zone_de_gestion_frame,
+                                                     text="Profondeur de la couche arable (cm): ")
                         profondeur_entry = ttk.Entry(zone_de_gestion_frame)
                         superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
                                                                 text="Superficie de la zone (ha): ")
@@ -1367,8 +1371,8 @@ def initialize_globals():
                                         champs_index]
                                 rechauffement_champs_new_zone_label_frame = ttk.LabelFrame(
                                     rechauffement_champs_label_frame,
-                                    text="Zone gestion " + str(len(
-                                        rechauffement_champs_label_frame.winfo_children()) + 1),
+                                    text="Zone gestion " + str(int(len(
+                                        rechauffement_champs_label_frame.winfo_children()) / 2) + 1),
                                     name="zonegestion" + str(len(
                                         rechauffement_champs_label_frame.winfo_children())))
                                 rechauffement_champs_new_zone_label_frame.pack()
@@ -1470,7 +1474,8 @@ def initialize_globals():
                             for regie in zone["regies_sol_et_culture_projection"]:
                                 index = len(scrollable_frame_projection.winfo_children()) + 1
                                 add_regies_projection(scrollable_frame_projection, index, regie)
-                        elif len(zone_rechauffement["regies_sol_et_culture_historique"]) > 0:
+                        elif zone_rechauffement is not None and len(
+                                zone_rechauffement["regies_sol_et_culture_historique"]) > 0:
                             for regie in zone_rechauffement["regies_sol_et_culture_historique"]:
                                 index = len(scrollable_frame_projection.winfo_children()) + 1
                                 add_regies_projection(scrollable_frame_projection, index, regie)
@@ -1525,7 +1530,7 @@ def initialize_globals():
                             state="disabled")
 
                 def appliquer_les_regies_aux_autres_zones_rechauffement(champ_label_frame, zone_courante_index):
-                    zone_courante = champ_label_frame.nametowidget("zone"+str(zone_courante_index))
+                    zone_courante = champ_label_frame.nametowidget("zone" + str(zone_courante_index))
                     regies = zone_courante.winfo_children()
                     regies.pop()
                     entree_invalide_liste = []
@@ -1550,7 +1555,8 @@ def initialize_globals():
                                 pourcentage_tige_exporte) and pourcentage_tige_exporte != "") or (
                                 util.is_decimal_number(pourcentage_tige_exporte) and (
                                 float(pourcentage_tige_exporte) < 0 or float(pourcentage_tige_exporte) > 100)):
-                            entree_invalide_liste.append("\"Pourcentage paille ou tige exportée\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut dans la zone que vous souhaitez appliquer")
+                            entree_invalide_liste.append(
+                                "\"Pourcentage paille ou tige exportée\" doit être un réel positif dans l'intervalle [0,1] ou le champs peut être vide pour aller chercher une proportion par défaut dans la zone que vous souhaitez appliquer")
                         if pourcentage_tige_exporte == "":
                             pourcentage_tige_exporte = None
                         if pourcentage_tige_exporte is not None and util.is_decimal_number(
@@ -1558,7 +1564,8 @@ def initialize_globals():
                             pourcentage_tige_exporte = float(pourcentage_tige_exporte)
                         production_recolte = regie.grid_slaves(row=3, column=1)[0].get()
                         if production_recolte not in ["Oui", "Non"]:
-                            entree_invalide_liste.append("\"Production récolté\" doit être l'une des options de la combobox dans la zone que vous souhaitez appliquer")
+                            entree_invalide_liste.append(
+                                "\"Production récolté\" doit être l'une des options de la combobox dans la zone que vous souhaitez appliquer")
                         else:
                             if production_recolte == "Oui":
                                 production_recolte = True
@@ -1569,7 +1576,8 @@ def initialize_globals():
                                 pourcentage_humidite) and pourcentage_humidite != "") or (
                                 util.is_decimal_number(pourcentage_humidite) and (
                                 float(pourcentage_humidite) < 0 or float(pourcentage_humidite) > 100)):
-                            entree_invalide_liste.append("\"Pourcentage d'humidité\" doit être un réel positif dans l'intervalle [0,100] ou le champs peut être vide pour aller chercher une proportion par défaut dans la zone que vous souhaitez appliquer")
+                            entree_invalide_liste.append(
+                                "\"Pourcentage d'humidité\" doit être un réel positif dans l'intervalle [0,100] ou le champs peut être vide pour aller chercher une proportion par défaut dans la zone que vous souhaitez appliquer")
                         if pourcentage_humidite == "":
                             pourcentage_humidite = None
                         if pourcentage_humidite is not None and util.is_decimal_number(pourcentage_humidite):
@@ -1582,23 +1590,27 @@ def initialize_globals():
                         travail_du_sol = regie.grid_slaves(row=5, column=1)[0].get()
                         global types_travail_du_sol_supportes
                         if travail_du_sol not in types_travail_du_sol_supportes:
-                            entree_invalide_liste.append("\"Travail du sol\" doit être parmis les choix disponibles dans la zone que vous souhaitez appliquer")
+                            entree_invalide_liste.append(
+                                "\"Travail du sol\" doit être parmis les choix disponibles dans la zone que vous souhaitez appliquer")
                         travail_du_sol_dict = {"travail_du_sol": travail_du_sol}
                         culture_secondaire = regie.grid_slaves(row=7, column=1)[0].get()
                         global cultures_secondaires_supportees
                         if culture_secondaire == "":
                             culture_secondaire = None
                         if culture_secondaire is not None and culture_secondaire not in cultures_secondaires_supportees:
-                            entree_invalide_liste.append("\"Culture secondaire\" doit être parmis les choix disponibles ou laissé vide s'il n'y a pas de culture secondaire dans la zone que vous souhaitez appliquer")
+                            entree_invalide_liste.append(
+                                "\"Culture secondaire\" doit être parmis les choix disponibles ou laissé vide s'il n'y a pas de culture secondaire dans la zone que vous souhaitez appliquer")
                         rendement_culture_secondaire = regie.grid_slaves(row=8, column=1)[0].get()
                         if rendement_culture_secondaire == "":
                             rendement_culture_secondaire = None
                         if rendement_culture_secondaire is not None and not util.is_decimal_number(
                                 rendement_culture_secondaire):
-                            entree_invalide_liste.append("\"Rendement culture secondaire\" doit être un réel positif ou laissé vide s'il n'y a pas de culture secondaire")
+                            entree_invalide_liste.append(
+                                "\"Rendement culture secondaire\" doit être un réel positif ou laissé vide s'il n'y a pas de culture secondaire")
                         elif (culture_secondaire is None and rendement_culture_secondaire is not None) or (
                                 culture_secondaire is not None and rendement_culture_secondaire is None):
-                            entree_invalide_liste.append("\"Rendement culture secondaire\" et \"Culture secondaire\" doivent être tout deux laissé vide s'il n'y a pas de culture secondaire")
+                            entree_invalide_liste.append(
+                                "\"Rendement culture secondaire\" et \"Culture secondaire\" doivent être tout deux laissé vide s'il n'y a pas de culture secondaire")
                         else:
                             if rendement_culture_secondaire is not None:
                                 rendement_culture_secondaire = float(rendement_culture_secondaire)
@@ -1617,8 +1629,8 @@ def initialize_globals():
                                 amendement = None
                             if amendement is not None and amendement not in amendements_supportees:
                                 entree_invalide_liste.append(
-                                     "\"Amendement\" " + str(
-                                         index_composante_amendement + 1) + " doit être parmis les choix disponibles dans la zone que vous souhaitez appliquer")
+                                    "\"Amendement\" " + str(
+                                        index_composante_amendement + 1) + " doit être parmis les choix disponibles dans la zone que vous souhaitez appliquer")
                             apport = \
                                 composante_amendement_liste.grid_slaves([index_composante_amendement + 1],
                                                                         column=1)[
@@ -1627,14 +1639,14 @@ def initialize_globals():
                                 apport = None
                             if apport is not None and not util.is_decimal_number(apport):
                                 entree_invalide_liste.append(
-                                     "\"Apport\" " + str(index_composante_amendement + 1) +
-                                     " est invalide, il doit être un réel positif ou laissé vide s'il n'y a pas d'amendements dans la zone que vous souhaitez appliquer")
+                                    "\"Apport\" " + str(index_composante_amendement + 1) +
+                                    " est invalide, il doit être un réel positif ou laissé vide s'il n'y a pas d'amendements dans la zone que vous souhaitez appliquer")
                             elif (amendement is None and apport is not None) or (
                                     amendement is not None and apport is None):
-                                entree_invalide_liste.append( "\"Apport\" " + str(
-                                         index_composante_amendement + 1) + " et \"Amendement\" " + str(
-                                         index_composante_amendement + 1) +
-                                     " doivent être tout deux laissé vide s'il n'y a pas d'amendements  dans la zone que vous souhaitez appliquer")
+                                entree_invalide_liste.append("\"Apport\" " + str(
+                                    index_composante_amendement + 1) + " et \"Amendement\" " + str(
+                                    index_composante_amendement + 1) +
+                                                             " doivent être tout deux laissé vide s'il n'y a pas d'amendements  dans la zone que vous souhaitez appliquer")
                             else:
                                 if apport is not None:
                                     apport = float(apport)
@@ -1647,7 +1659,7 @@ def initialize_globals():
                                       "travail_du_sol": travail_du_sol_dict}
                         regies_zone_courante.append(regie_dict)
                     if len(entree_invalide_liste) == 0:
-                        regies_zone_courante = {"regies_sol_et_culture_historique":regies_zone_courante}
+                        regies_zone_courante = {"regies_sol_et_culture_historique": regies_zone_courante}
                         index_zone = 0
                         index_widget = 0
                         for widget in champ_label_frame.winfo_children():
@@ -1680,6 +1692,7 @@ def initialize_globals():
                         index_from_button_name[
                             appliquer_les_regies_aux_autres_zones_rechauffement_button.winfo_name()] = index
                         appliquer_les_regies_aux_autres_zones_rechauffement_button.pack()
+
                     global information_champs
                     canvas_rechauffement_via_rotation = tk.Canvas(rechauffement_frame)
                     scrollbar_rechauffement_via_rotation = ttk.Scrollbar(rechauffement_frame, orient="vertical",
@@ -2689,7 +2702,7 @@ def initialize_globals():
 
                     root.withdraw()
                     edition_window = tk.Toplevel()
-                    edition_window.resizable(0,0)
+                    edition_window.resizable(0, 0)
                     edition_window.protocol("WM_DELETE_WINDOW", fenetre_edition_ferme)
                     edition_frame = ttk.Frame(edition_window)
                     canvas = tk.Canvas(edition_frame)
@@ -3194,7 +3207,7 @@ def initialize_globals():
                                                               "carbon_total": carbon_total})
 
                     nouvel_amendement_window = tk.Toplevel()
-                    nouvel_amendement_window.resizable(0,0)
+                    nouvel_amendement_window.resizable(0, 0)
                     nouvel_amendement_frame = ttk.Frame(nouvel_amendement_window)
                     nouvel_amendement_window.protocol("WM_DELETE_WINDOW", fenetre_nouvel_amendement_ferme)
                     amendement_label = ttk.Label(nouvel_amendement_frame, text="Amendement: ")
@@ -3286,7 +3299,7 @@ def initialize_globals():
 
                     root.withdraw()
                     menu_transfert_window = tk.Toplevel()
-                    menu_transfert_window.resizable(0,0)
+                    menu_transfert_window.resizable(0, 0)
                     menu_transfert_window.protocol("WM_DELETE_WINDOW", fenetre_menu_transfert_ferme)
                     menu_transfert_frame = ttk.Frame(menu_transfert_window)
                     menu_transfert_label = ttk.Label(menu_transfert_frame, text="Menu de transfert des amendements")
@@ -3396,7 +3409,8 @@ def initialize_globals():
                 root.deiconify()
 
             def retour_au_menu_principal():
-                response = messagebox.askyesno(title="Retour menu principal", message= "Lors d'un retour au menu principal toutes les données non sauvegardées seront perdues. Souhaitez-vous retourner au menu principal?")
+                response = messagebox.askyesno(title="Retour menu principal",
+                                               message="Lors d'un retour au menu principal toutes les données non sauvegardées seront perdues. Souhaitez-vous retourner au menu principal?")
                 if response:
                     root.destroy()
                     initialize_run_gui()
@@ -3447,7 +3461,8 @@ def initialize_globals():
                 description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                   value="Masse volumique apparente (g/cm3)")
                 index_column_cell += 1
-                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Profondeur de la couche arable (cm)")
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                  value="Profondeur de la couche arable (cm)")
                 index_column_cell += 1
                 description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Groupe textural")
                 index_column_cell += 1
@@ -3581,7 +3596,8 @@ def initialize_globals():
                                 index_column_cell += 1
                                 description_regies_simulations_worksheet.cell(row=index_row_cell,
                                                                               column=index_column_cell,
-                                                                              value=str(index_annee+1)).alignment = alignment
+                                                                              value=str(
+                                                                                  index_annee + 1)).alignment = alignment
                                 index_column_cell += 1
                                 description_regies_simulations_worksheet.cell(row=index_row_cell,
                                                                               column=index_column_cell,
