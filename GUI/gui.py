@@ -17,7 +17,7 @@ import GUI.fonction_utilitaire as util
 
 os.chdir(sys._MEIPASS)
 sp = subprocess.Popen(
-    "cd GUI & app.exe",
+    "cd GUI & API_OGEMOS.exe",
     shell=True)
 
 
@@ -123,6 +123,7 @@ def initialize_globals():
 
         root = tk.Tk()
         root.title("OGEMOS")
+        root.resizable(0, 0)
         mainframe = ttk.Frame(root)
         mainframe.grid(row=0, column=0, ipadx=5, ipady=5)
 
@@ -350,7 +351,7 @@ def initialize_globals():
                                                 profondeur) < 0:
                                             entree_invalide_liste.append((information_champs[index]["nom_du_champs"],
                                                                           "Zone gestion " + str(index_zone),
-                                                                          "\"Profondeur\" doit être un réel positif"))
+                                                                          "\"Profondeur de la couche arable\" doit être un réel positif"))
                                         else:
                                             profondeur = float(profondeur)
                                     grid_slave6_1 = champs_frame_widget.grid_slaves(row=6, column=1)
@@ -423,7 +424,7 @@ def initialize_globals():
                     masse_volumique_apparente_label = ttk.Label(zone_gestion_frame,
                                                                 text="Masse volumique apparente (g/cm3): ")
                     masse_volumique_apparente_entry = ttk.Entry(zone_gestion_frame)
-                    profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur (cm): ")
+                    profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur de la couche arable (cm): ")
                     profondeur_entry = ttk.Entry(zone_de_gestion_frame)
                     superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame, text="Superficie de la zone (ha): ")
                     superficie_de_la_zone_entry = ttk.Entry(zone_de_gestion_frame)
@@ -583,6 +584,7 @@ def initialize_globals():
 
                             root.withdraw()
                             duree_simulation_window = tk.Toplevel()
+                            duree_simulation_window.resizable(0, 0)
                             duree_simulation_window.focus()
                             duree_simulation_window.protocol("WM_DELETE_WINDOW", readd_simulation)
                             duree_simulation_frame = ttk.Frame(duree_simulation_window)
@@ -807,6 +809,7 @@ def initialize_globals():
 
                 def set_up_new_champs():
                     new_champs_window = tk.Toplevel()
+                    new_champs_window.resizable(0,0)
                     global nombre_de_champs_modifie
                     nombre_de_champs_modifie = False
                     global information_champs_modifie
@@ -856,7 +859,7 @@ def initialize_globals():
                             masse_volumique_apparente_label = ttk.Label(zone_gestion_frame,
                                                                         text="Masse volumique apparente (g/cm3): ")
                             masse_volumique_apparente_entry = ttk.Entry(zone_gestion_frame)
-                            profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur (cm): ")
+                            profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur de la couche arable(cm): ")
                             profondeur_entry = ttk.Entry(zone_de_gestion_frame)
                             superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
                                                                     text="Superficie de la zone (ha): ")
@@ -996,7 +999,7 @@ def initialize_globals():
                                             entree_invalide_liste.append(
                                                 (information_champs[nombre_de_champs - 1]["nom_du_champs"],
                                                  "Zone gestion " + str(index_zone + 1),
-                                                 "\"Profondeur\" doit être un réel positif"))
+                                                 "\"Profondeur de la couche arable\" doit être un réel positif"))
                                         else:
                                             profondeur = float(profondeur)
                                     grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
@@ -1189,6 +1192,7 @@ def initialize_globals():
                             new_zone_window.destroy()
 
                         new_zone_window = tk.Toplevel()
+                        new_zone_window.resizable(0, 0)
                         new_zone_window.protocol("WM_DELETE_WINDOW", remise_a_etat_initial)
                         creation_zone_frame = ttk.Frame(new_zone_window)
                         canvas = tk.Canvas(creation_zone_frame)
@@ -1228,7 +1232,7 @@ def initialize_globals():
                         masse_volumique_apparente_label = ttk.Label(zone_de_gestion_frame,
                                                                     text="Masse volumique apparente (g/cm3): ")
                         masse_volumique_apparente_entry = ttk.Entry(zone_de_gestion_frame)
-                        profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur (cm): ")
+                        profondeur_label = ttk.Label(zone_de_gestion_frame, text="Profondeur de la couche arable (cm): ")
                         profondeur_entry = ttk.Entry(zone_de_gestion_frame)
                         superficie_de_la_zone_label = ttk.Label(zone_de_gestion_frame,
                                                                 text="Superficie de la zone (ha): ")
@@ -1331,7 +1335,7 @@ def initialize_globals():
                                                 (information_champs[champs_index]["nom_du_champs"],
                                                  "Zone gestion " + str(
                                                      information_champs[champs_index]["nombre_de_zone_de_gestion"]),
-                                                 "\"Profondeur\" doit être un réel positif"))
+                                                 "\"Profondeur de la couche arable\" doit être un réel positif"))
                                         else:
                                             profondeur = float(profondeur)
                                     grid_slave6_1 = scrollable_frame_widget.grid_slaves(row=6, column=1)
@@ -2685,6 +2689,7 @@ def initialize_globals():
 
                     root.withdraw()
                     edition_window = tk.Toplevel()
+                    edition_window.resizable(0,0)
                     edition_window.protocol("WM_DELETE_WINDOW", fenetre_edition_ferme)
                     edition_frame = ttk.Frame(edition_window)
                     canvas = tk.Canvas(edition_frame)
@@ -2756,7 +2761,7 @@ def initialize_globals():
                                 masse_volumique_apparente_entry.insert(0,
                                                                        information_zone_de_gestion[
                                                                            "masse_volumique_apparente"])
-                            profondeur_label = ttk.Label(zone_label_frame, text="Profondeur (cm): ")
+                            profondeur_label = ttk.Label(zone_label_frame, text="Profondeur de la couche arable (cm): ")
                             profondeur_entry = ttk.Entry(zone_label_frame)
                             if information_zone_de_gestion["profondeur"] is not None:
                                 profondeur_entry.insert(0, information_zone_de_gestion["profondeur"])
@@ -2857,7 +2862,7 @@ def initialize_globals():
                                     entree_invalide_liste.append(
                                         ("Champs " + str(champs_label_frame_index - 1),
                                          "Zone gestion " + str(zone_label_frame_index - 1),
-                                         "\"Profondeur\" doit être un réel positif"))
+                                         "\"Profondeur de la couche arable\" doit être un réel positif"))
                                 else:
                                     profondeur = float(profondeur)
                                 superficie_de_la_zone = zone_frame.grid_slaves(row=6, column=1)[0].get()
@@ -3189,6 +3194,7 @@ def initialize_globals():
                                                               "carbon_total": carbon_total})
 
                     nouvel_amendement_window = tk.Toplevel()
+                    nouvel_amendement_window.resizable(0,0)
                     nouvel_amendement_frame = ttk.Frame(nouvel_amendement_window)
                     nouvel_amendement_window.protocol("WM_DELETE_WINDOW", fenetre_nouvel_amendement_ferme)
                     amendement_label = ttk.Label(nouvel_amendement_frame, text="Amendement: ")
@@ -3280,6 +3286,7 @@ def initialize_globals():
 
                     root.withdraw()
                     menu_transfert_window = tk.Toplevel()
+                    menu_transfert_window.resizable(0,0)
                     menu_transfert_window.protocol("WM_DELETE_WINDOW", fenetre_menu_transfert_ferme)
                     menu_transfert_frame = ttk.Frame(menu_transfert_window)
                     menu_transfert_label = ttk.Label(menu_transfert_frame, text="Menu de transfert des amendements")
@@ -3440,7 +3447,7 @@ def initialize_globals():
                 description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
                                                   value="Masse volumique apparente (g/cm3)")
                 index_column_cell += 1
-                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Profondeur (cm)")
+                description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Profondeur de la couche arable (cm)")
                 index_column_cell += 1
                 description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Groupe textural")
                 index_column_cell += 1
