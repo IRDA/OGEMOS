@@ -1470,7 +1470,7 @@ def initialize_globals():
                             for regie in zone["regies_sol_et_culture_projection"]:
                                 index = len(scrollable_frame_projection.winfo_children()) + 1
                                 add_regies_projection(scrollable_frame_projection, index, regie)
-                        elif zone_rechauffement is not None:
+                        elif len(zone_rechauffement["regies_sol_et_culture_historique"]) > 0:
                             for regie in zone_rechauffement["regies_sol_et_culture_historique"]:
                                 index = len(scrollable_frame_projection.winfo_children()) + 1
                                 add_regies_projection(scrollable_frame_projection, index, regie)
