@@ -2746,11 +2746,8 @@ def initialize_globals():
                                                                     information_zone_de_gestion[
                                                                         "taux_matiere_organique"])
                             municipalite_label = ttk.Label(zone_label_frame, text="Municipalité: ")
-                            global municipalites_supportees
-                            municipalite_combobox = ttk.Combobox(zone_label_frame, values=municipalites_supportees,
-                                                                 postcommand=lambda: filter_combobox_values(
-                                                                     municipalite_combobox, municipalites_supportees))
-                            municipalite_combobox.set(information_zone_de_gestion["municipalite"])
+                            municipalite_combobox = create_municipalite_combobox(information_zone_de_gestion,
+                                                                                 zone_label_frame)
                             groupe_textural_label = ttk.Label(zone_label_frame, text="Groupe textural: ")
                             global groupes_texturaux_supportees
                             groupe_textural_combobox = ttk.Combobox(zone_label_frame,
@@ -2944,6 +2941,14 @@ def initialize_globals():
                     sauvegarde_des_modifications_button.pack()
 
                     edition_frame.pack()
+
+                def create_municipalite_combobox(information_zone_de_gestion, zone_label_frame):
+                    global municipalites_supportees
+                    municipalite_combobox = ttk.Combobox(zone_label_frame, values=municipalites_supportees,
+                                                         postcommand=lambda: filter_combobox_values(
+                                                             municipalite_combobox, municipalites_supportees))
+                    municipalite_combobox.set(information_zone_de_gestion["municipalite"])
+                    return municipalite_combobox
 
                 for widget in parent_frame_tabs.winfo_children():
                     widget.destroy()
