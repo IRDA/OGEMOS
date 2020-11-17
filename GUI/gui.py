@@ -17,7 +17,7 @@ import GUI.fonction_utilitaire as util
 
 os.chdir(sys._MEIPASS)
 sp = subprocess.Popen(
-    "cd GUI & API_OGEMOS.exe",
+    "API_OGEMOS.exe",
     shell=True)
 
 

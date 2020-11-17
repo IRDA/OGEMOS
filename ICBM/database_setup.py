@@ -5,7 +5,7 @@ import os
 
 
 
-os.chdir(sys._MEIPASS)
-connection_string = 'sqlite:///BD/coefficient.db'
+current_directory = os.getcwd()
+connection_string = 'sqlite:///'+current_directory+"/coefficient.db"
 engine = create_engine(connection_string)
 Session = sessionmaker(bind=engine)
