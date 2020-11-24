@@ -4,6 +4,7 @@ import subprocess
 import tkinter as tk
 import os
 import sys
+import webbrowser
 from tkinter import filedialog
 from tkinter import messagebox
 from tkinter import ttk
@@ -15,7 +16,6 @@ from openpyxl.styles import Font, Alignment
 
 import GUI.fonction_utilitaire as util
 
-os.chdir(sys._MEIPASS)
 sp = subprocess.Popen(
     "API_OGEMOS.exe",
     shell=True)
@@ -147,6 +147,9 @@ def initialize_globals():
                     canvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
             except KeyError:
                 pass
+
+        def callback(event):
+            webbrowser.open_new(event.widget.cget("text"))
 
         root.bind_all("<MouseWheel>", on_mousewheel)
         root.bind_all("<Button-4>", on_mousewheel)
@@ -3334,12 +3337,15 @@ def initialize_globals():
                                                               command=ajouter_un_nouvel_amendement)
                 menu_transfert_amendements_button = ttk.Button(menu_frame, text="Menu de transfert de version",
                                                                command=menu_transfert_version)
+                lien_github_ogemos_label = tk.Label(menu_frame, text=r"https://github.com/IRDA/OGEMOS", fg="blue", cursor="hand2")
+                lien_github_ogemos_label.bind("<Button-1>", callback)
                 bienvenue_label.pack(pady=5, padx=10)
                 nouvelle_entreprise_button.pack(pady=5, padx=10)
                 charger_entreprise_button.pack(pady=5, padx=10)
                 charger_plan_de_gestion_de_carbone_button.pack(pady=5, padx=10)
                 ajouter_nouvel_amendement_button.pack(pady=5, padx=10)
                 menu_transfert_amendements_button.pack(pady=5, padx=10)
+                lien_github_ogemos_label.pack()
 
             def sauvegarder_attributs_entreprise_apres_creation():
                 root.withdraw()
