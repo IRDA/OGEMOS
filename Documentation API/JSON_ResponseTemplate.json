@@ -1,0 +1,106 @@
+{
+    "bilans_des_simulations": [
+        {
+            "bilan_entreprise_ponderee": [float], (évolution du carbone ramenée sur l'entreprise pondéré à l'aide de la superficie des champs sur une base annuelle)
+            "bilans_des_champs": [
+                {
+                    "bilan_champs_pondere": [float], (évolution du carbone ramenée sur le champ pondéré à l'aide de la superficie des zones sur une base annuelle)
+                    "bilans_des_zones": [
+                        {
+                            "bilan_annuel_moyen_pour_la_zone": float, (bilan de carbone moyen pour la simulation)
+                            "bilan_apports_amendements": [float], (apports annuels en carbone des amendements)
+                            "bilan_apports_cultures_principales": [float], (apports annuels en carbone de la culture principale)
+                            "bilan_apports_cultures_principales_aeriennes": [float], (apports annuels en carbone de la partie aerienne de la culture principale)
+                            "bilan_apports_cultures_principales_racinaires": [float], (apports annuels en carbone de la partie racinaire de la culture principale)
+                            "bilan_apports_cultures_secondaires": [float], (apports annuels en carbone de la culture secondaire)
+                            "bilan_apports_cultures_secondaires_aeriennes": [float], (apports annuels de la partie aerienne de la culture secondaire)
+                            "bilan_apports_cultures_secondaires_racinaires": [float], (apports annuels de la partie racinaire de la culture secondaire)
+                            "bilan_carbone_de_la_zone_pour_la_simulation": [float], (évolution du carbone de la zone sur une base annuelle)
+                            "bilan_des_regies_historiques": [ (description des apports du réchauffement)
+                                {
+                                    "amendements": {
+                                        "amendements": [
+                                            {
+                                                "amendement": null or string,
+                                                "apport": null or float
+                                            }
+                                        ]
+                                    },
+                                    "annee_culture": null or int,
+                                    "culture_principale": {
+                                        "culture_principale": string or null
+                                    },
+                                    "culture_secondaire": {
+                                        "culture_secondaire": null or string
+                                    }
+                                }
+                            ],
+                            "bilan_des_regies_pour_la_duree_de_la_simulation": [(description des apports pour chaque année simulée)
+                                {
+                                    "amendements": {
+                                        "amendements": [
+                                            {
+                                                "amendement": string or null,
+                                                "apport": float or null
+                                            }
+                                        ]
+                                    },
+                                    "annee_culture": int,
+                                    "culture_principale": {
+                                        "culture_principale": string
+                                    },
+                                    "culture_secondaire": {
+                                        "culture_secondaire": string or null
+                                    }
+                                } (se répète pour chaque année de la simulation)
+                            ],
+                            "bilan_des_regies_projections": [(description de la rotation simulée)
+                                {
+                                    "amendements": {
+                                        "amendements": [
+                                            {
+                                                "amendement": string or null,
+                                                "apport": float or null
+                                            }
+                                        ]
+                                    },
+                                    "annee_culture": null or int,
+                                    "culture_principale": {
+                                        "culture_principale": string
+                                    },
+                                    "culture_secondaire": {
+                                        "culture_secondaire": string or null
+                                    }
+                                }
+                            ],
+                            "bilan_etats_pool_jeune_aerien": [float], (évolution du pool de carbone jeune aérien sur une base annuelle)
+                            "bilan_etats_pool_jeune_amendements": [float], (évolution du pool de carbone jeune d'amendement sur une base annuelle)
+                            "bilan_etats_pool_jeune_racinaire": [float], (évolution du pool de carbone jeune racinaire sur une base annuelle)
+                            "bilan_etats_pool_jeune_total": [float], (évolution du pool de carbone jeune total sur une base annuelle)
+                            "bilan_etats_pool_stable": [float], (évolution du pool de carbone stable sur une base annuelle)
+                            "bilan_matiere_orgagnique_pour_la_simulation": [float], (évolution de la matière organique de la zone sur une base annuelle)
+                            "classe_de_drainage": string,
+                            "comparaison_percentile50": float,
+                            "comparaison_percentile90": float,
+                            "difference_entre_la_teneur_finale_et_la_zone": float,
+                            "groupe_textural": string,
+                            "moyenne_apports_amendements": float,
+                            "moyenne_apports_cultures_principales": float,
+                            "moyenne_apports_cultures_secondaires": float,
+                            "moyenne_de_chaque_annee_de_rotation": [ (moyenne du carbone pour chaque année de rotation donc si elle se répète on peut avoir la moyenne du carbone de ces répétitions)
+                                float
+                            ],
+                            "taille_de_la_zone": float,
+                            "taux_de_matiere_organique_initial": float,
+                            "teneur_finale_projetee": float
+                        }
+                    ],
+                    "nom_champs": string,
+                    "nom_du_champs": string,
+                    "nombre_de_zone_de_gestion": int,
+                    "taille_du_champs": float
+                }
+            "nom_entreprise": string
+        }
+    ]
+}
