@@ -102,7 +102,12 @@ class ZoneDeGestion:
         self.COEFFICIENT_HUMIFICATION_RACINNAIRE = 0.3
 
         if masse_volumique_apparente is None:
-            self.__masse_volumique_apparente = 1.318
+            if groupe_textural == "Groupe 1 (texture fine)":
+                self.__masse_volumique_apparente = -0.0335*taux_matiere_organique+1.3944
+            elif groupe_textural == "Groupe 2 (texture moyenne)":
+                self.__masse_volumique_apparente = -0.0337*taux_matiere_organique+1.4731
+            else:
+                self.__masse_volumique_apparente = -0.0232*taux_matiere_organique+1.4001
         else:
             self.__masse_volumique_apparente = masse_volumique_apparente
         if profondeur is None:
