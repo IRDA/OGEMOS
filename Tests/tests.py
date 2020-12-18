@@ -26,7 +26,7 @@ while donnees_amendements.cell(row=row_index, column=column_index).value is not 
         amendement_dict = {"amendement": id_amendement,
                            "pourcentage_humidite": str(pourcentage_humidite),
                            "carbon_total": str(carbon_total)}
-        # response = requests.post('http://localhost:5000/api/ajout-amendement', json=amendement_dict)
+        response = requests.post('http://localhost:5000/api/ajout-amendement', json=amendement_dict)
 simulation = {"simulations": [{"nom_simulation": "Test OGEMOS", "duree_projection": 0, "annee_initiale_projection": 0,
                                "annee_finale_projection": 0,
                                "entreprise_agricole": {"nom": "Test OGEMOS", "champs": []}}]}
@@ -188,7 +188,7 @@ while donnees_regies.cell(row=row_index, column=column_index).value is not None:
 for champ in champ_dict:
     print(champ)
     simulation["simulations"][0]["entreprise_agricole"]["champs"].append(champ)
-# test_response = requests.post("http://localhost:5000/api/icbm-bilan", json=simulation)
+test_response = requests.post("http://localhost:5000/api/icbm-bilan", json=simulation)
 print(simulation)
 print(champ_dict)
-# print(test_response)
+print(test_response)
