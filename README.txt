@@ -8,12 +8,13 @@
 # OGEMOS
 Outil de gestion de la matière organique des sols basé sur le modèle ICBM (Introductory Carbon Balance Model)
 
-Instructions pour télécharger l'exécutaable le plus à jour:
+Instructions pour télécharger l'exécutable le plus à jour:
  - Sélectionner le dossier Executables.
- - Cliquer sur le fichier zip que vous voulez télécharger
-   la différence est que l'un d'entre eux a le guide d'utilisateur
-   en plus des exécutables.
- - Le bouton pour download le zip est à droite de la
+ - Cliquer sur le fichier zip que vous voulez télécharger,
+   soit celui avec les exécutables seulement ou celui avec 
+   les exécutables et le guide d'utilisation.
+ - Le bouton pour télécharger le zip est à droite de la
    deuxième section.
- - Il faut ensuite unzip le fichier pour aller aux exécutables.
+ - Il faut ensuite deziper le fichier pour aller aux exécutables 
+   API_OGEMOS.exe (sans interface graphique (GUI)) ou APP_OGEMOS.exe (avec GUI).
   
