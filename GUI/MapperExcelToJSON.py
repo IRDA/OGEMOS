@@ -18,12 +18,12 @@ def map_excel_to_json(path):
     row = initial_row
     column = initial_column
 
-    # TODO: Check for a solution to the fact that numbers alone in a cell are not considered string
+    # TODO: Check for a way to handle an error where the line contains info but the first cell is forgotten
 
     while donnee_entreprises.cell(row=row, column=column).value is not None:
         if str(donnee_entreprises.cell(row=row, column=column).value) in entreprises_dict.keys():
             entreprise = str(donnee_entreprises.cell(row=row, column=column).value)
-            if entreprise is None:
+            if entreprise == "None":
                 raise TypeError(
                     "Type du nom de l'entreprise est invalide dans la rangée {} et la colonne {} de la feuille de calcul Entreprises".format(
                         row, column))
@@ -33,8 +33,8 @@ def map_excel_to_json(path):
                         row, column))
             column += 1
             if str(donnee_entreprises.cell(row=row, column=column).value) in entreprises_dict[entreprise].keys():
-                champ = donnee_entreprises.cell(row=row, column=column).value
-                if champ is None:
+                champ = str(donnee_entreprises.cell(row=row, column=column).value)
+                if champ == "None":
                     raise TypeError(
                         "Type du nom du champ est invalide dans la rangée {} et la colonne {} de la feuille de calcul Entreprises".format(
                             row, column))
@@ -49,7 +49,7 @@ def map_excel_to_json(path):
                     raise Exception(
                         "Duplicat d'une zone de gestion dans la rangée {} et la colonne {} de la feuille de calcul Entreprises".format(
                             row, column))
-                elif zone_de_gestion is None:
+                elif zone_de_gestion == "None":
                     raise TypeError(
                         "Type du nom de la zone de gestion est invalide dans la rangée {} et la colonne {} de la feuille de calcul Entreprises".format(
                             row, column))
@@ -63,11 +63,12 @@ def map_excel_to_json(path):
                     column += 1
                     ajout_caracteristiques_physiques(column, donnee_entreprises, row,
                                                      zone_de_gestion_data)
+                    column = initial_column
 
             else:
                 entreprises_dict[entreprise][str(donnee_entreprises.cell(row=row, column=column).value)] = {}
                 champ = str(donnee_entreprises.cell(row=row, column=column).value)
-                if champ is None:
+                if champ == "None":
                     raise TypeError(
                         "Type du nom du champ est invalide dans la rangée {} et la colonne {} de la feuille de calcul Entreprises".format(
                             row, column))
@@ -78,7 +79,7 @@ def map_excel_to_json(path):
                 column += 1
                 entreprises_dict[entreprise][champ][str(donnee_entreprises.cell(row=row, column=column).value)] = {}
                 zone_de_gestion = str(donnee_entreprises.cell(row=row, column=column).value)
-                if zone_de_gestion is None:
+                if zone_de_gestion == "None":
                     raise TypeError(
                         "Type du nom de la zone de gestion est invalide dans la rangée {} et la colonne {} de la feuille de calcul Entreprises".format(
                             row, column))
@@ -90,10 +91,11 @@ def map_excel_to_json(path):
                 column += 1
                 ajout_caracteristiques_physiques(column, donnee_entreprises, row,
                                                  zone_de_gestion_data)
+                column = initial_column
         else:
             entreprises_dict[str(donnee_entreprises.cell(row=row, column=column).value)] = {}
             entreprise = str(donnee_entreprises.cell(row=row, column=column).value)
-            if entreprise is None:
+            if entreprise == "None":
                 raise TypeError(
                     "Type du nom de l'entreprise est invalide dans la rangée {} et la colonne {} de la feuille de calcul Entreprises".format(
                         row, column))
@@ -104,7 +106,7 @@ def map_excel_to_json(path):
             column += 1
             entreprises_dict[entreprise][str(donnee_entreprises.cell(row=row, column=column).value)] = {}
             champ = str(donnee_entreprises.cell(row=row, column=column).value)
-            if champ is None:
+            if champ == "None":
                 raise TypeError(
                     "Type du nom du champ est invalide dans la rangée {} et la colonne {} de la feuille de calcul Entreprises".format(
                         row, column))
@@ -115,7 +117,7 @@ def map_excel_to_json(path):
             column += 1
             entreprises_dict[entreprise][champ][str(donnee_entreprises.cell(row=row, column=column).value)] = {}
             zone_de_gestion = str(donnee_entreprises.cell(row=row, column=column).value)
-            if zone_de_gestion is None:
+            if zone_de_gestion == "None":
                 raise TypeError(
                     "Type du nom de la zone de gestion est invalide dans la rangée {} et la colonne {} de la feuille de calcul Entreprises".format(
                         row, column))
@@ -127,6 +129,7 @@ def map_excel_to_json(path):
             column += 1
             ajout_caracteristiques_physiques(column, donnee_entreprises, row,
                                              zone_de_gestion_data)
+            column = initial_column
         row += 1
 
     row = initial_row
@@ -137,7 +140,7 @@ def map_excel_to_json(path):
             raise Exception(
                 "Duplicat d'une simulation dans la rangée {} et la colonne {} de la feuille de calcul Simulations".format(
                     row, column))
-        elif simulation is None:
+        elif simulation == "None":
             raise TypeError(
                 "Type du nom de la simulation est invalide dans la rangée {} et la colonne {} de la feuille de calcul Simulations".format(
                     row, column))
@@ -229,28 +232,40 @@ def map_excel_to_json(path):
                         row, column))
             column += 1
             if entreprise in simulation_data[simulation].keys():
-                pass
-            elif entreprise not in simulation_data[simulation].keys() and len(simulation_data[simulation].keys()) == 1:
-                raise ValueError(
-                    "Nom de l'entreprise invalide dans la rangée {} de la feuille de calcul Régies projection, les simulations ne peuvent avoir qu'une seule entreprise")
-            else:
                 try:
-                    entreprises_dict[entreprise]
-                except KeyError:
-                    raise ValueError(
-                        "Nom de l'entreprise est invalide dans la rangée {} et la colonne 2 de la feuille de calcul Régies projection".format(
-                            row))
-                try:
-                    entreprises_dict[entreprise][champ]
-                except KeyError:
+                    assert champ in entreprises_dict[entreprise].keys()
+                except AssertionError:
                     raise ValueError(
                         "Nom du champ est invalide dans la rangée {} et la colonne 3 de la feuille de calcul Régies projection".format(
                             row))
                 try:
-                    entreprises_dict[entreprise][champ][zone_gestion]
-                except KeyError:
+                    assert zone_gestion in entreprises_dict[entreprise][champ].keys()
+                except AssertionError:
                     raise ValueError(
-                        "Nom de la zone de gestion est invalide dans la rangée {} et la colonne 3 de la feuille de calcul Régies projection".format(
+                        "Nom de la zone de gestion est invalide dans la rangée {} et la colonne 4 de la feuille de calcul Régies projection".format(
+                            row))
+            elif entreprise not in simulation_data[simulation].keys() and len(simulation_data[simulation].keys()) == 1:
+                raise ValueError(
+                    "Nom de l'entreprise invalide dans la rangée {} de la feuille de calcul Régies projection, les simulations ne peuvent avoir qu'une seule entreprise".format(
+                        row))
+            else:
+                try:
+                    assert entreprise in entreprises_dict.keys()
+                except AssertionError:
+                    raise ValueError(
+                        "Nom de l'entreprise est invalide dans la rangée {} et la colonne 2 de la feuille de calcul Régies projection".format(
+                            row))
+                try:
+                    assert champ in entreprises_dict[entreprise].keys()
+                except AssertionError:
+                    raise ValueError(
+                        "Nom du champ est invalide dans la rangée {} et la colonne 3 de la feuille de calcul Régies projection".format(
+                            row))
+                try:
+                    assert zone_gestion in entreprises_dict[entreprise][champ].keys()
+                except AssertionError:
+                    raise ValueError(
+                        "Nom de la zone de gestion est invalide dans la rangée {} et la colonne 4 de la feuille de calcul Régies projection".format(
                             row))
                 simulation_data[simulation][entreprise] = copy.deepcopy(entreprises_dict[entreprise])
             if int(annee_rotation) == len(
@@ -351,8 +366,24 @@ def map_excel_to_json(path):
                 amendements_apports_list = amendements_apports.split(",")
                 index = 0
                 for amendement in amendements_list:
-                    regie["amendements"].append({"amendement": amendement, "apport": amendements_apports_list[index]})
+                    try:
+                        float(amendements_apports_list[index])
+                    except ValueError:
+                        raise TypeError(
+                            "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies projection".format(
+                                row, column))
+                    except TypeError:
+                        raise TypeError(
+                            "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies projection".format(
+                                row, column))
+                    regie["amendements"].append(
+                        {"amendement": amendement, "apport": float(amendements_apports_list[index])})
                     index += 1
+                if donnee_regies_projections.cell(row=row, column=column).value is None:
+                    raise TypeError(
+                        "Type de travail du sol est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies projection".format(
+                            row, column))
+                regie["travail_du_sol"] = {"travail_du_sol": str(donnee_regies_projections.cell(row=row, column=column).value)}
             else:
                 raise Exception(
                     "Erreur d'ordonancement de la rotation dans le rangée {} de la feuille de calcul Régies projection".format(
@@ -364,189 +395,219 @@ def map_excel_to_json(path):
             raise Exception(
                 "Nom de simulation invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies projection".format(
                     row, column))
+        column = initial_column
         row += 1
 
-        row = initial_row
-        column = initial_column
-        while donnee_regies_historiques.cell(row=row, column=column).value is not None:
-            if str(donnee_regies_historiques.cell(row=row, column=column).value) in simulations_dict.keys():
-                simulation = str(donnee_regies_historiques.cell(row=row, column=column).value)
+    row = initial_row
+    column = initial_column
+    while donnee_regies_historiques.cell(row=row, column=column).value is not None:
+        if str(donnee_regies_historiques.cell(row=row, column=column).value) in simulations_dict.keys():
+            simulation = str(donnee_regies_historiques.cell(row=row, column=column).value)
+            if donnee_regies_historiques.cell(row=row, column=column).value is None:
+                raise TypeError(
+                    "Type du nom de la simulation est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                        row, column))
+
+            column += 1
+            entreprise = str(donnee_regies_historiques.cell(row=row, column=column).value)
+            if entreprise is None:
+                raise TypeError(
+                    "Type du nom de l'entreprise est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                        row, column))
+            column += 1
+            champ = str(donnee_regies_historiques.cell(row=row, column=column).value)
+            if champ is None:
+                raise TypeError(
+                    "Type du nom du champ est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                        row, column))
+            column += 1
+            zone_gestion = str(donnee_regies_historiques.cell(row=row, column=column).value)
+            if zone_gestion is None:
+                raise TypeError(
+                    "Type du nom de la zone de gestion est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                        row, column))
+            column += 1
+            try:
+                annee_rotation = int(donnee_regies_historiques.cell(row=row, column=column).value)
+            except ValueError:
+                raise TypeError(
+                    "Année de rotation invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                        row, column))
+            except TypeError:
+                raise TypeError(
+                    "Année de rotation invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                        row, column))
+            column += 1
+            if entreprise in simulation_data[simulation].keys():
+                try:
+                    entreprises_dict[entreprise][champ]
+                except KeyError:
+                    raise ValueError(
+                        "Nom du champ est invalide dans la rangée {} et la colonne 3 de la feuille de calcul Régies historique".format(
+                            row))
+                try:
+                    entreprises_dict[entreprise][champ][zone_gestion]
+                except KeyError:
+                    raise ValueError(
+                        "Nom de la zone de gestion est invalide dans la rangée {} et la colonne 4 de la feuille de calcul Régies historique".format(
+                            row))
+            elif entreprise not in simulation_data[simulation].keys() and len(
+                    simulation_data[simulation].keys()) == 1:
+                raise ValueError(
+                    "Nom de l'entreprise invalide dans la rangée {} de la feuille de calcul Régies historique, les simulations ne peuvent avoir qu'une seule entreprise".format(
+                        row))
+            else:
+                try:
+                    entreprises_dict[entreprise]
+                except KeyError:
+                    raise ValueError(
+                        "Nom de l'entreprise est invalide dans la rangée {} et la colonne 2 de la feuille de calcul Régies historique".format(
+                            row))
+                try:
+                    entreprises_dict[entreprise][champ]
+                except KeyError:
+                    raise ValueError(
+                        "Nom du champ est invalide dans la rangée {} et la colonne 3 de la feuille de calcul Régies historique".format(
+                            row))
+                try:
+                    entreprises_dict[entreprise][champ][zone_gestion]
+                except KeyError:
+                    raise ValueError(
+                        "Nom de la zone de gestion est invalide dans la rangée {} et la colonne 4 de la feuille de calcul Régies historique".format(
+                            row))
+
+                simulation_data[simulation][entreprise] = copy.deepcopy(entreprises_dict[entreprise])
+            if int(annee_rotation) == len(
+                    simulation_data[simulation][entreprise][champ][zone_gestion][
+                        "regies_sol_et_culture_historique"]) + 1:
                 if donnee_regies_historiques.cell(row=row, column=column).value is None:
                     raise TypeError(
-                        "Type du nom de la simulation est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                        "Type de la culture principale est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
                             row, column))
-
-                column += 1
-                entreprise = str(donnee_regies_historiques.cell(row=row, column=column).value)
-                if entreprise is None:
-                    raise TypeError(
-                        "Type du nom de l'entreprise est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                            row, column))
-                column += 1
-                champ = str(donnee_regies_historiques.cell(row=row, column=column).value)
-                if champ is None:
-                    raise TypeError(
-                        "Type du nom du champ est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                            row, column))
-                column += 1
-                zone_gestion = str(donnee_regies_historiques.cell(row=row, column=column).value)
-                if zone_gestion is None:
-                    raise TypeError(
-                        "Type du nom de la zone de gestion est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                            row, column))
+                regie = {}
+                regie["culture_principale"] = {}
+                regie["culture_principale"]["culture_principale"] = str(donnee_regies_historiques.cell(row=row,
+                                                                                                       column=column).value)
                 column += 1
                 try:
-                    annee_rotation = int(donnee_regies_historiques.cell(row=row, column=column).value)
+                    regie["culture_principale"]["rendement"] = float(donnee_regies_historiques.cell(row=row,
+                                                                                                    column=column).value)
                 except ValueError:
                     raise TypeError(
-                        "Année de rotation invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                        "Rendement culture principale invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
                             row, column))
                 except TypeError:
                     raise TypeError(
-                        "Année de rotation invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                        "Rendement culture principale invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
                             row, column))
                 column += 1
-                if entreprise in simulation_data[simulation].keys():
-                    pass
-                elif entreprise not in simulation_data[simulation].keys() and len(
-                        simulation_data[simulation].keys()) == 1:
-                    raise ValueError(
-                        "Nom de l'entreprise invalide dans la rangée {} de la feuille de calcul Régies historique, les simulations ne peuvent avoir qu'une seule entreprise")
+                try:
+                    regie["culture_principale"]["pourcentage_tige_exporte"] = float(
+                        donnee_regies_historiques.cell(row=row,
+                                                       column=column).value)
+                except ValueError:
+                    raise TypeError(
+                        "Pourcentage tige exportée invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            row, column))
+                except TypeError:
+                    raise TypeError(
+                        "Pourcentage tige exportée invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            row, column))
+                column += 1
+                if donnee_regies_historiques.cell(row=row, column=column).value is None:
+                    raise TypeError(
+                        "Type de produit récolté est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            row, column))
                 else:
-                    try:
-                        entreprises_dict[entreprise]
-                    except KeyError:
-                        raise ValueError(
-                            "Nom de l'entreprise est invalide dans la rangée {} et la colonne 2 de la feuille de calcul Régies historique".format(
-                                row))
-                    try:
-                        entreprises_dict[entreprise][champ]
-                    except KeyError:
-                        raise ValueError(
-                            "Nom du champ est invalide dans la rangée {} et la colonne 3 de la feuille de calcul Régies historique".format(
-                                row))
-                    try:
-                        entreprises_dict[entreprise][champ][zone_gestion]
-                    except KeyError:
-                        raise ValueError(
-                            "Nom de la zone de gestion est invalide dans la rangée {} et la colonne 3 de la feuille de calcul Régies historique".format(
-                                row))
-
-                    simulation_data[simulation][entreprise] = copy.deepcopy(entreprises_dict[entreprise])
-                if int(annee_rotation) == len(
-                        simulation_data[simulation][entreprise][champ][zone_gestion][
-                            "regies_sol_et_culture_historique"]) + 1:
-                    if donnee_regies_historiques.cell(row=row, column=column).value is None:
-                        raise TypeError(
-                            "Type de la culture principale est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                                row, column))
-                    regie = {}
-                    regie["culture_principale"] = {}
-                    regie["culture_principale"]["culture_principale"] = str(donnee_regies_historiques.cell(row=row,
-                                                                                                           column=column).value)
-                    column += 1
-                    try:
-                        regie["culture_principale"]["rendement"] = float(donnee_regies_historiques.cell(row=row,
-                                                                                                        column=column).value)
-                    except ValueError:
-                        raise TypeError(
-                            "Rendement culture principale invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                                row, column))
-                    except TypeError:
-                        raise TypeError(
-                            "Rendement culture principale invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                                row, column))
-                    column += 1
-                    try:
-                        regie["culture_principale"]["pourcentage_tige_exporte"] = float(
-                            donnee_regies_historiques.cell(row=row,
-                                                           column=column).value)
-                    except ValueError:
-                        raise TypeError(
-                            "Pourcentage tige exportée invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                                row, column))
-                    except TypeError:
-                        raise TypeError(
-                            "Pourcentage tige exportée invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                                row, column))
-                    column += 1
-                    if donnee_regies_historiques.cell(row=row, column=column).value is None:
-                        raise TypeError(
-                            "Type de produit récolté est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                                row, column))
+                    if str(donnee_regies_historiques.cell(row=row,
+                                                          column=column).value) == "Oui" or str(
+                        donnee_regies_historiques.cell(
+                            row=row, column=column).value) == "Non":
+                        regie["culture_principale"]["produit_recolte"] = donnee_regies_historiques.cell(row=row,
+                                                                                                        column=column).value
                     else:
-                        if str(donnee_regies_historiques.cell(row=row,
-                                                              column=column).value) == "Oui" or str(
-                            donnee_regies_historiques.cell(
-                                row=row, column=column).value == "Non"):
-                            regie["culture_principale"]["produit_recolte"] = donnee_regies_historiques.cell(row=row,
-                                                                                                            column=column).value
-                        else:
-                            raise ValueError(
-                                "La valeur de la donnée dans la rangée {} et la colonne {} de la feuille de calcul Régies historique devrait être Oui ou Non".format(
-                                    row, column))
-                    column += 1
+                        raise ValueError(
+                            "La valeur de la donnée dans la rangée {} et la colonne {} de la feuille de calcul Régies historique devrait être Oui ou Non".format(
+                                row, column))
+                column += 1
+                try:
+                    regie["culture_principale"]["pourcentage_humidite"] = float(
+                        donnee_regies_historiques.cell(row=row,
+                                                       column=column).value)
+                except ValueError:
+                    raise TypeError(
+                        "Pourcentage humidité invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            row, column))
+                except TypeError:
+                    raise TypeError(
+                        "Pourcentage humidité invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            row, column))
+                column += 1
+                if donnee_regies_historiques.cell(row=row, column=column).value is None:
+                    raise TypeError(
+                        "Type de culture secondaire est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            row, column))
+                regie["culture_secondaire"] = {}
+                regie["culture_secondaire"]["culture_secondaire"] = str(donnee_regies_historiques.cell(row=row,
+                                                                                                       column=column).value)
+                column += 1
+                try:
+                    regie["culture_secondaire"]["rendement"] = float(donnee_regies_historiques.cell(row=row,
+                                                                                                    column=column).value)
+                except ValueError:
+                    raise TypeError(
+                        "Rendement culture secondaire invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            row, column))
+                except TypeError:
+                    raise TypeError(
+                        "Rendement culture secondaire invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            row, column))
+                column += 1
+                if donnee_regies_historiques.cell(row=row, column=column).value is None:
+                    raise TypeError(
+                        "Type des amendements est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            row, column))
+                regie["amendements"] = []
+                amendements = str(donnee_regies_historiques.cell(row=row, column=column).value)
+                column += 1
+                amendements_apports = str(donnee_regies_historiques.cell(row=row, column=column).value)
+                column += 1
+                amendements_list = amendements.split(",")
+                amendements_apports_list = amendements_apports.split(",")
+                index = 0
+                for amendement in amendements_list:
                     try:
-                        regie["culture_principale"]["pourcentage_humidite"] = float(
-                            donnee_regies_historiques.cell(row=row,
-                                                           column=column).value)
+                        float(amendements_apports_list[index])
                     except ValueError:
                         raise TypeError(
-                            "Pourcentage humidité invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies historique".format(
                                 row, column))
                     except TypeError:
                         raise TypeError(
-                            "Pourcentage humidité invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies historique".format(
                                 row, column))
-                    column += 1
+                    regie["amendements"].append(
+                        {"amendement": amendement, "apport": amendements_apports_list[index]})
+                    index += 1
                     if donnee_regies_historiques.cell(row=row, column=column).value is None:
                         raise TypeError(
-                            "Type de culture secondaire est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            "Type de travail du sol est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
                                 row, column))
-                    regie["culture_secondaire"] = {}
-                    regie["culture_secondaire"]["culture_secondaire"] = str(donnee_regies_historiques.cell(row=row,
-                                                                                                           column=column).value)
-                    column += 1
-                    try:
-                        regie["culture_secondaire"]["rendement"] = float(donnee_regies_historiques.cell(row=row,
-                                                                                                        column=column).value)
-                    except ValueError:
-                        raise TypeError(
-                            "Rendement culture secondaire invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                                row, column))
-                    except TypeError:
-                        raise TypeError(
-                            "Rendement culture secondaire invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                                row, column))
-                    column += 1
-                    if donnee_regies_historiques.cell(row=row, column=column).value is None:
-                        raise TypeError(
-                            "Type des amendements est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                                row, column))
-                    regie["amendements"] = []
-                    amendements = str(donnee_regies_historiques.cell(row=row, column=column).value)
-                    column += 1
-                    amendements_apports = str(donnee_regies_historiques.cell(row=row, column=column).value)
-                    column += 1
-                    amendements_list = amendements.split(",")
-                    amendements_apports_list = amendements_apports.split(",")
-                    index = 0
-                    for amendement in amendements_list:
-                        regie["amendements"].append(
-                            {"amendement": amendement, "apport": amendements_apports_list[index]})
-                        index += 1
-                else:
-                    raise Exception(
-                        "Erreur d'ordonancement de la rotation dans le rangée {} de la feuille de calcul Régies historique".format(
-                            row))
-
-                simulation_data[simulation][entreprise][champ][zone_gestion]["regies_sol_et_culture_historique"].append(
-                    regie)
+                    regie["travail_du_sol"] = {
+                        "travail_du_sol": str(donnee_regies_historiques.cell(row=row, column=column).value)}
             else:
                 raise Exception(
-                    "Nom de simulation invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                        row, column))
-            row += 1
+                    "Erreur d'ordonancement de la rotation dans le rangée {} de la feuille de calcul Régies historique".format(
+                        row))
+
+            simulation_data[simulation][entreprise][champ][zone_gestion]["regies_sol_et_culture_historique"].append(
+                regie)
+        else:
+            raise Exception(
+                "Nom de simulation invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                    row, column))
+        column = initial_column
+        row += 1
     json_final = formatter_vers_json_final(simulation_data, simulations_dict)
     return json_final
 
@@ -630,6 +691,8 @@ def formatter_vers_json_final(simulation_data, simualtion_dict):
         simulation_final["duree_projection"] = simualtion_dict[simulation]["duree_projection"]
         simulation_final["annee_initiale_projection"] = simualtion_dict[simulation]["annee_initiale_projection"]
         simulation_final["annee_finale_projection"] = simualtion_dict[simulation]["annee_finale_projection"]
+        if len(list(simulation_data[simulation].keys())) == 0:
+            raise ValueError("Il n'y pas d'entreprise associé à la simulation {}".format(simulation))
         entreprise = list(simulation_data[simulation].keys())[0]
         simulation_final["entreprise_agricole"] = {"nom": entreprise}
         simulation_final["entreprise_agricole"]["champs"] = []
