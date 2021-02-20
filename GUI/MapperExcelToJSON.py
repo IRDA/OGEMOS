@@ -20,7 +20,7 @@ def map_excel_to_json(path):
 
     # TODO: Check for a way to handle an error where the line contains info but the first cell is forgotten
 
-    while donnee_entreprises.cell(row=row, column=column).value is not None:
+    while row_check(donnee=donnee_entreprises, row=row, number_of_columns=10, worksheet_name="Entreprises"):
         if str(donnee_entreprises.cell(row=row, column=column).value) in entreprises_dict.keys():
             entreprise = str(donnee_entreprises.cell(row=row, column=column).value)
             if entreprise == "None":
@@ -134,7 +134,7 @@ def map_excel_to_json(path):
 
     row = initial_row
     column = initial_column
-    while donnee_simulations.cell(row=row, column=column).value is not None:
+    while row_check(donnee=donnee_simulations, row=row, number_of_columns=4, worksheet_name="Simulations"):
         simulation = str(donnee_simulations.cell(row=row, column=column).value)
         if simulation in simulations_dict.keys():
             raise Exception(
@@ -194,7 +194,7 @@ def map_excel_to_json(path):
         simulation_data[simulation] = {}
     row = initial_row
     column = initial_column
-    while donnee_regies_projections.cell(row=row, column=column).value is not None:
+    while row_check(donnee=donnee_regies_projections, row=row, number_of_columns=15, worksheet_name="Régies projection"):
         if str(donnee_regies_projections.cell(row=row, column=column).value) in simulations_dict.keys():
             if donnee_regies_projections.cell(row=row, column=column).value is None:
                 raise TypeError(
@@ -383,7 +383,8 @@ def map_excel_to_json(path):
                     raise TypeError(
                         "Type de travail du sol est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies projection".format(
                             row, column))
-                regie["travail_du_sol"] = {"travail_du_sol": str(donnee_regies_projections.cell(row=row, column=column).value)}
+                regie["travail_du_sol"] = {
+                    "travail_du_sol": str(donnee_regies_projections.cell(row=row, column=column).value)}
             else:
                 raise Exception(
                     "Erreur d'ordonancement de la rotation dans le rangée {} de la feuille de calcul Régies projection".format(
@@ -400,7 +401,7 @@ def map_excel_to_json(path):
 
     row = initial_row
     column = initial_column
-    while donnee_regies_historiques.cell(row=row, column=column).value is not None:
+    while row_check(donnee=donnee_regies_historiques, row=row, number_of_columns=15, worksheet_name="Régies historique"):
         if str(donnee_regies_historiques.cell(row=row, column=column).value) in simulations_dict.keys():
             simulation = str(donnee_regies_historiques.cell(row=row, column=column).value)
             if donnee_regies_historiques.cell(row=row, column=column).value is None:
@@ -704,6 +705,21 @@ def formatter_vers_json_final(simulation_data, simualtion_dict):
             simulation_final["entreprise_agricole"]["champs"].append(champ_final)
         json_final["simulations"].append(simulation_final)
     return json_final
+
+
+def row_check(donnee, row, number_of_columns, worksheet_name):
+    if donnee.cell(row=row, column=1).value is not None:
+        return True
+    else:
+        column = 2
+        while column <= number_of_columns:
+            if donnee.cell(row=row, column=column).value is None:
+                pass
+            else:
+                raise TypeError(
+                    "La rangée {} de la feuille de calcul {} à la colonne 1 n'a pas de valeur mais la rangée contient des données. La rangée devrait être soit complètement vide ou complètement pleine.".format(row,worksheet_name))
+            column += 1
+        return False
 
 
 if __name__ == "__main__":
