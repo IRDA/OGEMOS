@@ -46,7 +46,7 @@ def map_excel_to_json(path):
                 zone_de_gestion = str(donnee_entreprises.cell(row=row, column=column).value)
                 if zone_de_gestion in \
                         entreprises_dict[entreprise][champ].keys():
-                    raise Exception(
+                    raise TypeError(
                         "Duplicat d'une zone de gestion dans la rangée {} et la colonne {} de la feuille de calcul Entreprises".format(
                             row, column))
                 elif zone_de_gestion == "None":
@@ -137,7 +137,7 @@ def map_excel_to_json(path):
     while row_check(donnee=donnee_simulations, row=row, number_of_columns=4, worksheet_name="Simulations"):
         simulation = str(donnee_simulations.cell(row=row, column=column).value)
         if simulation in simulations_dict.keys():
-            raise Exception(
+            raise TypeError(
                 "Duplicat d'une simulation dans la rangée {} et la colonne {} de la feuille de calcul Simulations".format(
                     row, column))
         elif simulation == "None":
@@ -194,7 +194,8 @@ def map_excel_to_json(path):
         simulation_data[simulation] = {}
     row = initial_row
     column = initial_column
-    while row_check(donnee=donnee_regies_projections, row=row, number_of_columns=15, worksheet_name="Régies projection"):
+    while row_check(donnee=donnee_regies_projections, row=row, number_of_columns=15,
+                    worksheet_name="Régies projection"):
         if str(donnee_regies_projections.cell(row=row, column=column).value) in simulations_dict.keys():
             if donnee_regies_projections.cell(row=row, column=column).value is None:
                 raise TypeError(
@@ -314,8 +315,10 @@ def map_excel_to_json(path):
                                                           column=column).value) == "Oui" or str(
                         donnee_regies_projections.cell(
                             row=row, column=column).value) == "Non":
-                        regie["culture_principale"]["produit_recolte"] = str(donnee_regies_projections.cell(row=row,
-                                                                                                            column=column).value)
+                        if str(donnee_regies_projections.cell(row=row, column=column).value) == "Oui":
+                            regie["culture_principale"]["produit_recolte"] = True
+                        else:
+                            regie["culture_principale"]["produit_recolte"] = False
                     else:
                         raise ValueError(
                             "La valeur de la donnée dans la rangée {} et la colonne {} de la feuille de calcul Régies projection devrait être Oui ou Non".format(
@@ -386,14 +389,14 @@ def map_excel_to_json(path):
                 regie["travail_du_sol"] = {
                     "travail_du_sol": str(donnee_regies_projections.cell(row=row, column=column).value)}
             else:
-                raise Exception(
+                raise TypeError(
                     "Erreur d'ordonancement de la rotation dans le rangée {} de la feuille de calcul Régies projection".format(
                         row))
 
             simulation_data[simulation][entreprise][champ][zone_gestion]["regies_sol_et_culture_projection"].append(
                 regie)
         else:
-            raise Exception(
+            raise TypeError(
                 "Nom de simulation invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies projection".format(
                     row, column))
         column = initial_column
@@ -401,7 +404,8 @@ def map_excel_to_json(path):
 
     row = initial_row
     column = initial_column
-    while row_check(donnee=donnee_regies_historiques, row=row, number_of_columns=15, worksheet_name="Régies historique"):
+    while row_check(donnee=donnee_regies_historiques, row=row, number_of_columns=15,
+                    worksheet_name="Régies historique"):
         if str(donnee_regies_historiques.cell(row=row, column=column).value) in simulations_dict.keys():
             simulation = str(donnee_regies_historiques.cell(row=row, column=column).value)
             if donnee_regies_historiques.cell(row=row, column=column).value is None:
@@ -524,8 +528,10 @@ def map_excel_to_json(path):
                                                           column=column).value) == "Oui" or str(
                         donnee_regies_historiques.cell(
                             row=row, column=column).value) == "Non":
-                        regie["culture_principale"]["produit_recolte"] = donnee_regies_historiques.cell(row=row,
-                                                                                                        column=column).value
+                        if str(donnee_regies_historiques.cell(row=row, column=column).value) == "Oui":
+                            regie["culture_principale"]["produit_recolte"] = True
+                        else:
+                            regie["culture_principale"]["produit_recolte"] = False
                     else:
                         raise ValueError(
                             "La valeur de la donnée dans la rangée {} et la colonne {} de la feuille de calcul Régies historique devrait être Oui ou Non".format(
@@ -588,7 +594,7 @@ def map_excel_to_json(path):
                             "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies historique".format(
                                 row, column))
                     regie["amendements"].append(
-                        {"amendement": amendement, "apport": amendements_apports_list[index]})
+                        {"amendement": amendement, "apport": float(amendements_apports_list[index])})
                     index += 1
                     if donnee_regies_historiques.cell(row=row, column=column).value is None:
                         raise TypeError(
@@ -597,19 +603,20 @@ def map_excel_to_json(path):
                     regie["travail_du_sol"] = {
                         "travail_du_sol": str(donnee_regies_historiques.cell(row=row, column=column).value)}
             else:
-                raise Exception(
+                raise TypeError(
                     "Erreur d'ordonancement de la rotation dans le rangée {} de la feuille de calcul Régies historique".format(
                         row))
 
             simulation_data[simulation][entreprise][champ][zone_gestion]["regies_sol_et_culture_historique"].append(
                 regie)
         else:
-            raise Exception(
+            raise TypeError(
                 "Nom de simulation invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
                     row, column))
         column = initial_column
         row += 1
     json_final = formatter_vers_json_final(simulation_data, simulations_dict)
+    print(json_final)
     return json_final
 
 
@@ -717,7 +724,8 @@ def row_check(donnee, row, number_of_columns, worksheet_name):
                 pass
             else:
                 raise TypeError(
-                    "La rangée {} de la feuille de calcul {} à la colonne 1 n'a pas de valeur mais la rangée contient des données. La rangée devrait être soit complètement vide ou complètement pleine.".format(row,worksheet_name))
+                    "La rangée {} de la feuille de calcul {} à la colonne 1 n'a pas de valeur mais la rangée contient des données. La rangée devrait être soit complètement vide ou complètement pleine.".format(
+                        row, worksheet_name))
             column += 1
         return False
 

@@ -15,6 +15,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment
 
 import GUI.fonction_utilitaire as util
+from GUI.MapperExcelToJSON import map_excel_to_json
 
 sp = subprocess.Popen(
     "API_OGEMOS.exe",
@@ -3156,6 +3157,31 @@ def initialize_globals():
                     if no_error:
                         show_creation_des_regies(menu_frame, simulations=simulations)
 
+                def lancer_ogemos_sur_des_donnees_excel():
+                    for widget in menu_frame.winfo_children():
+                        widget.destroy()
+                    root.withdraw()
+                    excel_filename = filedialog.askopenfilename(initialdir="/",
+                                                                title="File Explorer",
+                                                                filetypes=(("xlsx", "*.xlsx"),
+                                                                           ("all files", "*.*")))
+                    if excel_filename == "":
+                        menu_initial_ogemos(menu_frame)
+                        root.deiconify()
+                        return
+                    try:
+                        json_from_excel_data = map_excel_to_json(excel_filename)
+                        messagebox.showwarning(title="Complete", message=str(json_from_excel_data))
+                        response = requests.post('http://localhost:5000/api/icbm-bilan',
+                                                 json=json_from_excel_data)
+                        messagebox.showwarning(title="Complete", message=str(response.json()))
+                        creation_du_rapport(response.json())
+                        menu_initial_ogemos(menu_frame)
+                        root.deiconify()
+                    except TypeError as error:
+                        if hasattr(error, 'message'):
+                            messagebox.showwarning(title="Erreur données Excel", message=error.message)
+
                 def ajouter_un_nouvel_amendement(data=None):
                     def fenetre_nouvel_amendement_ferme():
                         root.deiconify()
@@ -3333,16 +3359,21 @@ def initialize_globals():
                 charger_plan_de_gestion_de_carbone_button = ttk.Button(menu_frame,
                                                                        text="Charger un plan de gestion de carbone",
                                                                        command=charger_plan_de_gestion_de_carbone)
+                lancer_ogemos_sur_des_donnees_excel_button = ttk.Button(menu_frame,
+                                                                        text="Lancer OGEMOS à partir d'un fichier Excel",
+                                                                        command=lancer_ogemos_sur_des_donnees_excel)
                 ajouter_nouvel_amendement_button = ttk.Button(menu_frame, text="Ajouter un nouvel amendement",
                                                               command=ajouter_un_nouvel_amendement)
                 menu_transfert_amendements_button = ttk.Button(menu_frame, text="Menu de transfert de version",
                                                                command=menu_transfert_version)
-                lien_github_ogemos_label = tk.Label(menu_frame, text=r"https://github.com/IRDA/OGEMOS", fg="blue", cursor="hand2")
+                lien_github_ogemos_label = tk.Label(menu_frame, text=r"https://github.com/IRDA/OGEMOS", fg="blue",
+                                                    cursor="hand2")
                 lien_github_ogemos_label.bind("<Button-1>", callback)
                 bienvenue_label.pack(pady=5, padx=10)
                 nouvelle_entreprise_button.pack(pady=5, padx=10)
                 charger_entreprise_button.pack(pady=5, padx=10)
                 charger_plan_de_gestion_de_carbone_button.pack(pady=5, padx=10)
+                lancer_ogemos_sur_des_donnees_excel_button.pack(pady=5, padx=10)
                 ajouter_nouvel_amendement_button.pack(pady=5, padx=10)
                 menu_transfert_amendements_button.pack(pady=5, padx=10)
                 lien_github_ogemos_label.pack()
@@ -3427,9 +3458,11 @@ def initialize_globals():
                     initialize_run_gui()
 
             def creation_du_rapport(bilan_response):
+                messagebox.showwarning(title="Complete", message="Entré dans création du rapport")
                 bilan_workbook = Workbook()
 
                 def sauvegarder_rapport_des_resultats():
+                    messagebox.showwarning(title="Complete", message="Complete")
                     root.withdraw()
                     filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer",
                                                             filetypes=(("xlsx files", "*.xlsx"), ("all files", "*.*")))
@@ -3448,13 +3481,11 @@ def initialize_globals():
                         root.deiconify()
                         return message
 
+                messagebox.showwarning(title="Complete", message="Workbook created")
                 description_champs_worksheet = bilan_workbook.active
                 description_champs_worksheet.title = "Zone"
                 index_column_cell = 1
                 index_row_cell = 1
-                global information_champs
-                global nom_entreprise
-                global duree_simulation
                 description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Producteur")
                 index_column_cell += 1
                 description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell, value="Champ")
@@ -3481,6 +3512,7 @@ def initialize_globals():
                                                   value="Classe de drainage")
                 index_column_cell = 1
                 index_row_cell += 1
+                messagebox.showwarning(title="Complete", message="Headers created")
                 font = Font(bold=True)
                 alignment = Alignment(wrap_text=True)
                 for cell_name in ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1']:
@@ -3489,41 +3521,46 @@ def initialize_globals():
                     cell.alignment = alignment
                 for column_name in ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']:
                     description_champs_worksheet.column_dimensions[column_name].width = 14
-                for champ in information_champs:
-                    index_zone = 1
-                    for zone in champ["information_zone_de_gestion"]:
-                        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=nom_entreprise).alignment = alignment
-                        index_column_cell += 1
-                        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=champ["nom_du_champs"]).alignment = alignment
-                        index_column_cell += 1
-                        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=str(index_zone)).alignment = alignment
-                        index_column_cell += 1
-                        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=zone["superficie_de_la_zone"]).alignment = alignment
-                        index_column_cell += 1
-                        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=zone["municipalite"]).alignment = alignment
-                        index_column_cell += 1
-                        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=zone["taux_matiere_organique"]).alignment = alignment
-                        index_column_cell += 1
-                        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=zone["masse_volumique_apparente"]).alignment = alignment
-                        index_column_cell += 1
-                        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=zone["profondeur"]).alignment = alignment
-                        index_column_cell += 1
-                        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=zone["groupe_textural"]).alignment = alignment
-                        index_column_cell += 1
-                        description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                          value=zone["classe_de_drainage"]).alignment = alignment
-                        index_zone += 1
-                        index_column_cell = 1
-                        index_row_cell += 1
+                bilans_simulations = bilan_response["bilans_des_simulations"]
+                for simulation in bilans_simulations:
+                    for champ in simulation["bilans_des_champs"]:
+                        index_zone = 1
+                        for zone in champ["bilans_des_zones"]:
+                            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                              value=simulation["nom_entreprise"]).alignment = alignment
+                            index_column_cell += 1
+                            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                              value=champ["nom_du_champs"]).alignment = alignment
+                            index_column_cell += 1
+                            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                              value=str(index_zone)).alignment = alignment
+                            index_column_cell += 1
+                            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                              value=zone["taille_de_la_zone"]).alignment = alignment
+                            index_column_cell += 1
+                            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                              value=zone["municipalite"]).alignment = alignment
+                            index_column_cell += 1
+                            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                              value=zone[
+                                                                  "taux_de_matiere_organique_initial"]).alignment = alignment
+                            index_column_cell += 1
+                            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                              value=zone[
+                                                                  "masse_volumique_apparente"]).alignment = alignment
+                            index_column_cell += 1
+                            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                              value=zone["profondeur"]).alignment = alignment
+                            index_column_cell += 1
+                            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                              value=zone["groupe_textural"]).alignment = alignment
+                            index_column_cell += 1
+                            description_champs_worksheet.cell(row=index_row_cell, column=index_column_cell,
+                                                              value=zone["classe_de_drainage"]).alignment = alignment
+                            index_zone += 1
+                            index_column_cell = 1
+                            index_row_cell += 1
+                messagebox.showwarning(title="Complete", message="Complete first worksheet")
                 description_regies_simulations_worksheet = bilan_workbook.create_sheet("Simulation")
                 index_column_cell = 1
                 index_row_cell = 1
@@ -3576,7 +3613,6 @@ def initialize_globals():
                 index_column_cell = 1
                 index_row_cell += 1
                 index_simulation = 0
-                bilans_simulations = bilan_response["bilans_des_simulations"]
                 for simulation in bilans_simulations:
                     for champ in simulation["bilans_des_champs"]:
                         index_zone = 1
@@ -3602,7 +3638,7 @@ def initialize_globals():
                                 index_column_cell += 1
                                 description_regies_simulations_worksheet.cell(row=index_row_cell,
                                                                               column=index_column_cell,
-                                                                              value=duree_simulation[index_simulation][
+                                                                              value=simulation[
                                                                                   "nom_simulation"]).alignment = alignment
                                 index_column_cell += 1
                                 description_regies_simulations_worksheet.cell(row=index_row_cell,
@@ -3689,6 +3725,7 @@ def initialize_globals():
                                 index_annee += 1
                             index_zone += 1
                     index_simulation += 1
+                messagebox.showwarning(title="Complete", message="Complete second worksheet")
 
                 description_resultats_annuels_worksheet = bilan_workbook.create_sheet("Résultats annuels")
                 index_column_cell = 1
@@ -3763,7 +3800,7 @@ def initialize_globals():
                                 index_column_cell += 1
                                 description_resultats_annuels_worksheet.cell(row=index_row_cell,
                                                                              column=index_column_cell,
-                                                                             value=duree_simulation[index_simulation][
+                                                                             value=simulation[
                                                                                  "nom_simulation"]).alignment = alignment
                                 index_column_cell += 1
                                 description_resultats_annuels_worksheet.cell(row=index_row_cell,
@@ -3884,7 +3921,7 @@ def initialize_globals():
                                                               value="Comparaison 90ème percentile")
                 index_column_cell = 1
                 index_row_cell += 1
-
+                messagebox.showwarning(title="Complete", message="Complete third worksheet")
                 font = Font(bold=True)
                 alignment = Alignment(wrap_text=True)
                 for cell_name in ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1', 'K1', 'L1', 'M1']:
@@ -3910,7 +3947,7 @@ def initialize_globals():
                                                                           value=str(index_zone)).alignment = alignment
                             index_column_cell += 1
                             description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
-                                                                          value=duree_simulation[index_simulation][
+                                                                          value=simulation[
                                                                               "nom_simulation"]).alignment = alignment
                             index_column_cell += 1
                             description_resultats_sommaire_worksheet.cell(row=index_row_cell, column=index_column_cell,
@@ -3977,6 +4014,7 @@ def initialize_globals():
                             index_row_cell += 1
                             index_zone += 1
                     index_simulation += 1
+                messagebox.showinfo("Complete", "Production rapport terminé")
                 sauvegarde_succes = sauvegarder_rapport_des_resultats()
                 if sauvegarde_succes[0] == 2:
                     messagebox.showinfo("Résultat sauvegarde", sauvegarde_succes[1])

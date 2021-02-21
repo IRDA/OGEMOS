@@ -180,6 +180,7 @@ def __simulation_mapping(data):
     for simulation in data:
         annee_initiale = simulation["annee_initiale_projection"]
         annee_finale = simulation["annee_finale_projection"]
+        nom_simulation = simulation["nom_simulation"]
 
         try:
             assert isinstance(annee_initiale, int)
@@ -195,7 +196,7 @@ def __simulation_mapping(data):
 
         entreprise_agricole = __entreprise_agricole_mapping(simulation["entreprise_agricole"])
 
-        gestion_simulation.ajouter_une_simulation(Simulation(annee_initiale, annee_finale, entreprise_agricole))
+        gestion_simulation.ajouter_une_simulation(Simulation(annee_initiale, annee_finale, entreprise_agricole, nom_simulation))
     return gestion_simulation
 
 

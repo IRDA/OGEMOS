@@ -500,5 +500,8 @@ class ZoneDeGestion:
             "taux_de_matiere_organique_initial": self.__taux_matiere_organique,
             "groupe_textural": self.__groupe_textural,
             "classe_de_drainage": self.__classe_de_drainage,
+            "municipalite": self.__municipalite,
+            "masse_volumique_apparente": self.__masse_volumique_apparente,
+            "profondeur": self.__profondeur,
             "bilan_des_regies_projections": bilan_des_regies_projections,
             "bilan_des_regies_historiques": bilan_des_regies_historiques}
