@@ -3171,10 +3171,8 @@ def initialize_globals():
                         return
                     try:
                         json_from_excel_data = map_excel_to_json(excel_filename)
-                        messagebox.showwarning(title="Complete", message=str(json_from_excel_data))
                         response = requests.post('http://localhost:5000/api/icbm-bilan',
                                                  json=json_from_excel_data)
-                        messagebox.showwarning(title="Complete", message=str(response.json()))
                         creation_du_rapport(response.json())
                         menu_initial_ogemos(menu_frame)
                         root.deiconify()
@@ -3458,11 +3456,9 @@ def initialize_globals():
                     initialize_run_gui()
 
             def creation_du_rapport(bilan_response):
-                messagebox.showwarning(title="Complete", message="Entré dans création du rapport")
                 bilan_workbook = Workbook()
 
                 def sauvegarder_rapport_des_resultats():
-                    messagebox.showwarning(title="Complete", message="Complete")
                     root.withdraw()
                     filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer",
                                                             filetypes=(("xlsx files", "*.xlsx"), ("all files", "*.*")))
@@ -3481,7 +3477,6 @@ def initialize_globals():
                         root.deiconify()
                         return message
 
-                messagebox.showwarning(title="Complete", message="Workbook created")
                 description_champs_worksheet = bilan_workbook.active
                 description_champs_worksheet.title = "Zone"
                 index_column_cell = 1
@@ -3512,7 +3507,6 @@ def initialize_globals():
                                                   value="Classe de drainage")
                 index_column_cell = 1
                 index_row_cell += 1
-                messagebox.showwarning(title="Complete", message="Headers created")
                 font = Font(bold=True)
                 alignment = Alignment(wrap_text=True)
                 for cell_name in ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1']:
@@ -3560,7 +3554,6 @@ def initialize_globals():
                             index_zone += 1
                             index_column_cell = 1
                             index_row_cell += 1
-                messagebox.showwarning(title="Complete", message="Complete first worksheet")
                 description_regies_simulations_worksheet = bilan_workbook.create_sheet("Simulation")
                 index_column_cell = 1
                 index_row_cell = 1
@@ -3725,7 +3718,6 @@ def initialize_globals():
                                 index_annee += 1
                             index_zone += 1
                     index_simulation += 1
-                messagebox.showwarning(title="Complete", message="Complete second worksheet")
 
                 description_resultats_annuels_worksheet = bilan_workbook.create_sheet("Résultats annuels")
                 index_column_cell = 1
@@ -3921,7 +3913,6 @@ def initialize_globals():
                                                               value="Comparaison 90ème percentile")
                 index_column_cell = 1
                 index_row_cell += 1
-                messagebox.showwarning(title="Complete", message="Complete third worksheet")
                 font = Font(bold=True)
                 alignment = Alignment(wrap_text=True)
                 for cell_name in ['A1', 'B1', 'C1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'J1', 'K1', 'L1', 'M1']:
@@ -4014,7 +4005,6 @@ def initialize_globals():
                             index_row_cell += 1
                             index_zone += 1
                     index_simulation += 1
-                messagebox.showinfo("Complete", "Production rapport terminé")
                 sauvegarde_succes = sauvegarder_rapport_des_resultats()
                 if sauvegarde_succes[0] == 2:
                     messagebox.showinfo("Résultat sauvegarde", sauvegarde_succes[1])
