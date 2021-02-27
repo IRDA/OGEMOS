@@ -3174,11 +3174,14 @@ def initialize_globals():
                         response = requests.post('http://localhost:5000/api/icbm-bilan',
                                                  json=json_from_excel_data)
                         creation_du_rapport(response.json())
+
+                    except TypeError as error:
+                        messagebox.showwarning(title="Erreur données Excel", message=error)
+                    except ValueError as error:
+                        messagebox.showwarning(title="Erreur données Excel", message=error)
+                    finally:
                         menu_initial_ogemos(menu_frame)
                         root.deiconify()
-                    except TypeError as error:
-                        if hasattr(error, 'message'):
-                            messagebox.showwarning(title="Erreur données Excel", message=error.message)
 
                 def ajouter_un_nouvel_amendement(data=None):
                     def fenetre_nouvel_amendement_ferme():

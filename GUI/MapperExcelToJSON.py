@@ -4,6 +4,14 @@ import copy
 
 def map_excel_to_json(path):
     wb = load_workbook(filename=path)
+    try:
+        donnee_entreprises = wb["Entreprises"]
+        donnee_simulations = wb["Simulations"]
+        donnee_regies_projections = wb["Régies projection"]
+        donnee_regies_historiques = wb["Régies historique"]
+    except Exception:
+        raise TypeError("Format du fichier fourni ne correspond pas au gabarit")
+
     donnee_entreprises = wb["Entreprises"]
     donnee_simulations = wb["Simulations"]
     donnee_regies_projections = wb["Régies projection"]
@@ -17,8 +25,6 @@ def map_excel_to_json(path):
 
     row = initial_row
     column = initial_column
-
-    # TODO: Check for a way to handle an error where the line contains info but the first cell is forgotten
 
     while row_check(donnee=donnee_entreprises, row=row, number_of_columns=10, worksheet_name="Entreprises"):
         if str(donnee_entreprises.cell(row=row, column=column).value) in entreprises_dict.keys():
@@ -245,7 +251,8 @@ def map_excel_to_json(path):
                     raise ValueError(
                         "Nom de la zone de gestion est invalide dans la rangée {} et la colonne 4 de la feuille de calcul Régies projection".format(
                             row))
-            elif entreprise not in simulation_data[simulation].keys() and len(simulation_data[simulation].keys()) == 1:
+            elif entreprise not in simulation_data[simulation].keys() and len(
+                    simulation_data[simulation].keys()) == 1:
                 raise ValueError(
                     "Nom de l'entreprise invalide dans la rangée {} de la feuille de calcul Régies projection, les simulations ne peuvent avoir qu'une seule entreprise".format(
                         row))
@@ -325,8 +332,9 @@ def map_excel_to_json(path):
                                 row, column))
                 column += 1
                 try:
-                    regie["culture_principale"]["pourcentage_humidite"] = float(donnee_regies_projections.cell(row=row,
-                                                                                                               column=column).value)
+                    regie["culture_principale"]["pourcentage_humidite"] = float(
+                        donnee_regies_projections.cell(row=row,
+                                                       column=column).value)
                 except ValueError:
                     raise TypeError(
                         "Pourcentage humidité invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies projection".format(
@@ -616,7 +624,6 @@ def map_excel_to_json(path):
         column = initial_column
         row += 1
     json_final = formatter_vers_json_final(simulation_data, simulations_dict)
-    print(json_final)
     return json_final
 
 
