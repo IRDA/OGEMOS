@@ -17,7 +17,7 @@ def is_valid_string(string):
         if character.isalnum():
             pass
         else:
-            if character in ["-", "/", " ", ",", "'", ".", "(", ")"]:
+            if character in ["-", "/", " ", ",", "'", ".", "(", ")", "+"]:
                 pass
             else:
                 is_valid = False

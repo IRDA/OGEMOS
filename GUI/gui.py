@@ -16,6 +16,7 @@ from openpyxl.styles import Font, Alignment
 
 import GUI.fonction_utilitaire as util
 from GUI.MapperExcelToJSON import map_excel_to_json
+from GUI.CustomExceptions import DependanceError
 
 sp = subprocess.Popen(
     "API_OGEMOS.exe",
@@ -3178,6 +3179,8 @@ def initialize_globals():
                     except TypeError as error:
                         messagebox.showwarning(title="Erreur données Excel", message=error)
                     except ValueError as error:
+                        messagebox.showwarning(title="Erreur données Excel", message=error)
+                    except DependanceError as error:
                         messagebox.showwarning(title="Erreur données Excel", message=error)
                     finally:
                         menu_initial_ogemos(menu_frame)

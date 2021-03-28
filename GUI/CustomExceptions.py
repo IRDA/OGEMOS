@@ -1,0 +1,2 @@
+class DependanceError(Exception):
+    pass

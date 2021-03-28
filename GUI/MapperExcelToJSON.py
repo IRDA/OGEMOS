@@ -1,5 +1,6 @@
 from openpyxl import load_workbook
 import copy
+from GUI.CustomExceptions import DependanceError
 
 
 def map_excel_to_json(path):
@@ -349,12 +350,23 @@ def map_excel_to_json(path):
                         "Type de culture secondaire est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies projection".format(
                             row, column))
                 regie["culture_secondaire"] = {}
-                regie["culture_secondaire"]["culture_secondaire"] = str(donnee_regies_projections.cell(row=row,
-                                                                                                       column=column).value)
+                culture_secondaire = str(donnee_regies_projections.cell(row=row, column=column).value)
                 column += 1
                 try:
-                    regie["culture_secondaire"]["rendement"] = float(donnee_regies_projections.cell(row=row,
-                                                                                                    column=column).value)
+                    rendement_culture_secondaire = float(donnee_regies_projections.cell(row=row,
+                                                                                       column=column).value)
+                    if culture_secondaire == "-1" and rendement_culture_secondaire == -1:
+                        regie["culture_secondaire"]["culture_secondaire"] = None
+                        regie["culture_secondaire"]["rendement"] = None
+                    elif culture_secondaire == "-1" and not rendement_culture_secondaire == -1:
+                        raise DependanceError(
+                            "S'il n'y pas de culture secondaire, il ne doit pas y avoir de rendement pour celle-ci dans la feuille de calcul Régies projection à la rangée {}".format(row))
+                    elif rendement_culture_secondaire == -1 and not culture_secondaire == "-1":
+                        raise DependanceError(
+                            "S'il n'y pas de rendement de culture secondaire, il ne doit pas y avoir de culture secondaire dans la feuille de calcul Régies projection à la rangée {}".format(row))
+                    else:
+                        regie["culture_secondaire"]["culture_secondaire"] = culture_secondaire
+                        regie["culture_secondaire"]["rendement"] = rendement_culture_secondaire
                 except ValueError:
                     raise TypeError(
                         "Rendement culture secondaire invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies projection".format(
@@ -373,23 +385,30 @@ def map_excel_to_json(path):
                 column += 1
                 amendements_apports = str(donnee_regies_projections.cell(row=row, column=column).value)
                 column += 1
-                amendements_list = amendements.split(",")
-                amendements_apports_list = amendements_apports.split(",")
-                index = 0
-                for amendement in amendements_list:
-                    try:
-                        float(amendements_apports_list[index])
-                    except ValueError:
-                        raise TypeError(
-                            "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies projection".format(
-                                row, column))
-                    except TypeError:
-                        raise TypeError(
-                            "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies projection".format(
-                                row, column))
-                    regie["amendements"].append(
-                        {"amendement": amendement, "apport": float(amendements_apports_list[index])})
-                    index += 1
+                if amendements == "-1" and amendements_apports == "-1":
+                    pass
+                elif amendements == "-1" and not amendements_apports == "-1":
+                    raise DependanceError("S'il n'y a pas d'amendements, il ne doit pas y avoir d'apports pour ceux-ci dans la feuille de calcul Régies projection à la rangée {}".format(row))
+                elif amendements_apports == "-1" and not amendements == "-1":
+                    raise DependanceError("S'il n'y a pas d'apports d'amendements, il ne doit pas y avoir d'amendements dans la feuille de calcul Régies projection à la rangée {}".format(row))
+                else:
+                    amendements_list = amendements.split(",")
+                    amendements_apports_list = amendements_apports.split(",")
+                    index = 0
+                    for amendement in amendements_list:
+                        try:
+                            float(amendements_apports_list[index])
+                        except ValueError:
+                            raise TypeError(
+                                "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies projection".format(
+                                    row, column))
+                        except TypeError:
+                            raise TypeError(
+                                "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies projection".format(
+                                    row, column))
+                        regie["amendements"].append(
+                            {"amendement": amendement, "apport": float(amendements_apports_list[index])})
+                        index += 1
                 if donnee_regies_projections.cell(row=row, column=column).value is None:
                     raise TypeError(
                         "Type de travail du sol est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies projection".format(
@@ -400,9 +419,9 @@ def map_excel_to_json(path):
                 raise TypeError(
                     "Erreur d'ordonancement de la rotation dans le rangée {} de la feuille de calcul Régies projection".format(
                         row))
-
             simulation_data[simulation][entreprise][champ][zone_gestion]["regies_sol_et_culture_projection"].append(
                 regie)
+            print(simulation_data)
         else:
             raise TypeError(
                 "Nom de simulation invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies projection".format(
@@ -466,6 +485,8 @@ def map_excel_to_json(path):
                             row))
             elif entreprise not in simulation_data[simulation].keys() and len(
                     simulation_data[simulation].keys()) == 1:
+                print(entreprise)
+                print(simulation_data[simulation].keys())
                 raise ValueError(
                     "Nom de l'entreprise invalide dans la rangée {} de la feuille de calcul Régies historique, les simulations ne peuvent avoir qu'une seule entreprise".format(
                         row))
@@ -563,12 +584,23 @@ def map_excel_to_json(path):
                         "Type de culture secondaire est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
                             row, column))
                 regie["culture_secondaire"] = {}
-                regie["culture_secondaire"]["culture_secondaire"] = str(donnee_regies_historiques.cell(row=row,
-                                                                                                       column=column).value)
+                culture_secondaire = str(donnee_regies_historiques.cell(row=row, column=column).value)
                 column += 1
                 try:
-                    regie["culture_secondaire"]["rendement"] = float(donnee_regies_historiques.cell(row=row,
-                                                                                                    column=column).value)
+                    rendement_culture_secondaire = float(donnee_regies_historiques.cell(row=row,
+                                                                                       column=column).value)
+                    if culture_secondaire == "-1" and rendement_culture_secondaire == -1:
+                        regie["culture_secondaire"]["culture_secondaire"] = None
+                        regie["culture_secondaire"]["rendement"] = None
+                    elif culture_secondaire == "-1" and not rendement_culture_secondaire == -1:
+                        raise DependanceError(
+                            "S'il n'y pas de culture secondaire, il ne doit pas y avoir de rendement pour celle-ci dans la feuille de calcul Régies historique à la rangée {}".format(row))
+                    elif rendement_culture_secondaire == -1 and not culture_secondaire == "-1":
+                        raise DependanceError(
+                            "S'il n'y pas de rendement de culture secondaire, il ne doit pas y avoir de culture secondaire dans la feuille de calcul Régies historique à la rangée {}".format(row))
+                    else:
+                        regie["culture_secondaire"]["culture_secondaire"] = culture_secondaire
+                        regie["culture_secondaire"]["rendement"] = rendement_culture_secondaire
                 except ValueError:
                     raise TypeError(
                         "Rendement culture secondaire invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
@@ -587,29 +619,40 @@ def map_excel_to_json(path):
                 column += 1
                 amendements_apports = str(donnee_regies_historiques.cell(row=row, column=column).value)
                 column += 1
-                amendements_list = amendements.split(",")
-                amendements_apports_list = amendements_apports.split(",")
-                index = 0
-                for amendement in amendements_list:
-                    try:
-                        float(amendements_apports_list[index])
-                    except ValueError:
-                        raise TypeError(
-                            "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies historique".format(
-                                row, column))
-                    except TypeError:
-                        raise TypeError(
-                            "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies historique".format(
-                                row, column))
-                    regie["amendements"].append(
-                        {"amendement": amendement, "apport": float(amendements_apports_list[index])})
-                    index += 1
-                    if donnee_regies_historiques.cell(row=row, column=column).value is None:
-                        raise TypeError(
-                            "Type de travail du sol est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
-                                row, column))
-                    regie["travail_du_sol"] = {
-                        "travail_du_sol": str(donnee_regies_historiques.cell(row=row, column=column).value)}
+                if amendements == "-1" and amendements_apports == "-1":
+                    pass
+                elif amendements == "-1" and not amendements_apports == "-1":
+                    raise DependanceError(
+                        "S'il n'y a pas d'amendements, il ne doit pas y avoir d'apports pour ceux-ci dans la feuille de calcul Régies historique à la rangée {}".format(
+                            row))
+                elif amendements_apports == "-1" and not amendements == "-1":
+                    raise DependanceError(
+                        "S'il n'y a pas d'apports d'amendements, il ne doit pas y avoir d'amendements dans la feuille de calcul Régies historique à la rangée {}".format(
+                            row))
+                else:
+                    amendements_list = amendements.split(",")
+                    amendements_apports_list = amendements_apports.split(",")
+                    index = 0
+                    for amendement in amendements_list:
+                        try:
+                            float(amendements_apports_list[index])
+                        except ValueError:
+                            raise TypeError(
+                                "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies historique".format(
+                                    row, column))
+                        except TypeError:
+                            raise TypeError(
+                                "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies historique".format(
+                                    row, column))
+                        regie["amendements"].append(
+                            {"amendement": amendement, "apport": float(amendements_apports_list[index])})
+                        index += 1
+                if donnee_regies_historiques.cell(row=row, column=column).value is None:
+                    raise TypeError(
+                        "Type de travail du sol est invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies historique".format(
+                            row, column))
+                regie["travail_du_sol"] = {
+                    "travail_du_sol": str(donnee_regies_historiques.cell(row=row, column=column).value)}
             else:
                 raise TypeError(
                     "Erreur d'ordonancement de la rotation dans le rangée {} de la feuille de calcul Régies historique".format(
@@ -663,7 +706,11 @@ def ajout_caracteristiques_physiques(column, donnee_entreprises, row, zone_de_ge
                 column))
     column += 1
     try:
-        zone_de_gestion_data["masse_volumique_apparente"] = float(donnee_entreprises.cell(row=row, column=column).value)
+        if float(donnee_entreprises.cell(row=row, column=column).value) == -1:
+            zone_de_gestion_data["masse_volumique_apparente"] = None
+        else:
+            zone_de_gestion_data["masse_volumique_apparente"] = float(
+                donnee_entreprises.cell(row=row, column=column).value)
     except ValueError:
         raise TypeError(
             "Masse volumique apparente invalide dans la rangée {} et la colonne {} de la feuille de calcul Entreprises".format(
@@ -738,5 +785,5 @@ def row_check(donnee, row, number_of_columns, worksheet_name):
 
 
 if __name__ == "__main__":
-    path = 'C:\\Users\\Samuel\\Documents\\Stage IRDA\\Test_Gabarit_Excel_OGEMOS.xlsx'
-    map_excel_to_json(path)
+    path = 'C:\\Users\\Samuel\\Documents\\Stage IRDA\\Test_de_sensibilite.xlsx'
+    print(map_excel_to_json(path))

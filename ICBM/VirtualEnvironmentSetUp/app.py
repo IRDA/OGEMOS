@@ -191,7 +191,7 @@ def __simulation_mapping(data):
         try:
             assert isinstance(annee_finale, int)
         except AssertionError:
-            message_erreur = str(annee_finale) + " n'est pas un nom d'entreprise valide. Voir documentation API."
+            message_erreur = str(annee_finale) + " n'est pas une annee finale valide. Voir documentation API."
             abort(400, message_erreur)
 
         entreprise_agricole = __entreprise_agricole_mapping(simulation["entreprise_agricole"])
@@ -222,7 +222,7 @@ def __champs_mapping(data):
         try:
             assert isinstance(nom_champs, str)
         except AssertionError:
-            message_erreur = str(nom_champs) + " n'est pas un nom d'entreprise valide. Voir documentation API."
+            message_erreur = str(nom_champs) + " n'est pas un nom de champ valide. Voir documentation API."
             abort(400, message_erreur)
 
         liste_champs.append(Champs(nom_champs, zones_de_gestion))
@@ -475,7 +475,7 @@ def __culture_secondaire_mapping(data):
         abort(400, message_erreur)
 
     try:
-        assert isinstance(rendement, float)
+        assert isinstance(rendement, (float, int))
     except AssertionError:
         message_erreur = str(
             rendement) + " n'est pas une période d'implantation valide. Voir documentation API."
