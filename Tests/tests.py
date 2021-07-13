@@ -9,7 +9,7 @@ def tests():
     TRAVAIL_DU_SOL_DEFAUT = "Travail réduit"
 
     wb = load_workbook(
-        filename='C:\\Users\\Samuel\\Documents\\Stage IRDA\\Donnees__validation_Ogemos_Logiag_2021-03-06_SC_v2.xlsx')
+        filename='C:\\Users\\Samuel\\Documents\\Stage IRDA\\Données Chaudière Appalaches.xlsx')
     donnees_champs = wb['Données champs']
     donnees_regies = wb['Données régies']
     donnees_amendements = wb['Données amendements']

@@ -20,7 +20,8 @@
 																									"culture_secondaire": {"culture_secondaire": string or null si null rendement doit aussi être null,
 																														   "rendement": float or null},
 																									"amendements": [{"amendement": string or null si null rendement doit aussi être null,
-																													 "apport": float or null}],
+																													 "apport": float or null}
+																													 "taux_humidite": float or null (non obligatoire)],
 																									"travail_du_sol": {"travail_du_sol": string}}],
 															  "regies_sol_et_culture_historique": [{"culture_principale": {"culture_principale": string,
 																														   "rendement": float or null,

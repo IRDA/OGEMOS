@@ -1,9 +1,13 @@
 from openpyxl import load_workbook
 import copy
 from GUI.CustomExceptions import DependanceError
+import requests
+
+
 
 
 def map_excel_to_json(path):
+    liste_amendements_valides = requests.get("http://localhost:5000/api/get-amendement").json()["amendements_supportees"]
     wb = load_workbook(filename=path)
     try:
         donnee_entreprises = wb["Entreprises"]
@@ -396,6 +400,8 @@ def map_excel_to_json(path):
                     amendements_apports_list = amendements_apports.split(",")
                     index = 0
                     for amendement in amendements_list:
+                        if amendement not in liste_amendements_valides:
+                            raise TypeError("Un amendement est invalide dans la rangée {} et la colonne 13 de la feuille de calcul Régies projection".format(row))
                         try:
                             float(amendements_apports_list[index])
                         except ValueError:
@@ -421,7 +427,6 @@ def map_excel_to_json(path):
                         row))
             simulation_data[simulation][entreprise][champ][zone_gestion]["regies_sol_et_culture_projection"].append(
                 regie)
-            print(simulation_data)
         else:
             raise TypeError(
                 "Nom de simulation invalide dans la rangée {} et la colonne {} de la feuille de calcul Régies projection".format(
@@ -485,8 +490,6 @@ def map_excel_to_json(path):
                             row))
             elif entreprise not in simulation_data[simulation].keys() and len(
                     simulation_data[simulation].keys()) == 1:
-                print(entreprise)
-                print(simulation_data[simulation].keys())
                 raise ValueError(
                     "Nom de l'entreprise invalide dans la rangée {} de la feuille de calcul Régies historique, les simulations ne peuvent avoir qu'une seule entreprise".format(
                         row))
@@ -634,6 +637,8 @@ def map_excel_to_json(path):
                     amendements_apports_list = amendements_apports.split(",")
                     index = 0
                     for amendement in amendements_list:
+                        if amendement not in liste_amendements_valides:
+                            raise TypeError("Un amendement est invalide dans la rangée {} et la colonne 13 de la feuille de calcul Régies historique".format(row))
                         try:
                             float(amendements_apports_list[index])
                         except ValueError:
@@ -785,5 +790,8 @@ def row_check(donnee, row, number_of_columns, worksheet_name):
 
 
 if __name__ == "__main__":
-    path = 'C:\\Users\\Samuel\\Documents\\Stage IRDA\\Test_de_sensibilite.xlsx'
-    print(map_excel_to_json(path))
+    path = 'C:\\Users\\Samuel\\Documents\\Stage IRDA\\Données Chaudière Appalaches Gabarit OGEMOS.xlsx'
+    test=map_excel_to_json(path)
+    print(test)
+    response = requests.post("http://localhost:5000/api/icbm-bilan", json=test)
+    print(response.text)

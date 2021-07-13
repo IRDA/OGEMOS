@@ -72,6 +72,18 @@ def initialize_globals():
 
     def initialize_run_gui():
 
+        current_directory = os.getcwd()
+        current_directory_len = len(current_directory)
+        len_to_truncate = 18
+        new_directory_len = current_directory_len - len_to_truncate
+        global app_root_directory
+        app_root_directory = ""
+        formatting_increment = 0
+        for letter in current_directory:
+            if formatting_increment < new_directory_len:
+                app_root_directory = app_root_directory + letter
+            formatting_increment += 1
+
         global furthest_left_tab_index_simulation
         furthest_left_tab_index_simulation = 0
         global furthest_right_tab_index_simulation
@@ -1629,13 +1641,21 @@ def initialize_globals():
                             amendement = \
                                 composante_amendement_liste.grid_slaves([index_composante_amendement], column=1)[
                                     0].get()
+
+                            pourcentage_humidite_amendement = \
+                            composante_amendement_liste.grid_slaves([index_composante_amendement + 2], column=1)[
+                                0].get()
+                            if pourcentage_humidite_amendement == "":
+                                pourcentage_humidite_amendement = None
+
                             global amendements_supportees
                             if amendement == "":
                                 amendement = None
-                            if amendement is not None and amendement not in amendements_supportees:
+                            if amendement is not None and amendement not in amendements_supportees and pourcentage_humidite_amendement is None:
                                 entree_invalide_liste.append(
                                     "\"Amendement\" " + str(
-                                        index_composante_amendement + 1) + " doit être parmis les choix disponibles dans la zone que vous souhaitez appliquer")
+                                        int(
+                                            index_composante_amendement / 3) + 1) + " doit être parmis les choix disponibles dans la zone que vous souhaitez appliquer")
                             apport = \
                                 composante_amendement_liste.grid_slaves([index_composante_amendement + 1],
                                                                         column=1)[
@@ -1644,20 +1664,39 @@ def initialize_globals():
                                 apport = None
                             if apport is not None and not util.is_decimal_number(apport):
                                 entree_invalide_liste.append(
-                                    "\"Apport\" " + str(index_composante_amendement + 1) +
+                                    "\"Apport\" " + str(int(index_composante_amendement / 3) + 1) +
                                     " est invalide, il doit être un réel positif ou laissé vide s'il n'y a pas d'amendements dans la zone que vous souhaitez appliquer")
                             elif (amendement is None and apport is not None) or (
                                     amendement is not None and apport is None):
                                 entree_invalide_liste.append("\"Apport\" " + str(
-                                    index_composante_amendement + 1) + " et \"Amendement\" " + str(
-                                    index_composante_amendement + 1) +
+                                    int(index_composante_amendement / 3) + 1) + " et \"Amendement\" " + str(
+                                    int(index_composante_amendement / 3) + 1) +
                                                              " doivent être tout deux laissé vide s'il n'y a pas d'amendements  dans la zone que vous souhaitez appliquer")
                             else:
                                 if apport is not None:
                                     apport = float(apport)
+                            if pourcentage_humidite_amendement is not None and not util.is_decimal_number(
+                                    pourcentage_humidite_amendement):
+                                entree_invalide_liste.append(
+                                    "\"Pourcentage humidité\" " + str(int(index_composante_amendement / 3) + 1) +
+                                    " est invalide, il doit être un réel positif entre 0 et 100 inclusivement ou laissé vide s'il n'y a pas d'amendements dans la zone que vous souhaitez appliquer")
+                            elif pourcentage_humidite_amendement is not None and util.is_decimal_number(
+                                    pourcentage_humidite_amendement):
+                                if (amendement is None and apport is not None) or (
+                                        amendement is not None and apport is None) or (
+                                        amendement is None and apport is None and pourcentage_humidite_amendement is not None) or 0 > float(
+                                        pourcentage_humidite_amendement) > 100:
+                                    entree_invalide_liste.append(
+                                        "\"Pourcentage humidité\" " + str(int(index_composante_amendement / 3) + 1) +
+                                        " est invalide, il doit être un réel positif entre 0 et 100 inclusivement ou laissé vide s'il n'y a pas d'amendements dans la zone que vous souhaitez appliquer")
+                                else:
+                                    if pourcentage_humidite_amendement is not None:
+                                        pourcentage_humidite_amendement = float(pourcentage_humidite_amendement)
+
                             amendements.append({"amendement": amendement,
-                                                "apport": apport})
-                            index_composante_amendement += 2
+                                                "apport": apport,
+                                                "pourcentage_humidite": pourcentage_humidite_amendement})
+                            index_composante_amendement += 3
                         regie_dict = {"culture_principale": culture_principale_dict,
                                       "culture_secondaire": culture_secondaire_dict,
                                       "amendements": amendements,
@@ -1747,11 +1786,11 @@ def initialize_globals():
 
                 def ajouter_des_amendements(amendement_frame, amendements=None):
 
-                    def on_amendment_selected(event):
+                    def on_amendement_selected(event):
                         if amendement_combobox.get() != "" and apport_amendement_entry.get() == "":
                             apport_amendement_entry.insert(0, "10.0")
 
-                    def definition_composante_amendements_charges(amendement_courrant):
+                    def definition_composante_amendements_charges(amendement_courant):
                         def on_amendment_charge_selected(event):
                             if amendement_charge_combobox.get() != "" and apport_amendement_charge_entry.get() == "":
                                 apport_amendement_charge_entry.insert(0, "10.0")
@@ -1761,16 +1800,24 @@ def initialize_globals():
                                                                   postcommand=lambda: filter_combobox_values(
                                                                       amendement_charge_combobox,
                                                                       amendements_supportees))
-                        if amendement_courrant["amendement"] is not None:
-                            amendement_charge_combobox.set(amendement_courrant["amendement"])
+                        if amendement_courant["amendement"] is not None:
+                            amendement_charge_combobox.set(amendement_courant["amendement"])
                         apport_amendement_charge_label = ttk.Label(amendement_frame, text="Apport (t/ha):")
                         apport_amendement_charge_entry = ttk.Entry(amendement_frame)
-                        if amendement_courrant["apport"] is not None:
-                            apport_amendement_charge_entry.insert(0, str(amendement_courrant["apport"]))
+                        if amendement_courant["apport"] is not None:
+                            apport_amendement_charge_entry.insert(0, str(amendement_courant["apport"]))
+                        pourcentage_humidite_charge_amendement_label = ttk.Label(amendement_frame,
+                                                                                 text="Pourcentage humidité [0-100]:")
+                        pourcentage_humidite_charge_amendement_entry = ttk.Entry(amendement_frame)
+                        if amendement_courant["pourcentage_humidite"] is not None:
+                            pourcentage_humidite_charge_amendement_entry.insert(0, str(
+                                amendement_courant["pourcentage_humidite"]))
                         amendement_charge_label.grid(row=index, column=0, sticky="w", pady=3)
                         amendement_charge_combobox.grid(row=index, column=1, sticky="w", pady=3)
                         apport_amendement_charge_label.grid(row=index + 1, column=0, sticky="w", pady=3)
                         apport_amendement_charge_entry.grid(row=index + 1, column=1, sticky="w", pady=3)
+                        pourcentage_humidite_charge_amendement_label.grid(row=index + 2, column=0, sticky="w", pady=3)
+                        pourcentage_humidite_charge_amendement_entry.grid(row=index + 2, column=1, sticky="w", pady=3)
                         amendement_charge_combobox.bind("<<ComboboxSelected>>", on_amendment_charge_selected)
 
                     global amendements_supportees
@@ -1778,7 +1825,7 @@ def initialize_globals():
                         index = 0
                         for amendement in amendements:
                             definition_composante_amendements_charges(amendement)
-                            index += 2
+                            index += 3
                     else:
                         index = 0
                         amendement_label = ttk.Label(amendement_frame, text="Amendement: ")
@@ -1788,12 +1835,17 @@ def initialize_globals():
                                                                amendements_supportees))
                         apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t/ha):")
                         apport_amendement_entry = ttk.Entry(amendement_frame)
+                        pourcentage_humidte_amendement_label = ttk.Label(amendement_frame,
+                                                                         text="Pourcentage humidité [0-100]:")
+                        pourcentage_humidte_amendement_entry = ttk.Entry(amendement_frame)
                         amendement_label.grid(row=0, column=0, sticky="w", pady=3)
                         amendement_combobox.grid(row=0, column=1, sticky="w", pady=3)
                         apport_amendement_label.grid(row=1, column=0, sticky="w", pady=3)
                         apport_amendement_entry.grid(row=1, column=1, sticky="w", pady=3)
-                        amendement_combobox.bind("<<ComboboxSelected>>", on_amendment_selected)
-                        index += 2
+                        pourcentage_humidte_amendement_label.grid(row=2, column=0, sticky="w", pady=3)
+                        pourcentage_humidte_amendement_entry.grid(row=2, column=1, sticky="w", pady=3)
+                        amendement_combobox.bind("<<ComboboxSelected>>", on_amendement_selected)
+                        index += 3
 
                     ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
                                                          command=lambda: ajouter_amendement_regie(amendement_frame))
@@ -1815,13 +1867,20 @@ def initialize_globals():
                                                                                                   amendements_supportees))
                     apport_amendement_label = ttk.Label(amendement_frame, text="Apport (t/ha):")
                     apport_amendement_entry = ttk.Entry(amendement_frame)
+                    pourcentage_humidte_amendement_label = ttk.Label(amendement_frame,
+                                                                     text="Pourcentage humidité [0-100]:")
+                    pourcentage_humidte_amendement_entry = ttk.Entry(amendement_frame)
                     ajout_a_la_regie_button = ttk.Button(amendement_frame, text="Ajouter à la régie",
                                                          command=lambda: ajouter_amendement_regie(amendement_frame))
                     amendement_label.grid(row=grid_size[1] - 1, column=grid_size[0] - 2, sticky="w", pady=3)
                     amendement_combobox.grid(row=grid_size[1] - 1, column=grid_size[0] - 1, sticky="w", pady=3)
                     apport_amendement_label.grid(row=grid_size[1], column=grid_size[0] - 2, sticky="w", pady=3)
                     apport_amendement_entry.grid(row=grid_size[1], column=grid_size[0] - 1, sticky="w", pady=3)
-                    ajout_a_la_regie_button.grid(row=grid_size[1] + 1, column=grid_size[0] - 2, pady=3, columnspan=2)
+                    pourcentage_humidte_amendement_label.grid(row=grid_size[1] + 1, column=grid_size[0] - 2, sticky="w",
+                                                              pady=3)
+                    pourcentage_humidte_amendement_entry.grid(row=grid_size[1] + 1, column=grid_size[0] - 1, sticky="w",
+                                                              pady=3)
+                    ajout_a_la_regie_button.grid(row=grid_size[1] + 2, column=grid_size[0] - 2, pady=3, columnspan=2)
                     amendement_combobox.bind("<<ComboboxSelected>>", on_amendment_selected)
 
                 def add_regies_projection(zone_label_frame, index, regie=None):
@@ -2028,7 +2087,6 @@ def initialize_globals():
                     if len(entree_invalide_liste) == 0:
                         response = requests.post('http://localhost:5000/api/icbm-bilan',
                                                  json={"simulations": simulations})
-                        print(response.text)
                         creation_du_rapport(response.json())
                     else:
                         message = ""
@@ -2269,20 +2327,26 @@ def initialize_globals():
                             grid_size = composante_amendement_liste.grid_size()
                             amendements = []
                             while index_composante_amendement < grid_size[1] - 1:
+                                pourcentage_humidite_amendement = \
+                                    composante_amendement_liste.grid_slaves([index_composante_amendement + 2],
+                                                                            column=1)[0].get()
+                                if pourcentage_humidite_amendement == "":
+                                    pourcentage_humidite_amendement = None
                                 amendement = \
-                                    composante_amendement_liste.grid_slaves([index_composante_amendement], column=1)[
+                                    composante_amendement_liste.grid_slaves([index_composante_amendement],
+                                                                            column=1)[
                                         0].get()
                                 global amendements_supportees
                                 if amendement == "":
                                     amendement = None
-                                if amendement is not None and amendement not in amendements_supportees:
+                                if amendement is not None and amendement not in amendements_supportees and pourcentage_humidite_amendement is None:
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
                                          "Zone gestion " + str(zone_index + 1),
                                          "\"Amendement\" " + str(
-                                             index_composante_amendement + 1) + " doit être parmis les choix disponibles",
-                                         "Régie projection Simulation " + duree_simulation[simulation_index][
-                                             "nom_simulation"]))
+                                             int(
+                                                 index_composante_amendement / 3) + 1) + " doit être parmis les choix disponibles",
+                                         "section Régie projection Simulation"))
                                 apport = \
                                     composante_amendement_liste.grid_slaves([index_composante_amendement + 1],
                                                                             column=1)[
@@ -2293,27 +2357,51 @@ def initialize_globals():
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
                                          "Zone gestion " + str(zone_index + 1),
-                                         "\"Apport\" " + str(index_composante_amendement + 1) +
+                                         "\"Apport\" " + str(int(index_composante_amendement / 3) + 1) +
                                          " est invalide, il doit être un réel positif ou laissé vide s'il n'y a pas d'amendements",
-                                         "Régie projection Simulation " + duree_simulation[simulation_index][
-                                             "nom_simulation"]))
+                                         "section Régie projection Simulation"))
                                 elif (amendement is None and apport is not None) or (
                                         amendement is not None and apport is None):
                                     entree_invalide_liste.append(
                                         (information_champs[champs_index]["nom_du_champs"],
                                          "Zone gestion " + str(zone_index + 1),
                                          "\"Apport\" " + str(
-                                             index_composante_amendement + 1) + " et \"Amendement\" " + str(
-                                             index_composante_amendement + 1) +
+                                             int(index_composante_amendement / 3) + 1) + " et \"Amendement\" " + str(
+                                             int(index_composante_amendement / 3) + 1) +
                                          " doivent être tout deux laissé vide s'il n'y a pas d'amendements",
-                                         "Régie projection Simulation " + duree_simulation[simulation_index][
-                                             "nom_simulation"]))
+                                         "section Régie projection Simulation"))
                                 else:
                                     if apport is not None:
                                         apport = float(apport)
+                                if pourcentage_humidite_amendement is not None and not util.is_decimal_number(
+                                        pourcentage_humidite_amendement):
+                                    entree_invalide_liste.append(
+                                        (information_champs[champs_index]["nom_du_champs"],
+                                         "Zone gestion " + str(zone_index + 1),
+                                         "\"Pourcentage humidité\" " + str(int(index_composante_amendement / 3) + 1) +
+                                         " est invalide, il doit être un réel positif entre 0 et 100 inclusivement ou laissé vide s'il n'y a pas d'amendements",
+                                         "section Régie projection Simulation"))
+                                elif pourcentage_humidite_amendement is not None and util.is_decimal_number(
+                                        pourcentage_humidite_amendement):
+                                    if (amendement is None and apport is not None) or (
+                                            amendement is not None and apport is None) or (
+                                            amendement is None and apport is None and pourcentage_humidite_amendement is not None) or 0 > float(
+                                        pourcentage_humidite_amendement) > 100:
+                                        entree_invalide_liste.append(
+                                            (information_champs[champs_index]["nom_du_champs"],
+                                             "Zone gestion " + str(zone_index + 1),
+                                             "\"Pourcentage humidité\" " + str(
+                                                 int(index_composante_amendement / 3) + 1) +
+                                             " est invalide, il doit être un réel positif entre 0 et 100 inclusivement ou laissé vide s'il n'y a pas d'amendements",
+                                             "section Régie projection Simulation"))
+                                    else:
+                                        if pourcentage_humidite_amendement is not None:
+                                            pourcentage_humidite_amendement = float(pourcentage_humidite_amendement)
+
                                 amendements.append({"amendement": amendement,
-                                                    "apport": apport})
-                                index_composante_amendement += 2
+                                                    "apport": apport,
+                                                    "pourcentage_humidite": pourcentage_humidite_amendement})
+                                index_composante_amendement += 3
                             regie_dict = {"culture_principale": culture_principale_dict,
                                           "culture_secondaire": culture_secondaire_dict,
                                           "amendements": amendements,
@@ -2635,6 +2723,11 @@ def initialize_globals():
                                 amendement_non_vide_compteur = 0
                                 amendements = []
                                 while index_composante_amendement < grid_size[1] - 1:
+                                    pourcentage_humidite_amendement = \
+                                        composante_amendement_liste.grid_slaves([index_composante_amendement + 2],
+                                                                                column=1)[0].get()
+                                    if pourcentage_humidite_amendement == "":
+                                        pourcentage_humidite_amendement = None
                                     amendement = \
                                         composante_amendement_liste.grid_slaves([index_composante_amendement],
                                                                                 column=1)[
@@ -2642,12 +2735,13 @@ def initialize_globals():
                                     global amendements_supportees
                                     if amendement == "":
                                         amendement = None
-                                    if amendement is not None and amendement not in amendements_supportees:
+                                    if amendement is not None and amendement not in amendements_supportees and pourcentage_humidite_amendement is None:
                                         entree_invalide_liste.append(
                                             (information_champs[champs_index]["nom_du_champs"],
                                              "Zone gestion " + str(zone_index + 1),
                                              "\"Amendement\" " + str(
-                                                 index_composante_amendement + 1) + " doit être parmis les choix disponibles",
+                                                 int(
+                                                     index_composante_amendement / 3) + 1) + " doit être parmis les choix disponibles ou avoir un pourcentage d'humidité",
                                              "section Données réchauffement"))
                                     apport = \
                                         composante_amendement_liste.grid_slaves([index_composante_amendement + 1],
@@ -2659,7 +2753,7 @@ def initialize_globals():
                                         entree_invalide_liste.append(
                                             (information_champs[champs_index]["nom_du_champs"],
                                              "Zone gestion " + str(zone_index + 1),
-                                             "\"Apport\" " + str(index_composante_amendement + 1) +
+                                             "\"Apport\" " + str(index_composante_amendement / 3 + 1) +
                                              " est invalide, il doit être un réel positif ou laissé vide s'il n'y a pas d'amendements",
                                              "section Données réchauffement"))
                                     elif (amendement is None and apport is not None) or (
@@ -2668,19 +2762,47 @@ def initialize_globals():
                                             (information_champs[champs_index]["nom_du_champs"],
                                              "Zone gestion " + str(zone_index + 1),
                                              "\"Apport\" " + str(
-                                                 index_composante_amendement + 1) + " et \"Amendement\" " + str(
-                                                 index_composante_amendement + 1) +
+                                                 int(
+                                                     index_composante_amendement / 3) + 1) + " et \"Amendement\" " + str(
+                                                 int(index_composante_amendement / 3) + 1) +
                                              " doivent être tout deux laissé vide s'il n'y a pas d'amendements",
                                              "section Données réchauffement"))
                                     else:
                                         if apport is not None:
                                             apport = float(apport)
-                                    if amendement is not None or apport is not None:
+                                    if pourcentage_humidite_amendement is not None and not util.is_decimal_number(
+                                            pourcentage_humidite_amendement):
+                                        entree_invalide_liste.append(
+                                            (information_champs[champs_index]["nom_du_champs"],
+                                             "Zone gestion " + str(zone_index + 1),
+                                             "\"Pourcentage humidité\" " + str(
+                                                 int(index_composante_amendement / 3) + 1) +
+                                             " est invalide, il doit être un réel positif entre 0 et 100 inclusivement ou laissé vide s'il n'y a pas d'amendements",
+                                             "section Données réchauffement"))
+                                    elif pourcentage_humidite_amendement is not None and util.is_decimal_number(
+                                            pourcentage_humidite_amendement):
+                                        if (amendement is None and apport is not None) or (
+                                                amendement is not None and apport is None) or (
+                                                amendement is None and apport is None and pourcentage_humidite_amendement is not None) or 0 > float(
+                                            pourcentage_humidite_amendement) > 100:
+                                            entree_invalide_liste.append(
+                                                (information_champs[champs_index]["nom_du_champs"],
+                                                 "Zone gestion " + str(zone_index + 1),
+                                                 "\"Pourcentage humidité\" " + str(
+                                                     int(index_composante_amendement / 3) + 1) +
+                                                 " est invalide, il doit être un réel positif entre 0 et 100 inclusivement ou laissé vide s'il n'y a pas d'amendements",
+                                                 "section Données réchauffement"))
+                                        else:
+                                            if pourcentage_humidite_amendement is not None:
+                                                pourcentage_humidite_amendement = float(pourcentage_humidite_amendement)
+
+                                    if amendement is not None or apport is not None or pourcentage_humidite_amendement is not None:
                                         amendement_non_vide_compteur += 1
 
                                     amendements.append({"amendement": amendement,
-                                                        "apport": apport})
-                                    index_composante_amendement += 2
+                                                        "apport": apport,
+                                                        "pourcentage_humidite": pourcentage_humidite_amendement})
+                                    index_composante_amendement += 3
                                 if amendement_non_vide_compteur > 0:
                                     regie_vide["partie_amendement"] = False
                                 else:
@@ -3058,8 +3180,9 @@ def initialize_globals():
                     for widget in menu_frame.winfo_children():
                         widget.destroy()
                     root.withdraw()
+                    global app_root_directory
                     global filename
-                    filename = filedialog.askopenfilename(initialdir="/", title="Select file",
+                    filename = filedialog.askopenfilename(initialdir=app_root_directory, title="Select file",
                                                           filetypes=(("json files", "*.json"), ("all files", "*.*")))
                     if filename == "":
                         menu_initial_ogemos(menu_frame)
@@ -3094,7 +3217,9 @@ def initialize_globals():
                         widget.destroy()
                     root.withdraw()
                     global plan_gestion_filename
-                    plan_gestion_filename = filedialog.askopenfilename(initialdir="/", title="Select file",
+                    global app_root_directory
+                    plan_gestion_filename = filedialog.askopenfilename(initialdir=app_root_directory,
+                                                                       title="Select file",
                                                                        filetypes=(
                                                                            ("json files", "*.json"),
                                                                            ("all files", "*.*")))
@@ -3162,7 +3287,8 @@ def initialize_globals():
                     for widget in menu_frame.winfo_children():
                         widget.destroy()
                     root.withdraw()
-                    excel_filename = filedialog.askopenfilename(initialdir="/",
+                    global app_root_directory
+                    excel_filename = filedialog.askopenfilename(initialdir=app_root_directory,
                                                                 title="File Explorer",
                                                                 filetypes=(("xlsx", "*.xlsx"),
                                                                            ("all files", "*.*")))
@@ -3174,6 +3300,10 @@ def initialize_globals():
                         json_from_excel_data = map_excel_to_json(excel_filename)
                         response = requests.post('http://localhost:5000/api/icbm-bilan',
                                                  json=json_from_excel_data)
+                        if not response.ok:
+                            p_split = response.text.split("<p>")
+                            slash_p_split = p_split[1].split("</p>")
+                            raise ValueError(slash_p_split[0])
                         creation_du_rapport(response.json())
 
                     except TypeError as error:
@@ -3278,7 +3408,8 @@ def initialize_globals():
 
                     def sauvegarder_amendement_dans_un_fichier():
                         menu_transfert_window.withdraw()
-                        amendements_ajoutes_filename = filedialog.asksaveasfilename(initialdir="/",
+                        global app_root_directory
+                        amendements_ajoutes_filename = filedialog.asksaveasfilename(initialdir=app_root_directory,
                                                                                     title="File Explorer",
                                                                                     filetypes=(("json files", "*.json"),
                                                                                                ("all files", "*.*")))
@@ -3294,7 +3425,9 @@ def initialize_globals():
 
                     def charger_amendement_a_partir_de_fichier():
                         menu_transfert_window.withdraw()
-                        amendements_ajoutes_filename = filedialog.askopenfilename(initialdir="/", title="Select file",
+                        global app_root_directory
+                        amendements_ajoutes_filename = filedialog.askopenfilename(initialdir=app_root_directory,
+                                                                                  title="Select file",
                                                                                   filetypes=(
                                                                                       ("json files", "*.json"),
                                                                                       ("all files", "*.*")))
@@ -3384,8 +3517,9 @@ def initialize_globals():
 
             def sauvegarder_attributs_entreprise_apres_creation():
                 root.withdraw()
+                global app_root_directory
                 global filename
-                filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer",
+                filename = filedialog.asksaveasfilename(initialdir=app_root_directory, title="File Explorer",
                                                         filetypes=(("json files", "*.json"), ("all files", "*.*")))
                 if filename == "":
                     root.deiconify()
@@ -3437,8 +3571,10 @@ def initialize_globals():
                     root.deiconify()
                     return
                 root.withdraw()
+                global app_root_directory
                 global plan_gestion_filename
-                plan_gestion_filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer",
+                plan_gestion_filename = filedialog.asksaveasfilename(initialdir=app_root_directory,
+                                                                     title="File Explorer",
                                                                      filetypes=(
                                                                          ("json files", "*.json"),
                                                                          ("all files", "*.*")))
@@ -3466,7 +3602,8 @@ def initialize_globals():
 
                 def sauvegarder_rapport_des_resultats():
                     root.withdraw()
-                    filename = filedialog.asksaveasfilename(initialdir="/", title="File Explorer",
+                    global app_root_directory
+                    filename = filedialog.asksaveasfilename(initialdir=app_root_directory, title="File Explorer",
                                                             filetypes=(("xlsx files", "*.xlsx"), ("all files", "*.*")))
                     if filename == "":
                         root.deiconify()

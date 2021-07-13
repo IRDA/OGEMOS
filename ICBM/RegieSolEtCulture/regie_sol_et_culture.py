@@ -166,20 +166,28 @@ class Amendements:
 
 
 class Amendement:
-    def __init__(self, type_amendement, apport):
+    def __init__(self, type_amendement, apport, pourcentage_humidite):
         self.__type_amendement = type_amendement
         self.__apport = apport
+        self.__pourcentage_humidite = pourcentage_humidite
 
     def calculer_apport_en_carbone(self):
         ha_to_m2 = 1/10000
+        variation_teneur_carbone_vs_pourcentage_matiere_seche = 4.58
+        intercept_teneur_carbone_vs_pourcentage_matiere_seche = -8.39
+        if self.__pourcentage_humidite is not None:
+            pourcentage_matiere_seche = 100 - self.__pourcentage_humidite
         if self.__type_amendement is None:
             return 0
-        coefficient_de_calcul = get_coefficient_des_amendements(self.__type_amendement)
-        quantite_carbone_amendement = self.__apport * coefficient_de_calcul.carbon_total * ha_to_m2
+        if self.__pourcentage_humidite is None:
+            coefficient_de_calcul = get_coefficient_des_amendements(self.__type_amendement)
+            quantite_carbone_amendement = self.__apport * coefficient_de_calcul.carbon_total * ha_to_m2
+        else:
+            quantite_carbone_amendement = (variation_teneur_carbone_vs_pourcentage_matiere_seche * pourcentage_matiere_seche + intercept_teneur_carbone_vs_pourcentage_matiere_seche) * self.__apport * ha_to_m2
         return quantite_carbone_amendement
 
     def generer_bilan_amendement(self):
-        return {"amendement": self.__type_amendement, "apport": self.__apport}
+        return {"amendement": self.__type_amendement, "apport": self.__apport, "pourcentage_humidite":self.__pourcentage_humidite}
 
 
 class TravailDuSol:

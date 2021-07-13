@@ -196,7 +196,8 @@ def __simulation_mapping(data):
 
         entreprise_agricole = __entreprise_agricole_mapping(simulation["entreprise_agricole"])
 
-        gestion_simulation.ajouter_une_simulation(Simulation(annee_initiale, annee_finale, entreprise_agricole, nom_simulation))
+        gestion_simulation.ajouter_une_simulation(
+            Simulation(annee_initiale, annee_finale, entreprise_agricole, nom_simulation))
     return gestion_simulation
 
 
@@ -354,8 +355,9 @@ def __travail_du_sol_mapping(data):
 def __amendements_mapping(data):
     liste_amendement = []
     for amendement in data:
-        if amendement["amendement"] is None and amendement["apport"] is None:
-            liste_amendement.append(Amendement(amendement["amendement"], amendement["apport"]))
+        if amendement["amendement"] is None and amendement["apport"] is None and amendement["pourcentage_humidite"] is None:
+            liste_amendement.append(Amendement(amendement["amendement"], amendement["apport"],
+                                               amendement["pourcentage_humidite"]))
         else:
             try:
                 assert isinstance(amendement["apport"], (float, int))
@@ -364,12 +366,29 @@ def __amendements_mapping(data):
                 abort(400, message_erreur)
 
             try:
-                assert amendement["amendement"] in get_amendements_supportees()
+                assert amendement["amendement"] in get_amendements_supportees() or amendement["pourcentage_humidite"] is not None
             except AssertionError:
                 message_erreur = str(amendement["amendement"]) + " n'est pas un amendement supporté."
                 abort(400, message_erreur)
 
-            liste_amendement.append(Amendement(amendement["amendement"], amendement["apport"]))
+            if amendement["pourcentage_humidite"] is not None:
+                try:
+                    assert isinstance(amendement["pourcentage_humidite"], (float, int))
+                    assert 0 <= float(amendement["pourcentage_humidite"]) <= 100
+                except AssertionError:
+                    message_erreur = str(
+                        amendement["pourcentage_humidite"]) + " n'est pas un pourcentage d'humidité valide. Voir documentation API."
+                    abort(400, message_erreur)
+                try:
+                    assert 0 <= float(amendement["pourcentage_humidite"]) <= 100
+                except AssertionError:
+                    message_erreur = str(
+                        amendement["pourcentage_humidite"]) + " n'est pas un pourcentage d'humidité valide car un pourcentage doit" \
+                                                       "être entre 0 et 100 inclusivement."
+                    abort(400, message_erreur)
+
+            liste_amendement.append(
+                Amendement(amendement["amendement"], amendement["apport"], amendement["pourcentage_humidite"]))
     return Amendements(liste_amendement)
 
 
@@ -414,7 +433,7 @@ def __culture_principale_mapping(data, est_derniere_annee_rotation_culture_fourr
     try:
         assert isinstance(pourcentage_humidite, (float, int)) or pourcentage_humidite is None
         if pourcentage_humidite is not None:
-            assert pourcentage_humidite > 0
+            assert 0 <= pourcentage_humidite <= 100
     except AssertionError:
         message_erreur = str(
             pourcentage_humidite) + " n'est pas un pourcentage d'humidité valide. Voir documentation API."
