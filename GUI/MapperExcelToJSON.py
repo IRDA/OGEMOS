@@ -2,12 +2,12 @@ from openpyxl import load_workbook
 import copy
 from GUI.CustomExceptions import DependanceError
 import requests
-
-
+from GUI.fonction_utilitaire import is_valid_string
 
 
 def map_excel_to_json(path):
-    liste_amendements_valides = requests.get("http://localhost:5000/api/get-amendement").json()["amendements_supportees"]
+    liste_amendements_valides = requests.get("http://localhost:5000/api/get-amendement").json()[
+        "amendements_supportees"]
     wb = load_workbook(filename=path)
     try:
         donnee_entreprises = wb["Entreprises"]
@@ -358,16 +358,18 @@ def map_excel_to_json(path):
                 column += 1
                 try:
                     rendement_culture_secondaire = float(donnee_regies_projections.cell(row=row,
-                                                                                       column=column).value)
+                                                                                        column=column).value)
                     if culture_secondaire == "-1" and rendement_culture_secondaire == -1:
                         regie["culture_secondaire"]["culture_secondaire"] = None
                         regie["culture_secondaire"]["rendement"] = None
                     elif culture_secondaire == "-1" and not rendement_culture_secondaire == -1:
                         raise DependanceError(
-                            "S'il n'y pas de culture secondaire, il ne doit pas y avoir de rendement pour celle-ci dans la feuille de calcul Régies projection à la rangée {}".format(row))
+                            "S'il n'y pas de culture secondaire, il ne doit pas y avoir de rendement pour celle-ci dans la feuille de calcul Régies projection à la rangée {}".format(
+                                row))
                     elif rendement_culture_secondaire == -1 and not culture_secondaire == "-1":
                         raise DependanceError(
-                            "S'il n'y pas de rendement de culture secondaire, il ne doit pas y avoir de culture secondaire dans la feuille de calcul Régies projection à la rangée {}".format(row))
+                            "S'il n'y pas de rendement de culture secondaire, il ne doit pas y avoir de culture secondaire dans la feuille de calcul Régies projection à la rangée {}".format(
+                                row))
                     else:
                         regie["culture_secondaire"]["culture_secondaire"] = culture_secondaire
                         regie["culture_secondaire"]["rendement"] = rendement_culture_secondaire
@@ -389,31 +391,61 @@ def map_excel_to_json(path):
                 column += 1
                 amendements_apports = str(donnee_regies_projections.cell(row=row, column=column).value)
                 column += 1
-                if amendements == "-1" and amendements_apports == "-1":
+                pourcentages_humidite = str(donnee_regies_projections.cell(row=row, column=column).value)
+                column += 1
+                if amendements == "-1" and amendements_apports == "-1" and pourcentages_humidite == "-1":
                     pass
-                elif amendements == "-1" and not amendements_apports == "-1":
-                    raise DependanceError("S'il n'y a pas d'amendements, il ne doit pas y avoir d'apports pour ceux-ci dans la feuille de calcul Régies projection à la rangée {}".format(row))
-                elif amendements_apports == "-1" and not amendements == "-1":
-                    raise DependanceError("S'il n'y a pas d'apports d'amendements, il ne doit pas y avoir d'amendements dans la feuille de calcul Régies projection à la rangée {}".format(row))
+                elif amendements == "-1" and (not amendements_apports == "-1" or not pourcentages_humidite == "-1"):
+                    raise DependanceError(
+                        "S'il n'y a pas d'amendements, il ne doit pas y avoir d'apports ou de pourcentages d'humidité pour ceux-ci dans la feuille de calcul Régies projection à la rangée {}".format(
+                            row))
+                elif amendements_apports == "-1" and (not amendements == "-1" or not pourcentages_humidite == "-1"):
+                    raise DependanceError(
+                        "S'il n'y a pas d'apports d'amendements, il ne doit pas y avoir d'amendements ou de pourcentages d'humidité dans la feuille de calcul Régies projection à la rangée {}".format(
+                            row))
+                elif pourcentages_humidite == "-1" and (not amendements == "-1" or not amendements_apports == "-1"):
+                    raise DependanceError(
+                        "S'il n'y a pas de pourcentages d'humidité, il ne doit pas y avoir d'amendements ou d'apports dans la feuille de calcul Régies projection à la rangée {}".format(
+                            row))
                 else:
                     amendements_list = amendements.split(",")
                     amendements_apports_list = amendements_apports.split(",")
+                    pourcentages_humidite_list = pourcentages_humidite.split(",")
+                    if not (len(amendements_list) == len(amendements_apports_list) == len(pourcentages_humidite_list)):
+                        raise TypeError(
+                            "Il doit y avoir le même nombre d'amendement, d'apport et de pourcentage d'humidité dans la rangée {} de la feuille de calcul Régies projection".format(
+                                row))
                     index = 0
                     for amendement in amendements_list:
-                        if amendement not in liste_amendements_valides:
-                            raise TypeError("Un amendement est invalide dans la rangée {} et la colonne 13 de la feuille de calcul Régies projection".format(row))
+                        try:
+                            assert is_valid_string(amendements_list[index])
+                        except AssertionError:
+                            raise TypeError(
+                                "Un amendement est composé de caractères non-valide dans la rangée {} et la colonne 13 de la feuille de calcul Régies projection".format(
+                                    row))
                         try:
                             float(amendements_apports_list[index])
                         except ValueError:
                             raise TypeError(
                                 "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies projection".format(
-                                    row, column))
+                                    row))
                         except TypeError:
                             raise TypeError(
                                 "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies projection".format(
-                                    row, column))
+                                    row))
+                        try:
+                            float(pourcentages_humidite_list[index])
+                        except ValueError:
+                            raise TypeError(
+                                "Pourcentage d'humidité invalide dans la rangée {} et la colonne 15 de la feuille de calcul Régies projection".format(
+                                    row))
+                        except TypeError:
+                            raise TypeError(
+                                "Pourcentage d'humidité invalide dans la rangée {} et la colonne 15 de la feuille de calcul Régies projection".format(
+                                    row))
                         regie["amendements"].append(
-                            {"amendement": amendement, "apport": float(amendements_apports_list[index])})
+                            {"amendement": amendement, "apport": float(amendements_apports_list[index]),
+                             "pourcentage_humidite": float(pourcentages_humidite_list[index])})
                         index += 1
                 if donnee_regies_projections.cell(row=row, column=column).value is None:
                     raise TypeError(
@@ -591,16 +623,18 @@ def map_excel_to_json(path):
                 column += 1
                 try:
                     rendement_culture_secondaire = float(donnee_regies_historiques.cell(row=row,
-                                                                                       column=column).value)
+                                                                                        column=column).value)
                     if culture_secondaire == "-1" and rendement_culture_secondaire == -1:
                         regie["culture_secondaire"]["culture_secondaire"] = None
                         regie["culture_secondaire"]["rendement"] = None
                     elif culture_secondaire == "-1" and not rendement_culture_secondaire == -1:
                         raise DependanceError(
-                            "S'il n'y pas de culture secondaire, il ne doit pas y avoir de rendement pour celle-ci dans la feuille de calcul Régies historique à la rangée {}".format(row))
+                            "S'il n'y pas de culture secondaire, il ne doit pas y avoir de rendement pour celle-ci dans la feuille de calcul Régies historique à la rangée {}".format(
+                                row))
                     elif rendement_culture_secondaire == -1 and not culture_secondaire == "-1":
                         raise DependanceError(
-                            "S'il n'y pas de rendement de culture secondaire, il ne doit pas y avoir de culture secondaire dans la feuille de calcul Régies historique à la rangée {}".format(row))
+                            "S'il n'y pas de rendement de culture secondaire, il ne doit pas y avoir de culture secondaire dans la feuille de calcul Régies historique à la rangée {}".format(
+                                row))
                     else:
                         regie["culture_secondaire"]["culture_secondaire"] = culture_secondaire
                         regie["culture_secondaire"]["rendement"] = rendement_culture_secondaire
@@ -622,35 +656,60 @@ def map_excel_to_json(path):
                 column += 1
                 amendements_apports = str(donnee_regies_historiques.cell(row=row, column=column).value)
                 column += 1
-                if amendements == "-1" and amendements_apports == "-1":
+                pourcentages_humidite = str(donnee_regies_historiques.cell(row=row, column=column).value)
+                column += 1
+                if amendements == "-1" and amendements_apports == "-1" and pourcentages_humidite == "-1":
                     pass
-                elif amendements == "-1" and not amendements_apports == "-1":
+                elif amendements == "-1" and (not amendements_apports == "-1" or not pourcentages_humidite == "-1"):
                     raise DependanceError(
-                        "S'il n'y a pas d'amendements, il ne doit pas y avoir d'apports pour ceux-ci dans la feuille de calcul Régies historique à la rangée {}".format(
+                        "S'il n'y a pas d'amendements, il ne doit pas y avoir d'apports ou de pourcentages d'humidité pour ceux-ci dans la feuille de calcul Régies historique à la rangée {}".format(
                             row))
-                elif amendements_apports == "-1" and not amendements == "-1":
+                elif amendements_apports == "-1" and (not amendements == "-1" or not pourcentages_humidite == "-1"):
                     raise DependanceError(
-                        "S'il n'y a pas d'apports d'amendements, il ne doit pas y avoir d'amendements dans la feuille de calcul Régies historique à la rangée {}".format(
+                        "S'il n'y a pas d'apports d'amendements, il ne doit pas y avoir d'amendements ou de pourcentages d'humidité dans la feuille de calcul Régies historique à la rangée {}".format(
+                            row))
+                elif pourcentages_humidite == "-1" and (not amendements == "-1" or not amendements_apports == "-1"):
+                    raise DependanceError(
+                        "S'il n'y a pas de pourcentages d'humidité, il ne doit pas y avoir d'amendements ou d'apports dans la feuille de calcul Régies historique à la rangée {}".format(
                             row))
                 else:
                     amendements_list = amendements.split(",")
                     amendements_apports_list = amendements_apports.split(",")
+                    pourcentages_humidite_list = pourcentages_humidite.split(",")
+                    if not (len(amendements_list) == len(amendements_apports_list) == len(pourcentages_humidite_list)):
+                        raise TypeError(
+                            "Il doit y avoir le même nombre d'amendement, d'apport et de pourcentage d'humidité dans la rangée {} de la feuille de calcul Régies historique".format(
+                                row))
                     index = 0
                     for amendement in amendements_list:
-                        if amendement not in liste_amendements_valides:
-                            raise TypeError("Un amendement est invalide dans la rangée {} et la colonne 13 de la feuille de calcul Régies historique".format(row))
+                        try:
+                            assert is_valid_string(amendements_list[index])
+                        except AssertionError:
+                            raise TypeError(
+                                "Un amendement est composé de caractères non-valide dans la rangée {} et la colonne 13 de la feuille de calcul Régies historique".format(
+                                    row))
                         try:
                             float(amendements_apports_list[index])
                         except ValueError:
                             raise TypeError(
                                 "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies historique".format(
-                                    row, column))
+                                    row))
                         except TypeError:
                             raise TypeError(
                                 "Apports d'amendement invalide dans la rangée {} et la colonne 14 de la feuille de calcul Régies historique".format(
-                                    row, column))
+                                    row))
+                        try:
+                            float(pourcentages_humidite_list[index])
+                        except ValueError:
+                            raise TypeError(
+                                "Pourcentage d'humidité invalide dans la rangée {} et la colonne 15 de la feuille de calcul Régies historique".format(
+                                    row))
+                        except TypeError:
+                            raise TypeError(
+                                "Pourcentage d'humidité invalide dans la rangée {} et la colonne 15 de la feuille de calcul Régies historique".format(
+                                    row))
                         regie["amendements"].append(
-                            {"amendement": amendement, "apport": float(amendements_apports_list[index])})
+                            {"amendement": amendement, "apport": float(amendements_apports_list[index]), "pourcentage_humidite":float(pourcentages_humidite_list[index])})
                         index += 1
                 if donnee_regies_historiques.cell(row=row, column=column).value is None:
                     raise TypeError(
@@ -791,7 +850,7 @@ def row_check(donnee, row, number_of_columns, worksheet_name):
 
 if __name__ == "__main__":
     path = 'C:\\Users\\Samuel\\Documents\\Stage IRDA\\Données Chaudière Appalaches Gabarit OGEMOS.xlsx'
-    test=map_excel_to_json(path)
+    test = map_excel_to_json(path)
     print(test)
     response = requests.post("http://localhost:5000/api/icbm-bilan", json=test)
     print(response.text)
