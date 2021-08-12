@@ -138,6 +138,8 @@ def initialize_globals():
         root = tk.Tk()
         root.title("OGEMOS")
         root.resizable(0, 0)
+        ogemos_logo = tk.PhotoImage(file="ogemos_logo.png")
+        root.iconphoto(True, ogemos_logo)
         mainframe = ttk.Frame(root)
         mainframe.grid(row=0, column=0, ipadx=5, ipady=5)
 
@@ -1643,8 +1645,8 @@ def initialize_globals():
                                     0].get()
 
                             pourcentage_humidite_amendement = \
-                            composante_amendement_liste.grid_slaves([index_composante_amendement + 2], column=1)[
-                                0].get()
+                                composante_amendement_liste.grid_slaves([index_composante_amendement + 2], column=1)[
+                                    0].get()
                             if pourcentage_humidite_amendement == "":
                                 pourcentage_humidite_amendement = None
 
@@ -1685,7 +1687,7 @@ def initialize_globals():
                                 if (amendement is None and apport is not None) or (
                                         amendement is not None and apport is None) or (
                                         amendement is None and apport is None and pourcentage_humidite_amendement is not None) or 0 > float(
-                                        pourcentage_humidite_amendement) > 100:
+                                    pourcentage_humidite_amendement) > 100:
                                     entree_invalide_liste.append(
                                         "\"Pourcentage humidité\" " + str(int(index_composante_amendement / 3) + 1) +
                                         " est invalide, il doit être un réel positif entre 0 et 100 inclusivement ou laissé vide s'il n'y a pas d'amendements dans la zone que vous souhaitez appliquer")
@@ -2071,6 +2073,7 @@ def initialize_globals():
                         parent_frame_tabs.focus()
 
                 def get_information_toutes_les_simulations():
+                    messagebox.showinfo("Information calcul","Une fois cette fenêtre fermée, veuillez patienter car les calculs peuvent prendre plusieurs minutes dépendant de la taille de la tâche...")
                     simulations = []
                     entree_invalide_liste = []
                     index_simualtion = 0
@@ -3286,13 +3289,17 @@ def initialize_globals():
                 def lancer_ogemos_sur_des_donnees_excel():
                     for widget in menu_frame.winfo_children():
                         widget.destroy()
-                    root.withdraw()
+                    calculation_warning_label = ttk.Label(menu_frame,
+                                                          text="Veuillez patienter, les calculs peuvent prendre plusieurs minutes dépendant de la taille de la tâche...")
+                    calculation_warning_label.grid(row=0, column=0)
                     global app_root_directory
                     excel_filename = filedialog.askopenfilename(initialdir=app_root_directory,
                                                                 title="File Explorer",
                                                                 filetypes=(("xlsx", "*.xlsx"),
                                                                            ("all files", "*.*")))
                     if excel_filename == "":
+                        for widget in menu_frame.winfo_children():
+                            widget.destroy()
                         menu_initial_ogemos(menu_frame)
                         root.deiconify()
                         return
@@ -3313,6 +3320,8 @@ def initialize_globals():
                     except DependanceError as error:
                         messagebox.showwarning(title="Erreur données Excel", message=error)
                     finally:
+                        for widget in menu_frame.winfo_children():
+                            widget.destroy()
                         menu_initial_ogemos(menu_frame)
                         root.deiconify()
 
