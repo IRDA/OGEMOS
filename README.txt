@@ -1,4 +1,4 @@
- /*
+  /*
   * Copyright (c) 2018 Gouvernement du Québec
   *
   * SPDX-License-Identifier: LiLiQ-R-1.1
@@ -10,11 +10,7 @@ Outil de gestion de la matière organique des sols basé sur le modèle ICBM (In
 
 Instructions pour télécharger l'exécutable le plus à jour:
  - Sélectionner le dossier Executables.
- - Cliquer sur le fichier zip que vous voulez télécharger,
-   soit celui avec les exécutables seulement ou celui avec 
-   les exécutables et le guide d'utilisation.
- - Le bouton pour télécharger le zip est à droite de la
-   deuxième section.
- - Il faut ensuite deziper le fichier pour aller aux exécutables 
-   API_OGEMOS.exe (sans interface graphique (GUI)) ou APP_OGEMOS.exe (avec GUI).
-  
+ - Télécharger le fichier zip contenant les exécutables et le guide d'utilisation. 
+    Le bouton pour télécharger se trouve à droite dans le deuxième onglet.
+ - Dezziper le fichier sur votre ordi avant d'exécuter APP_OGEMOS.exe (avec interface GUI)
+    ou API_OGEMOS.exe (sans interface graphique (GUI))
